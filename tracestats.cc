@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/tracestats.cc,v 1.12 2002/02/12 21:50:57 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/tracestats.cc,v 1.13 2002/02/15 15:44:25 tmwong Exp $
   Description:  Generate LRU and frequency trace stats using fscachesim
                 objects.
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
@@ -32,14 +32,14 @@
 
 // Command usage.
 
-const char *globalProgArgs = "b:f:c:ms:t:";
+const char *globalProgArgs = "b:f:c:ms:w:";
 
 const char *globalProgUsage = "[-m] " \
 "[-b block_size] " \
 "[-s cache_size] " \
 "[-f file_prefix] " \
 "[-c warmup_count] "\
-"[-t warmup_time] " \
+"[-w warmup_time] " \
 "trace_file";
 
 // Default command-line argument values.
@@ -118,7 +118,7 @@ main(int argc, char *argv[])
     case 's':
       cacheSizeMB = strtoul(optarg, NULL, 0);
       break;
-    case 't':
+    case 'w':
       warmupTime = strtod(optarg, NULL);
       break;
     default:

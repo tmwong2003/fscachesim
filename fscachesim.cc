@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/fscachesim.cc,v 1.7 2002/02/18 20:56:19 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/fscachesim.cc,v 1.8 2002/02/18 21:44:01 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -33,10 +33,11 @@
 
 // Command usage.
 
-const char *globalProgArgs = "b:dmo:w:";
+const char *globalProgArgs = "b:c:dmo:w:";
 
 const char *globalProgUsage = \
 "[-b block_size] " \
+"[-c warmup_count] " \
 "[-d] " \
 "[-m] " \
 "[-o output_file_prefix] " \
@@ -115,6 +116,9 @@ main(int argc,
     switch (opt) {
     case 'b':
       blockSize = atol(optarg);
+      break;
+    case 'c':
+      warmupCount = atol(optarg);
       break;
     case 'd':
       useDemoteFlag = true;
@@ -285,13 +289,26 @@ main(int argc,
   if (outFilePrefix) {
     char filename[1024];
 
-    sprintf(filename,
-	    "%s-%s-%s-%llu-%llu",
-	    outFilePrefix,
-	    (useDemoteFlag ? "DEMOTE" : "NONE"),
-	    arrayType,
-	    clientSizeMB,
-	    arraySizeMB);
+    if (warmupCount > 0) {
+      sprintf(filename,
+	      "%s-%s-%s-%llu-%llu-%lluc",
+	      outFilePrefix,
+	      (useDemoteFlag ? "DEMOTE" : "NONE"),
+	      arrayType,
+	      clientSizeMB,
+	      arraySizeMB,
+	      warmupCount);
+    }
+    else {
+      sprintf(filename,
+	      "%s-%s-%s-%llu-%llu-%.0lfs",
+	      outFilePrefix,
+	      (useDemoteFlag ? "DEMOTE" : "NONE"),
+	      arrayType,
+	      clientSizeMB,
+	      arraySizeMB,
+	      warmupTime);
+    }
     if (!stdoutRedirect(filename)) {
       exit(EXIT_FAILURE);
     }
