@@ -1,4 +1,4 @@
-# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/Makefile.am,v 1.5 2000/10/25 03:32:30 tmwong Exp $
+# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/Makefile.am,v 1.6 2000/10/28 22:20:59 tmwong Exp $
 # Description: fscachesim Makefile.am
 # Created by:  T.M. Wong <tmwong+@cs.cmu.edu>
 
@@ -13,8 +13,8 @@ bin_PROGRAMS = fscachesim tracestats
 
 fscachesim_SOURCES = \
 	BlockStoreCache.cc \
-	BlockStoreInfinite.cc \
-	IORequestGenerator.cc \
+	IORequestGeneratorBatch.cc \
+	IORequestGeneratorFile.cc \
 	IORequestGeneratorGeneric.cc \
 	IORequestGeneratorMambo.cc \
 	Node.cc \
@@ -23,7 +23,8 @@ fscachesim_SOURCES = \
 
 tracestats_SOURCES = \
 	BlockStoreInfinite.cc \
-	IORequestGenerator.cc \
+	IORequestGeneratorBatch.cc \
+	IORequestGeneratorFile.cc \
 	IORequestGeneratorGeneric.cc \
 	IORequestGeneratorMambo.cc \
 	Node.cc \

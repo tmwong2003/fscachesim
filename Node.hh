@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/Node.hh,v 1.4 2000/10/24 19:54:42 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/Node.hh,v 1.5 2000/10/26 16:14:24 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -9,15 +9,12 @@
 
 #include "BlockStore.hh"
 #include "IORequest.hh"
+#include "Statistics.hh"
 
-class Node
-{
+class Node {
 private:
   BlockStore *blockStore;
   Node *nextNode;
-
-  double warmupTime;
-  bool warmupDone;
 
 private:
   // Copy constructors - declared private and never defined
@@ -29,28 +26,15 @@ public:
   // Constructors and destructors
 
   Node(BlockStore *inBlockStore,
-       Node *inNextNode,
-       double inWarmupTime) :
+       Node *inNextNode) :
     blockStore(inBlockStore),
-    nextNode(inNextNode),
-    warmupTime(inWarmupTime),
-    warmupDone(false) { ; };
+    nextNode(inNextNode) { ; };
   ~Node() { ; };
 
   // Process incoming I/O requests
 
   bool IORequestDown(IORequest& inIOReq);
   int IORequestUp(IORequest& inIOReq);
-
-  // Statistics management
-
-  void statisticsReset() {
-    blockStore->statisticsReset();
-  };
-
-  void statisticsShow() const {
-    blockStore->statisticsShow();
-  };
 };
 
 #endif /* _NODE_HH_ */

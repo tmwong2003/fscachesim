@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreInfinite.hh,v 1.4 2000/10/24 19:54:41 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreInfinite.hh,v 1.5 2000/10/26 16:14:24 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -56,9 +56,10 @@ private:
   BlockStoreInfinite& operator=(const BlockStoreInfinite&);
 
 public:
-  BlockStoreInfinite(unsigned long inCacheSize,
+  BlockStoreInfinite(const char *inName,
+		     unsigned long inCacheSize,
 		     unsigned int inBlockSize) :
-    BlockStore(inBlockSize),
+    BlockStore(inName, inBlockSize),
     blockTimestampMap(),
     blockTimestampClock(0),
     LRUTree(NULL),

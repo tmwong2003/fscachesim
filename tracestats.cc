@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/tracestats.cc,v 1.4 2000/10/26 02:00:50 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/tracestats.cc,v 1.5 2000/10/26 16:14:24 tmwong Exp $
   Description:  Generate LRU and frequency trace stats using fscachesim
                 objects.
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
@@ -13,35 +13,30 @@
 
 #include "BlockStoreInfinite.hh"
 #include "IORequest.hh"
+#include "IORequestGeneratorBatch.hh"
+#include "IORequestGeneratorFile.hh"
 #include "IORequestGeneratorGeneric.hh"
 #include "IORequestGeneratorMambo.hh"
 #include "Node.hh"
 
-const char *globalProgArgs = "b:mw:";
-const char *globalProgUsage = "[-m] [-b block_size] [-w warmup_time] trace_file";
+// Command usage.
+
+const char *globalProgArgs = "bf:c:mt:";
+
+const char *globalProgUsage = "[-m] " \
+"[-b block_size] " \
+"[-f file_prefix] " \
+"[-c warmup_count] "\
+"[-t warmup_time] " \
+"trace_file";
 
 // Default command-line argument values.
 
 const int globalBlockSize = 4096;
 
-const char *globalFreqFilename = "freq";
-const char *globalLRUFilename = "lru-cumul";
-const char *globalSummaryFilename = "summary";
-
-const double globalWarmupTime = 0;
-
-// Other default values.
-
-const int globalRecordsPerDot = 1000;
-
-class IORequestGeneratorLess:
-  public binary_function<IORequestGenerator *, IORequestGenerator *, bool> {
-public:
-  bool operator()(const IORequestGenerator *inGenL,
-		  const IORequestGenerator *inGenR) {
-    return (*inGenL < *inGenR);
-  };
-};
+const char *globalFreqFileSuffix = "freq";
+const char *globalLRUFileSuffix = "lru-cumul";
+const char *globalSummaryFileSuffix = "summary";
 
 void
 usage(char *inProgName,
@@ -79,10 +74,10 @@ stdoutRedirect(const char *inFilename)
 int
 main(int argc, char *argv[])
 {
-  list<IORequestGenerator *> generators;
-
+  char *filePrefix = "results";
   uint32_t blockSize = globalBlockSize;
-  double warmupTime = globalWarmupTime;
+  uint32_t warmupCount = 0;
+  double warmupTime = 0;
 
   bool useMamboFlag = false;
 
@@ -95,10 +90,16 @@ main(int argc, char *argv[])
     case 'b':
       blockSize = atol(optarg);
       break;
+    case 'c':
+      warmupCount = strtoul(optarg, NULL, 0);
+      break;
+    case 'f':
+      filePrefix = optarg;
+      break;
     case 'm':
       useMamboFlag = true;
       break;
-    case 'w':
+    case 't':
       warmupTime = strtod(optarg, NULL);
       break;
     default:
@@ -110,52 +111,69 @@ main(int argc, char *argv[])
     usage(argv[0], EXIT_FAILURE);
   }
 
-  BlockStoreInfinite cache(0, blockSize);
-  Node host(&cache, NULL, warmupTime);
-  int records = 0;
+  // Set the warmup style for this experiment.
+
+  IORequestGeneratorBatch *generators;
+  if (warmupCount > 0) {
+    generators = new IORequestGeneratorBatch(warmupCount);
+  }
+  else if (warmupTime > 0) {
+    generators = new IORequestGeneratorBatch(warmupTime);
+  }
+  else {
+    generators = new IORequestGeneratorBatch();
+  }
+
+  // Create a single infinite cache for all I/Os to feed into.
+
+  BlockStoreInfinite cache("cache-infinite", 0, blockSize);
+  generators->StatisticsAdd(&cache);
+  Node host(&cache, NULL);
 
   for (int i = optind; i < argc; i++) {
-    IORequestGenerator *generator;
+    // Create I/O generator based on the input trace type.
 
+    IORequestGeneratorFile *generator;
     if (useMamboFlag) {
       generator = new IORequestGeneratorMambo(&host, argv[i]);
     }
     else {
       generator = new IORequestGeneratorGeneric(&host, argv[i]);
     }
-
-    generators.push_back(generator);
+    generators->IORequestGeneratorAdd(generator);
   }
 
-  bool requestProcessed;
-  do {
-    generators.sort(IORequestGeneratorLess());
-    requestProcessed = generators.front()->IORequestDown();
+  // Run until we have no more I/Os to process.
 
-    records++;
-    if (records % globalRecordsPerDot == 0) {
-      fprintf(stderr, ".");
-      fflush(stderr);
-    }
-  } while (requestProcessed);
-  fprintf(stderr, "\n");
+  while (generators->IORequestDown());
 
   // Output the stats to separate files.
 
-  if (!stdoutRedirect(globalFreqFilename)) {
-    exit(EXIT_FAILURE);
-  }
-  cache.statisticsFreqShow();
+  {
+    char buffer[1024];
 
-  if (!stdoutRedirect(globalLRUFilename)) {
-    exit(EXIT_FAILURE);
-  }
-  cache.statisticsLRUCumulShow();
+    sprintf(buffer, "%s.%s", filePrefix, globalFreqFileSuffix);
+    if (!stdoutRedirect(buffer)) {
+      exit(EXIT_FAILURE);
+    }
+    cache.statisticsFreqShow();
 
-  if (!stdoutRedirect(globalSummaryFilename)) {
-    exit(EXIT_FAILURE);
+    sprintf(buffer, "%s.%s", filePrefix, globalLRUFileSuffix);
+    if (!stdoutRedirect(buffer)) {
+      exit(EXIT_FAILURE);
+    }
+    cache.statisticsLRUCumulShow();
+
+    sprintf(buffer, "%s.%s", filePrefix, globalSummaryFileSuffix);
+    if (!stdoutRedirect(buffer)) {
+      exit(EXIT_FAILURE);
+    }
+    cache.statisticsSummaryShow();
   }
-  cache.statisticsSummaryShow();
+
+  // Clean up after ourselves.
+
+  delete generators;
 
   return (EXIT_SUCCESS);
 }

@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreCache.hh,v 1.4 2000/10/24 19:54:41 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreCache.hh,v 1.5 2000/10/28 22:20:59 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -58,11 +58,12 @@ private:
   BlockStoreCache& operator=(const BlockStoreCache&);
 
 public:
-  BlockStoreCache(uint32_t inBlockSize,
+  BlockStoreCache(const char *inName,
+		  uint32_t inBlockSize,
 		  uint32_t inCacheSize,
 		  CacheReplPolicy_t inCacheReplPolicy,
 		  CacheDemotePolicy_t inCacheDemotePolicy) :
-    BlockStore(inBlockSize),
+    BlockStore(inName, inBlockSize),
     cache(),
     cacheSize(inCacheSize),
     cacheBlocks(0),

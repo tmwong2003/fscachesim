@@ -1,0 +1,77 @@
+#!/usr/bin/perl -w
+#
+# RCS:         $Header: $
+# Description: Generate a synthetic trace of 1-block read I/Os.
+# Author:      T.M. Wong <tmwong+@cs.cmu.edu>
+
+use strict;
+use vars qw($glblProgname);
+use Getopt::Std;
+
+$glblProgname = $0;
+
+sub usage {
+  print "$glblProgname: $glblProgname\n";
+  exit(0);
+}
+
+# The generic IORequestGenerator in fscachesim expects input of the form:
+#
+# time objectID offset length
+
+sub IOGenerateRandom {
+  my ($interarrivalTime, $totalTime, $blockSize, $fileSize) = @_;
+
+  srand();
+
+  my ($i) = 0;
+  while ($i < $totalTime) {
+    my ($offset) = int(rand() * $fileSize) * $blockSize;
+
+    print "$i 0 $offset $blockSize\n";
+
+    $i = $i + $interarrivalTime;
+  }
+}
+
+sub IOGenerateZipf {
+  my ($interarrivalTime, $totalTime, $blockSize, $fileSize) = @_;
+  my ($normalProb);
+  my (@zipfArray);
+
+  # Generate the uniform-Zipf converter.
+
+  $normalProb = 0;
+  my ($i);
+  for ($i = 0; $i < $fileSize; $i++) {
+    my ($prob) = 1 / ($i + 1);
+
+    $normalProb += $prob;
+
+    $zipfArray[$i] = $normalProb;
+  }
+
+  # Normalize the probabilities.
+
+  for ($i = 0; $i < $fileSize; $i++) {
+    $zipfArray[$i] = $zipfArray[$i] / $normalProb;
+  }
+
+  # Now generate the I/Os.
+
+  srand();
+  $i = 0;
+  while ($i < $totalTime) {
+    my ($prob) = rand();
+
+    my ($j);
+    for ($j = 0; $prob > $zipfArray[$j]; $j++) {};
+
+    my ($offset) = $j * $blockSize;
+    print "$i 0 $offset $blockSize\n";
+
+    $i = $i + $interarrivalTime;
+  }
+}
+
+IOGenerateZipf(1, 5406720, 4096, 49152);

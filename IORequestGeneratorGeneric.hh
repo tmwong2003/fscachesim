@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequestGeneratorGeneric.hh,v 1.1 2000/10/25 03:32:30 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequestGeneratorGeneric.hh,v 1.2 2000/10/26 16:14:24 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -11,9 +11,9 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#include "IORequestGenerator.hh"
+#include "IORequestGeneratorFile.hh"
 
-class IORequestGeneratorGeneric : public IORequestGenerator {
+class IORequestGeneratorGeneric : public IORequestGeneratorFile {
 private:
   IORequestGeneratorGeneric(const IORequestGeneratorGeneric&);
   IORequestGeneratorGeneric& operator=(const IORequestGeneratorGeneric&);
@@ -25,7 +25,7 @@ protected:
 public:
   IORequestGeneratorGeneric(Node *inNode,
 			    const char *inFilename) :
-    IORequestGenerator(inNode, inFilename) {
+    IORequestGeneratorFile(inNode, inFilename) {
     IORequestQueue();
   };
 

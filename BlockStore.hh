@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStore.hh,v 1.3 2000/10/24 19:54:40 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStore.hh,v 1.4 2000/10/26 16:14:24 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -15,6 +15,7 @@
 #include <map>
 
 #include "IORequest.hh"
+#include "Statistics.hh"
 
 class Block {
 public:
@@ -32,7 +33,7 @@ struct BlockLessThan
   }
 };
 
-class BlockStore {
+class BlockStore : public Statistics {
 protected:
   uint32_t blockSize;
 
@@ -51,7 +52,8 @@ private:
 public:
   // Constructors
 
-  BlockStore(uint32_t inBlockSize);
+  BlockStore(const char *inName,
+	     uint32_t inBlockSize);
 
   virtual ~BlockStore() { ; };
 
@@ -68,12 +70,12 @@ public:
     blockReadHits = 0;
     blockReadMisses = 0;
   };
-
-  virtual void statisticsShow() const = 0;
 };
 
 inline
-BlockStore::BlockStore(uint32_t inBlockSize) :
+BlockStore::BlockStore(const char *inName,
+		       uint32_t inBlockSize) :
+  Statistics(inName),
   blockSize(inBlockSize)
 {
   statisticsReset();

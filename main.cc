@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/main.cc,v 1.6 2000/10/26 16:14:24 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/main.cc,v 1.7 2000/10/28 22:20:59 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -9,12 +9,17 @@
 #include <stdlib.h>
 
 #include "BlockStoreCache.hh"
-#include "BlockStoreDisk.hh"
-#include "BlockStoreInfinite.hh"
 #include "IORequest.hh"
+#include "IORequestGeneratorBatch.hh"
 #include "IORequestGeneratorGeneric.hh"
 #include "IORequestGeneratorMambo.hh"
 #include "Node.hh"
+
+// tmwong XXX: this is a big hack. Include the experimental parameters.
+
+#include "experimentParams.hh"
+
+// Command usage.
 
 const char *globalProgArgs = "b:mw:";
 
@@ -27,24 +32,6 @@ const char *globalProgUsage = \
 // Default command-line argument values.
 
 const int globalBlockSize = 4096;
-const double globalWarmupTime = 0;
-
-const int globalHostCacheSize = 16384;
-const CacheDemotePolicy_t globalHostDemotePolicy = DemoteDemand;
-
-const int globalArrayCacheSize = 16384;
-const CacheReplPolicy_t globalArrayReplPolicy = MRU;
-
-const int globalRecordsPerDot = 1000;
-
-class IORequestGeneratorLess:
-  public binary_function<IORequestGenerator *, IORequestGenerator *, bool> {
-public:
-  bool operator()(const IORequestGenerator *inGenL,
-		  const IORequestGenerator *inGenR) {
-    return (*inGenL < *inGenR);
-  };
-};
 
 void
 usage(char *inProgName,
@@ -59,10 +46,9 @@ int
 main(int argc,
      char *argv[])
 {
-  list<IORequestGenerator *> generators;
-
   uint32_t blockSize = globalBlockSize;
-  double warmupTime = globalWarmupTime;
+  uint32_t warmupCount = 0;
+  double warmupTime = 0;
 
   bool useMamboFlag = false;
 
@@ -90,51 +76,61 @@ main(int argc,
     usage(argv[0], EXIT_FAILURE);
   }
 
-  BlockStoreCache arrayCache(blockSize,
+  // Set the warmup style for this experiment.
+
+  IORequestGeneratorBatch *generators;
+  if (warmupCount > 0) {
+    generators = new IORequestGeneratorBatch(warmupCount);
+  }
+  else if (warmupTime > 0) {
+    generators = new IORequestGeneratorBatch(warmupTime);
+  }
+  else {
+    generators = new IORequestGeneratorBatch();
+  }
+
+  // Create a single array cache for all client-missed I/Os to feed into.
+
+  BlockStoreCache arrayCache("array",
+			     blockSize,
 			     globalArrayCacheSize,
 			     globalArrayReplPolicy,
 			     None);
-  Node array(&arrayCache, NULL, warmupTime);
-  int records = 0;
+  generators->StatisticsAdd(&arrayCache);
+  Node array(&arrayCache, NULL);
 
   for (int i = optind; i < argc; i++) {
-    BlockStoreCache *cache = new BlockStoreCache(blockSize,
+    char buffer[20];
+
+    sprintf(buffer, "client-%d", i);
+    BlockStoreCache *cache = new BlockStoreCache(buffer,
+						 blockSize,
 						 globalHostCacheSize,
 						 LRU,
 						 globalHostDemotePolicy);
-    Node *host = new Node(cache, &array, warmupTime);
+    generators->StatisticsAdd(cache);
+    Node *host = new Node(cache, &array);
 
     // Create I/O generator based on the input trace type.
 
-    IORequestGenerator *generator;
+    IORequestGeneratorFile *generator;
     if (useMamboFlag) {
       generator = new IORequestGeneratorMambo(host, argv[i]);
     }
     else {
       generator = new IORequestGeneratorGeneric(host, argv[i]);
     }
-    generators.push_back(generator);
+    generators->IORequestGeneratorAdd(generator);
   }
 
-  bool requestProcessed;
-  do {
-    generators.sort(IORequestGeneratorLess());
-    requestProcessed = generators.front()->IORequestDown();
+  // Run until we have no more I/Os to process.
 
-    records++;
-    if (records % globalRecordsPerDot == 0) {
-      fprintf(stderr, ".");
-      fflush(stderr);
-    }
-  } while (requestProcessed);
-  fprintf(stderr, "\n");
+  while (generators->IORequestDown());
+  generators->statisticsShow();
 
-  for (list<IORequestGenerator *>::iterator i; i != generators.end(); i++) {
-    IORequestGenerator *generator = *i;
+  // Clean up after ourselves.
 
-    printf("Stats for IORequestGenerator %s\n", generator->filenameGet());
-    generator->nodeGet()->statisticsShow();
-  }
-  printf("Stats for array\n");
-  array.statisticsShow();
+  delete generators;
+
+  return (EXIT_SUCCESS);
 }

@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreCache.cc,v 1.4 2000/10/24 19:54:41 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreCache.cc,v 1.5 2000/10/28 22:20:58 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -135,6 +135,7 @@ BlockStoreCache::statisticsReset()
 void
 BlockStoreCache::statisticsShow() const
 {
+  printf("Statistics for BlockStoreCache.%s\n", nameGet());
   for (StatMapConstIter i = blockReadHitsMap.begin();
        i != blockReadHitsMap.end();
        i++) {
