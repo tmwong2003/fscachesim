@@ -1,4 +1,4 @@
-% $Header: $
+% $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/doc/manual.tex,v 1.1 2001/11/14 22:07:59 tmwong Exp $
 
 \documentclass[twoside]{article}
 
@@ -42,7 +42,7 @@ This manual describes how to use \fscachesim, a quick-and-dirty simulator I
 wrote to model the behavior of (large) client and array caches that
 implement various experimental management protocols. In particular, the
 simulator models protocols that use the \textsc{demote} operation proposed
-by myself and John Wilkes \cite{Wong2000} for transferring read-only disk
+by myself and John Wilkes \cite{Wong2002} for transferring read-only disk
 blocks from client to array caches.
 
 %
@@ -51,8 +51,8 @@ blocks from client to array caches.
 
 \section{Command summary}
 
-\fscachesim{}\quad \textit{option-flags...\quad client-cache-size\quad
-array-cache-size\quad trace-files...}
+\fscachesim{}\quad \textit{option-flags...\quad array-type\quad
+client-size\quad array-size\quad trace-files...}
 
 \subsection{Option flags}
 
@@ -61,23 +61,14 @@ array-cache-size\quad trace-files...}
 \item[\option{-b}{\quad block-size}] \quad\\ Specify the block size in
 bytes. The default is 4096.
 
-\item[\option{-D}] \quad\\ Enable demotion of blocks from the client to the
-array. The array will cache read and demoted blocks in LRU order unless you
-enable ghost caches with \option{-g}.
+\item[\option{-c}{\quad warmup-count}] \quad\\ Specify the warm-up
+I/O count. After processing the warm-up I/O count, \fscachesim{} will reset
+all cache statistics, but retain the cache contents. The default is 0.
 
 \item[\option{-d}] \quad\\ Enable demotion of blocks from the client to the
-array. The array will cache read blocks in MRU order, and demoted blocks in
-LRU order.
-
-\item[\option{-g}] \quad\\ Enable ghost caches and segmented
-cache insertion at the array. You must also enable demotions (with
-\option{-D}) explicitly.
+array.
 
 \item[\option{-m}] \quad\\ Read MAMBO-format trace files \cite{Uysal1997}.
-
-\item[\option{-s}{\quad probationary-cache-size}] \quad\\ Enable a
-segmented LRU cache at the array \cite{Karedla1994} with a probationary
-cache size of \option{}{probabtionary-cache-size} MB.
 
 \item[\option{-w}{\quad warmup-time}] \quad\\ Specify the warm-up
 time in seconds. After the warm-up time elapses, \fscachesim{} will reset
@@ -89,10 +80,41 @@ all cache statistics, but retain the cache contents. The default is 0.
 
 \begin{description}
 
-\item[\textit{client-size-size}] \quad\\ Specify the per-client cache size in
+\item[\textit{array-type}] \quad\\ Specify the array type. \fscachesim{}
+supports a number of cache models:
+
+LRU: Cache blocks in traditional LRU order.
+
+MRULRU: Cache blocks read from disk in MRU order, and blocks demoted from
+clients in LRU order.
+
+RSEGEXP: Cache blocks using the adaptive caching models described in
+the USENIX 2002 paper \cite{Wong2002}, in which we divide the ejection
+queue into ten exponential size segments. Each cache segment is twice the
+size of the previous segment, and the largest segment is at the end of the
+queue. We maintain \emph{ghost caches}, which measure how often read
+requests would hit in the actual cache if we only cached either read or
+demoted blocks. We then insert blocks read from disk (and blocks demoted
+from clients) into a segment in the actual cache based on the hit rate in
+the read (or demote) ghost.
+
+\begin{displaymath}
+\mathit{in\mbox{-}seg}_r =
+	\frac{\mathit{hits}_r}{\mathit{hits}_r + \mathit{hits}_d} \mathit{segs}
+\quad\mbox{and}\quad
+\mathit{in\mbox{-}seg}_d =
+	\frac{\mathit{hits}_d}{\mathit{hits}_r + \mathit{hits}_d} \mathit{segs}
+\end{displaymath}
+
+NSEGEXP: Similar to RSEGEXP, except that we normalize the insertion segment
+number by the maximum of the two potential numbers.
+
+\{N,R\}SEGUNI: Similar to \{N,R\}SEGEXP, except with uniform size segments.
+
+\item[\textit{client-size}] \quad\\ Specify the per-client cache size in
 MB. All clients have the same cache size.
 
-\item[\textit{array-size-size}] \quad\\ Specify the array cache size in MB.
+\item[\textit{array-size}] \quad\\ Specify the array cache size in MB.
 
 \item[\textit{trace-files...}] \quad\\ Specify the trace files. \fscachesim{}
 creates a simulated client for each input trace file.
@@ -117,38 +139,51 @@ length-of-request}$}
 
 \begin{description}
 
-\item[\texttt{\fscachesim{} -w 32768 -D 64 64 random}] \quad\\ Simulate a
+\item[\texttt{\fscachesim{} -w 32768 -d LRU 64 64 random}] \quad\\ Simulate a
 64 MB client and a 64 MB array system. The client will demote blocks, and
 the array will cache read and demoted blocks in LRU order. The client will
 replay I/O requests from the file named `\texttt{random}'. \fscachesim{}
 will reset the cache statistics after 32768 seconds of simulated time (as
 measured by the value of \textit{time-request-issued} on the requests).
 
-\item[\texttt{\fscachesim{} -w 32768 -d 64 64 random}] \quad\\ Simulate a
-64 MB client and a 64 MB array. The client will demote blocks, and the
-array will cache read blocks in MRU order, and demoted blocks in LRU
-order. The client will replay I/O requests from
+\item[\texttt{\fscachesim{} -w 32768 -d MRULRU 64 64 random}] \quad\\
+Simulate a 64 MB client and a 64 MB array. The client will demote blocks,
+and the array will cache read blocks in MRU order, and demoted blocks in
+LRU order. The client will replay I/O requests from
 `\texttt{random}'. \fscachesim{} will reset the cache statistics after
 32768 seconds of simulated time (as measured by the value of
 \textit{time-request-issued} on the requests).
 
-\item[\texttt{\fscachesim{} -g 256 2048 db2-1 db2-2}] \quad\\ Simulate
+\item[\texttt{\fscachesim{} RSEGEXP 256 2048 db2-1 db2-2}] \quad\\ Simulate
 two 256 MB clients and a 2 GB (2048 MB) array. The client will discard
 blocks that it ejects from its cache. The array will insert read blocks
 into the cache based on the read ghost cache score. One client will replay
 I/O requests from `\texttt{db2-1}', and the other client will replay
 requests from `\texttt{db2-2}'.
 
-\item[\texttt{\fscachesim{} -g -D 256 2048 httpd-1 httpd-2}] \quad\\ Simulate
-two 256 MB clients and a 2 GB (2048 MB) array. The clients will demote
-blocks, and the array will insert read and demoted blocks into the cache
-based on the read and demote ghost cache scores. One client will replay I/O
-requests from `\texttt{httpd-1}', and the other client will replay requests
-from `\texttt{httpd-2}'.
+\item[\texttt{\fscachesim{} -d RSEGEXP 256 2048 httpd-1 httpd-2}] \quad\\
+Simulate two 256 MB clients and a 2 GB (2048 MB) array. The clients will
+demote blocks, and the array will insert read and demoted blocks into the
+cache based on the read and demote ghost cache scores. One client will
+replay I/O requests from `\texttt{httpd-1}', and the other client will
+replay requests from `\texttt{httpd-2}'.
 
 \end{description}
 
-\bibliography{biblio}
-\bibliographystyle{abbrv}
+\begin{thebibliography}{UAS97}
+
+\bibitem[UAS97]{Uysal1997}
+Mustafa Uysal, Anurag Acharya, and Joel Saltz.
+\newblock Requirements of {I/O} systems for parallel machines: An
+  application-driven study.
+\newblock Technical Report CS-TR-3802, Dept. of Computer Science, University of
+  Maryland, College Park, MD, May 1997.
+
+\bibitem[WW02]{Wong2002}
+Theodore M. Wong and John Wilkes.
+\newblock My cache or yours? Making storage more exclusive,
+\newblock in Proc. of the 2002 USENIX Annual Technical Conference (June 2002)
+
+\end{thebibliography}
 
 \end{document}
