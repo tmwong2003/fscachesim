@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreCache.cc,v 1.5 2000/10/28 22:20:58 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCache.cc,v 1.6 2000/10/30 01:12:44 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "Cache.hh"
 #include "IORequest.hh"
 
 #include "BlockStoreCache.hh"
@@ -25,8 +26,12 @@ BlockStoreCache::IORequestDown(const IORequest& inIOReq,
   for (uint32_t i = 0; i < reqBlockLength; i++) {
     // See if the block is cached.
 
-    CacheIndexIter blockIter = cacheIndex.find(block);
-    if (blockIter != cacheIndex.end()) {
+    if (cache.isCached(block)) {
+
+      // Eject the block (we will re-cache it later).
+
+      cache.blockGet(block);
+
       switch (inIOReq.opGet()) {
       case Demote:
 	blockDemoteHitsMap[inIOReq.originatorGet()]++;
@@ -39,10 +44,6 @@ BlockStoreCache::IORequestDown(const IORequest& inIOReq,
       default:
 	abort();
       }
-
-      // Pull it out of the list.
-
-      cache.erase(blockIter->second);
     }
     else {
       switch (inIOReq.opGet()) {
@@ -60,12 +61,14 @@ BlockStoreCache::IORequestDown(const IORequest& inIOReq,
 
       // If the cache is full, eject the front block.
 
-      if (cacheBlocks == cacheSize) {
+      if (cache.isFull()) {
+	Block demoteBlock;
+
+	cache.blockEject(demoteBlock);
+
 	// If necessary, create a Demote I/O.
 
 	if (cacheDemotePolicy == DemoteDemand) {
-	  Block demoteBlock = *cache.begin();
-
 	  outIOReqList.push_back(IORequest(inIOReq.originatorGet(),
 					   Demote,
 					   demoteBlock.devID,
@@ -73,12 +76,6 @@ BlockStoreCache::IORequestDown(const IORequest& inIOReq,
 					   demoteBlock.blockID * blockSize,
 					   blockSize));
 	}
-
-	cacheIndex.erase(cache.front());
-	cache.pop_front();
-      }
-      else {
-	cacheBlocks++;
       }
 
       // Create a new IORequest to pass on to the next-level node.
@@ -93,19 +90,16 @@ BlockStoreCache::IORequestDown(const IORequest& inIOReq,
 
     switch (cacheReplPolicy) {
     case LRU:
-      cache.push_back(block);
-      cacheIndex[block] = --cache.end();
+      cache.blockPutAtTail(block);
       break;
     case MRU:
       if (inIOReq.opGet() == Demote) {
 	// Demoted blocks always go at the eject-me-last end.
 
-	cache.push_back(block);
-	cacheIndex[block] = --cache.end();
+	cache.blockPutAtTail(block);
       }
       else {
-	cache.push_front(block);
-	cacheIndex[block] = cache.begin();
+	cache.blockPutAtHead(block);
       }
       break;
     default:

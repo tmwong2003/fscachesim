@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreCache.hh,v 1.5 2000/10/28 22:20:59 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCache.hh,v 1.6 2000/10/30 01:12:44 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -16,6 +16,7 @@
 #include <stdio.h>
 
 #include "BlockStore.hh"
+#include "Cache.hh"
 
 enum CacheDemotePolicy_t {None, DemoteDemand};
 enum CacheReplPolicy_t {LRU, MRU};
@@ -28,20 +29,11 @@ private:
     };
   };
 
-  typedef list<Block> Cache;
-  typedef Cache::iterator CacheIter;
-
-  typedef map<Block, CacheIter, BlockLessThan> CacheIndex;
-  typedef CacheIndex::iterator CacheIndexIter;
-
   typedef map<const char *, uint32_t, CharStarLessThan> StatMap;
   typedef StatMap::iterator StatMapIter;
   typedef StatMap::const_iterator StatMapConstIter;
 
   Cache cache;
-  uint32_t cacheSize;
-  uint32_t cacheBlocks;
-  CacheIndex cacheIndex;
   CacheReplPolicy_t cacheReplPolicy;
   CacheDemotePolicy_t cacheDemotePolicy;
 
@@ -64,10 +56,7 @@ public:
 		  CacheReplPolicy_t inCacheReplPolicy,
 		  CacheDemotePolicy_t inCacheDemotePolicy) :
     BlockStore(inName, inBlockSize),
-    cache(),
-    cacheSize(inCacheSize),
-    cacheBlocks(0),
-    cacheIndex(),
+    cache(inCacheSize),
     cacheReplPolicy(inCacheReplPolicy),
     cacheDemotePolicy(inCacheDemotePolicy) { ; };
 
