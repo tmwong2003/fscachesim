@@ -4,8 +4,8 @@
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
-#ifndef _BLOCKSTORECACHESEGVARIABLE_HH_
-#define _BLOCKSTORECACHESEGVARIABLE_HH_
+#ifndef _BLOCKSTORECACHESEGVARIABLEMULTI_HH_
+#define _BLOCKSTORECACHESEGVARIABLEMULTI_HH_
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -14,7 +14,7 @@
 #include "BlockStore.hh"
 #include "CacheGhost.hh"
 
-class BlockStoreCacheSegVariable : public BlockStore {
+class BlockStoreCacheSegVariableMulti : public BlockStore {
 protected:
   struct CharStarLessThan {
     bool operator()(const char *str1, const char *str2) const {
@@ -33,7 +33,12 @@ protected:
 
   // The ghost caches, for demote and read operations
 
-  CacheGhost ghost;
+  typedef map<const char *, CacheGhost *> GhostMap;
+  typedef GhostMap::iterator GhostMapIter;
+  typedef GhostMap::const_iterator GhostMapConstIter;
+
+  GhostMap ghostMap;
+  uint32_t ghostCacheSize;
 
   StatMap demoteHitsMap;
   StatMap demoteMissesMap;
@@ -44,8 +49,8 @@ protected:
 private:
   // Copy constructors - declared private and never defined
 
-  BlockStoreCacheSegVariable(const BlockStoreCacheSegVariable&);
-  BlockStoreCacheSegVariable& operator=(const BlockStoreCacheSegVariable&);
+  BlockStoreCacheSegVariableMulti(const BlockStoreCacheSegVariableMulti&);
+  BlockStoreCacheSegVariableMulti& operator=(const BlockStoreCacheSegVariableMulti&);
 
 protected:
   int blockGetCascade(Block inBlock);
@@ -53,20 +58,18 @@ protected:
 			    int inSeg);
 
 public:
-  BlockStoreCacheSegVariable(const char *inName,
-			     uint32_t inBlockSize,
-			     uint32_t inCacheSize,
-			     int inSegCount,
-			     bool inNormalizeFlag);
+  BlockStoreCacheSegVariableMulti(const char *inName,
+				  uint32_t inBlockSize,
+				  uint32_t inCacheSize,
+				  int inSegCount);
 
-  BlockStoreCacheSegVariable(const char *inName,
-			     uint32_t inBlockSize,
-			     uint32_t inCacheSize,
-			     int inSegCount,
-			     int inSegMultiplier,
-			     bool inNormalizeFlag);
+  BlockStoreCacheSegVariableMulti(const char *inName,
+				  uint32_t inBlockSize,
+				  uint32_t inCacheSize,
+				  int inSegCount,
+				  int inSegMultiplier);
 
-  ~BlockStoreCacheSegVariable();
+  ~BlockStoreCacheSegVariableMulti();
 
   virtual bool IORequestDown(const IORequest& inIOReq,
 			     list<IORequest>& outIOReqList);
@@ -78,4 +81,4 @@ public:
   virtual void statisticsShow() const;
 };
 
-#endif /* _BLOCKSTORECACHESEGVARIABLE_HH_ */
+#endif /* _BLOCKSTORECACHESEGVARIABLEMULTI_HH_ */

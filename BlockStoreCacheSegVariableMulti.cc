@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCacheSegVariable.cc,v 1.3 2001/07/19 20:24:53 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCacheSegVariableMulti.cc,v 1.3 2001/07/19 20:24:53 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -12,10 +12,10 @@
 #include "CacheGhost.hh"
 #include "IORequest.hh"
 
-#include "BlockStoreCacheSegVariable.hh"
+#include "BlockStoreCacheSegVariableMulti.hh"
 
 int
-BlockStoreCacheSegVariable::blockGetCascade(Block inBlock)
+BlockStoreCacheSegVariableMulti::blockGetCascade(Block inBlock)
 {
   int retval = cacheSegCount;
 
@@ -32,7 +32,7 @@ BlockStoreCacheSegVariable::blockGetCascade(Block inBlock)
 }
 
 void
-BlockStoreCacheSegVariable::blockPutAtSegCascade(Block inBlock,
+BlockStoreCacheSegVariableMulti::blockPutAtSegCascade(Block inBlock,
 						 int inSeg)
 {
   Block cascadeEjectBlock = inBlock;
@@ -54,14 +54,15 @@ BlockStoreCacheSegVariable::blockPutAtSegCascade(Block inBlock,
   }
 }
 
-BlockStoreCacheSegVariable::BlockStoreCacheSegVariable(const char *inName,
-						       uint32_t inBlockSize,
-						       uint32_t inCacheSize,
-						       int inSegCount,
-						       bool inNormalizeFlag) :
+BlockStoreCacheSegVariableMulti::
+BlockStoreCacheSegVariableMulti(const char *inName,
+				uint32_t inBlockSize,
+				uint32_t inCacheSize,
+				int inSegCount) :
   BlockStore(inName, inBlockSize),
   cacheSegCount(inSegCount),
-  ghost(inCacheSize, inNormalizeFlag)
+  ghostMap(),
+  ghostCacheSize(inCacheSize)
 {
   uint32_t cacheSegSize = inCacheSize / cacheSegCount;
   uint32_t cacheSizeRemain = inCacheSize;
@@ -86,15 +87,16 @@ BlockStoreCacheSegVariable::BlockStoreCacheSegVariable(const char *inName,
 // For the exponential size segments, each segment is inSegMultiplier times
 // the size of the previous segment.
 
-BlockStoreCacheSegVariable::BlockStoreCacheSegVariable(const char *inName,
-						       uint32_t inBlockSize,
-						       uint32_t inCacheSize,
-						       int inSegCount,
-						       int inSegMultiplier,
-						       bool inNormalizeFlag) :
+BlockStoreCacheSegVariableMulti::
+BlockStoreCacheSegVariableMulti(const char *inName,
+				uint32_t inBlockSize,
+				uint32_t inCacheSize,
+				int inSegCount,
+				int inSegMultiplier) :
   BlockStore(inName, inBlockSize),
   cacheSegCount(inSegCount),
-  ghost(inCacheSize, inNormalizeFlag)
+  ghostMap(),
+  ghostCacheSize(inCacheSize)
 {
   cacheSegs = new Cache *[cacheSegCount];
   segHits = new uint32_t[cacheSegCount];
@@ -143,8 +145,13 @@ BlockStoreCacheSegVariable::BlockStoreCacheSegVariable(const char *inName,
   }
 }
 
-BlockStoreCacheSegVariable::~BlockStoreCacheSegVariable()
+BlockStoreCacheSegVariableMulti::~BlockStoreCacheSegVariableMulti()
 {
+  for (GhostMapIter i = ghostMap.begin();
+       i != ghostMap.end();
+       i++) {
+    delete i->second;
+  }
   for (int i = 0; i < cacheSegCount; i++) {
     delete cacheSegs[i];
   }
@@ -153,13 +160,23 @@ BlockStoreCacheSegVariable::~BlockStoreCacheSegVariable()
 }
 
 bool
-BlockStoreCacheSegVariable::IORequestDown(const IORequest& inIOReq,
-					  list<IORequest>& outIOReqList)
+BlockStoreCacheSegVariableMulti::IORequestDown(const IORequest& inIOReq,
+					       list<IORequest>& outIOReqList)
 {
   Block block = {0, inIOReq.objectIDGet(), inIOReq.blockOffsetGet(blockSize)};
   const char* reqOriginator = inIOReq.originatorGet();
   IORequestOp_t op = inIOReq.opGet();
   uint32_t reqBlockLength = inIOReq.blockLengthGet(blockSize);
+
+  // If a ghost cache doesn't already exist for the originator, make one.
+
+  GhostMapIter ghostIter = ghostMap.find(reqOriginator);
+  if (ghostIter == ghostMap.end()) {
+    fprintf(stderr,
+	    "tmwong: Made ghost cache for originator %s\n",
+	    reqOriginator);
+    ghostMap[reqOriginator] = new CacheGhost(ghostCacheSize);
+  }
 
   for (uint32_t i = 0; i < reqBlockLength; i++) {
     // See if we have cached this block.
@@ -174,7 +191,10 @@ BlockStoreCacheSegVariable::IORequestDown(const IORequest& inIOReq,
       case Read:
 	readHitsMap[reqOriginator]++;
 	blockReadHits++;
-	ghost.probUpdate(block);
+
+	// Per-client ghost caching.
+
+	ghostMap[reqOriginator]->probUpdate(block);
 	break;
       default:
 	abort();
@@ -193,7 +213,7 @@ BlockStoreCacheSegVariable::IORequestDown(const IORequest& inIOReq,
       case Read:
 	readMissesMap[reqOriginator]++;
 	blockReadMisses++;
-	ghost.probUpdate(block);
+	ghostMap[reqOriginator]->probUpdate(block);
 
 	// Create a new IORequest to pass on to the next-level node.
 
@@ -212,7 +232,8 @@ BlockStoreCacheSegVariable::IORequestDown(const IORequest& inIOReq,
       // it. Remember, the 0th segment is the closest to head of the queue
       // (i.e. the LRU end).
 
-      int insertSeg = (int)(cacheSegCount * ghost.probGet(op));
+      int insertSeg = (int)(cacheSegCount *
+			    ghostMap[reqOriginator]->probGet(op));
 #if 0
       // Here's a heuristic: workloads that demote lots of blocks that are
       // already in the array get penalized.
@@ -227,7 +248,7 @@ BlockStoreCacheSegVariable::IORequestDown(const IORequest& inIOReq,
       }
       blockPutAtSegCascade(block, insertSeg);
     }
-    ghost.blockPut(op, block);
+    ghostMap[reqOriginator]->blockPut(op, block);
 
     block.blockID++;
   }
@@ -236,7 +257,7 @@ BlockStoreCacheSegVariable::IORequestDown(const IORequest& inIOReq,
 }
 
 void
-BlockStoreCacheSegVariable::statisticsReset()
+BlockStoreCacheSegVariableMulti::statisticsReset()
 {
   for (int i = 0; i < cacheSegCount; i++) {
     segHits[i] = 0;
@@ -252,9 +273,9 @@ BlockStoreCacheSegVariable::statisticsReset()
 }
 
 void
-BlockStoreCacheSegVariable::statisticsShow() const
+BlockStoreCacheSegVariableMulti::statisticsShow() const
 {
-  printf("Statistics for BlockStoreCacheSegVariable.%s\n", nameGet());
+  printf("Statistics for BlockStoreCacheSegVariableMulti.%s\n", nameGet());
 
   uint32_t segHitsTotal = 0;
   for (int i = cacheSegCount - 1; i >= 0; i--) {
@@ -291,5 +312,9 @@ BlockStoreCacheSegVariable::statisticsShow() const
   printf("Read hits %u\n", blockReadHits);
   printf("Read misses %u\n", blockReadMisses);
 
-  ghost.statisticsShow();
+  for (GhostMapConstIter i = ghostMap.begin();
+       i != ghostMap.end();
+       i++) {
+    i->second->statisticsShow();
+  }
 }

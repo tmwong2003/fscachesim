@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/main.cc,v 1.16 2001/07/19 20:24:54 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/main.cc,v 1.17 2001/07/19 22:55:36 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -22,19 +22,25 @@
 
 // Command usage.
 
-const char *globalProgArgs = "b:Ddgms:w:";
+const char *globalProgArgs = "b:DdGgmns:uw:";
 
 const char *globalProgUsage = \
 "[-D] " \
 "[-d] " \
+"[-G] " \
 "[-g] " \
 "[-m] " \
+"[-n] " \
 "[-b block_size] " \
 "[-s prob_cache_size] " \
 "[-w warmup_time] " \
 "client_cache_size array_cache_size trace_files...";
 
 const int globalMBToB = 1048576;
+
+const int globalCacheSegVariableSegCount = 10;
+
+const int globalCacheSegVariableSegMultiplier = 2;
 
 void
 usage(char *inProgName,
@@ -50,6 +56,7 @@ main(int argc,
      char *argv[])
 {
   uint32_t arrayProbCacheSize = 0;
+  uint32_t arrayProbCacheSizeMB = 0;
   CacheReplPolicy_t arrayReplPolicy = LRU;
 
   uint32_t blockSize = 4096;
@@ -60,8 +67,11 @@ main(int argc,
   double warmupTime = 0;
 
   bool useGhostFlag = false;
+  bool useGhostMultiFlag = false;
   bool useMamboFlag = false;
+  bool useNormalizeFlag = false;
   bool useSLRUcacheFlag = false;
+  bool useUniformFlag = false;
 
   // Process command-line args.
 
@@ -79,15 +89,25 @@ main(int argc,
       hostDemotePolicy = DemoteDemand;
       arrayReplPolicy = MRU;
       break;
+    case 'G':
+      useGhostMultiFlag = true;
+      break;
     case 'g':
       useGhostFlag = true;
       break;
     case 'm':
       useMamboFlag = true;
       break;
+    case 'n':
+      useNormalizeFlag = true;
+      break;
     case 's':
       useSLRUcacheFlag = true;
-      arrayProbCacheSize = atol(optarg) * globalMBToB / blockSize;
+      arrayProbCacheSizeMB = atol(optarg);
+      arrayProbCacheSize = arrayProbCacheSizeMB * (globalMBToB / blockSize);
+      break;
+    case 'u':
+      useUniformFlag = true;
       break;
     case 'w':
       warmupTime = strtod(optarg, NULL);
@@ -116,8 +136,10 @@ main(int argc,
 
   // Get the cache sizes.
 
-  uint32_t hostCacheSize = atol(argv[optind]) * globalMBToB / blockSize;
-  uint32_t arrayCacheSize = atol(argv[optind + 1]) * globalMBToB / blockSize;
+  uint32_t hostCacheSizeMB = atol(argv[optind]);
+  uint32_t hostCacheSize = hostCacheSizeMB * (globalMBToB / blockSize);
+  uint32_t arrayCacheSizeMB = atol(argv[optind + 1]);
+  uint32_t arrayCacheSize = arrayCacheSizeMB * (globalMBToB / blockSize);
 
   // Create a single array cache for all client-missed I/Os to feed into.
 
@@ -129,10 +151,23 @@ main(int argc,
 					      arrayProbCacheSize);
   }
   else if (useGhostFlag) {
-    arrayCache = new BlockStoreCacheSegVariable("array",
-						blockSize,
-						arrayCacheSize,
-						10);
+    if (useUniformFlag) {
+      arrayCache = 
+	new BlockStoreCacheSegVariable("array",
+				       blockSize,
+				       arrayCacheSize,
+				       globalCacheSegVariableSegCount,
+				       useNormalizeFlag);
+    }
+    else {
+      arrayCache = 
+	new BlockStoreCacheSegVariable("array",
+				       blockSize,
+				       arrayCacheSize,
+				       globalCacheSegVariableSegCount,
+				       globalCacheSegVariableSegMultiplier,
+				       useNormalizeFlag);
+    }
   }
   else {
     arrayCache = new BlockStoreCache("array",
@@ -174,17 +209,30 @@ main(int argc,
 
   // Show stats.
 
-  printf("Client cache size %ld\n", hostCacheSize * blockSize / globalMBToB);
-  printf("Array cache size %ld\n", arrayCacheSize * blockSize / globalMBToB);
+  printf("Client cache size %u\n", hostCacheSizeMB);
+  printf("Array cache size %u\n", arrayCacheSizeMB);
   if (useSLRUcacheFlag) {
-    printf("Array prob cache size %ld\n",
-	   arrayProbCacheSize * blockSize / globalMBToB);
+    printf("Array prob cache size %ld\n", arrayProbCacheSizeMB);
     printf("Array cache policy SLRU-%s\n",
 	   (hostDemotePolicy == DemoteDemand ? "SLRU" : "NONE"));
   }
   else if (useGhostFlag) {
-    printf("Array cache policy SEGVAR-%s\n",
-	   (hostDemotePolicy == DemoteDemand ? "SEGVAR" : "NONE"));
+    if (useUniformFlag) {
+      printf("Array cache policy %sSEG-%s%s\n",
+	     (useNormalizeFlag ? "N" : "U"),
+	     (useNormalizeFlag ? "N" : "U"),
+	     (hostDemotePolicy == DemoteDemand ? "SEG" : "NONE"));
+    }
+    else {
+      printf("Array cache policy %sSEGEXP-%s%s\n",
+	     (useNormalizeFlag ? "N" : "U"),
+	     (useNormalizeFlag ? "N" : "U"),
+	     (hostDemotePolicy == DemoteDemand ? "SEGEXP" : "NONE"));
+    }
+  }
+  else if (useGhostMultiFlag) {
+    printf("Array cache policy SEGEXPMULTI-%s\n",
+	   (hostDemotePolicy == DemoteDemand ? "SEGEXPMULTI" : "NONE"));
   }
   else {
     printf("Array cache policy %s-",

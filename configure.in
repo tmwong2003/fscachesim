@@ -1,4 +1,4 @@
-dnl RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/configure.in,v 1.1.1.1 2000/09/21 16:25:41 tmwong Exp $
+dnl RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/configure.in,v 1.2 2000/09/22 16:15:39 tmwong Exp $
 dnl Description: fscachesim configure.in
 dnl Created by:  T.M. Wong <tmwong+@cs.cmu.edu>
 
@@ -14,7 +14,7 @@ dnl
 dnl Initializes automake
 dnl
 
-AM_INIT_AUTOMAKE(fscachesim,0.1)
+AM_INIT_AUTOMAKE(fscachesim,0.2)
 AM_CONFIG_HEADER(config.h)
 
 dnl

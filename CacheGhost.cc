@@ -1,9 +1,10 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCacheGhost.cc,v 1.1 2001/07/18 03:16:35 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/CacheGhost.cc,v 1.1 2001/07/18 20:36:11 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
+#include <algorithm>
 #include <stdio.h>
 #include <stdlib.h>
 
