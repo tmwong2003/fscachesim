@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCache.cc,v 1.6 2000/10/30 01:12:44 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCache.cc,v 1.7 2001/07/02 23:29:57 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -64,7 +64,7 @@ BlockStoreCache::IORequestDown(const IORequest& inIOReq,
       if (cache.isFull()) {
 	Block demoteBlock;
 
-	cache.blockEject(demoteBlock);
+	cache.blockGetAtHead(demoteBlock);
 
 	// If necessary, create a Demote I/O.
 

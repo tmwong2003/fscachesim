@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCache.hh,v 1.6 2000/10/30 01:12:44 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Cache.hh,v 1.1 2001/07/02 23:29:57 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -11,6 +11,7 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
+#include <assert.h>
 #include <list>
 #include <map>
 
@@ -36,24 +37,15 @@ public:
 
   ~Cache() { ; };
 
-  void blockEject(Block &outBlock);
   void blockGet(Block inBlock);
+
+  void blockGetAtHead(Block &outBlock);
   void blockPutAtHead(Block inBlock);
+
   void blockPutAtTail(Block inBlock);
 
   bool isCached(Block inBlock);
   bool isFull();
-};
-
-inline void
-Cache::blockEject(Block &outBlock)
-{
-  if (!cache.empty()) {
-    outBlock = *cache.begin();
-    cacheIndex.erase(cache.front());
-    cache.pop_front();
-    blockCount--;
-  }
 };
 
 inline void
@@ -65,6 +57,19 @@ Cache::blockGet(Block inBlock)
     cache.erase(blockIter->second);
     blockCount--;
   }
+  assert(blockCount >= 0);
+};
+
+inline void
+Cache::blockGetAtHead(Block &outBlock)
+{
+  if (!cache.empty()) {
+    outBlock = *cache.begin();
+    cacheIndex.erase(cache.front());
+    cache.pop_front();
+    blockCount--;
+  }
+  assert(blockCount >= 0);
 };
 
 inline void
@@ -73,6 +78,7 @@ Cache::blockPutAtHead(Block inBlock)
   blockCount++;
   cache.push_front(inBlock);
   cacheIndex[inBlock] = cache.begin();
+  assert(blockCount <= blockCountMax);
 };
 
 inline void
@@ -81,6 +87,7 @@ Cache::blockPutAtTail(Block inBlock)
   blockCount++;
   cache.push_back(inBlock);
   cacheIndex[inBlock] = --cache.end();
+  assert(blockCount <= blockCountMax);
 };
 
 inline bool

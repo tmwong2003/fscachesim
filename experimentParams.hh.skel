@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/experimentParams.hh,v 1.1 2000/10/30 01:12:45 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/experimentParams.hh,v 1.2 2001/06/30 21:56:02 tmwong Exp $
   Description:  fscachesim parameter file. HACK.
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -7,10 +7,10 @@
 #ifndef _EXPERIMENTPARAMS_HH_
 #define _EXPERIMENTPARAMS_HH_
 
-const int globalHostCacheSize = 16384;
-const CacheDemotePolicy_t globalHostDemotePolicy = None;
+const int globalHostCacheSize = 4096;
+const CacheDemotePolicy_t globalHostDemotePolicy = DemoteDemand;
 
-const int globalArrayCacheSize = 16384;
-const CacheReplPolicy_t globalArrayReplPolicy = LRU;
+const int globalArrayCacheSize = 4096;
+const CacheReplPolicy_t globalArrayReplPolicy = MRU;
 
 #endif /* _EXPERIMENTPARAMS_HH_ */

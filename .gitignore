@@ -37,6 +37,7 @@ config.status
 configure
 fscachesim
 mambo
+sharestats
 stamp-h
 stamp-h.in
 synth

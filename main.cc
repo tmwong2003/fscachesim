@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/main.cc,v 1.8 2000/10/30 01:12:45 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/main.cc,v 1.9 2001/06/30 21:56:02 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -12,6 +12,7 @@
 #include <unistd.h>
 
 #include "BlockStoreCache.hh"
+#include "BlockStoreCacheSegmented.hh"
 #include "IORequest.hh"
 #include "IORequestGeneratorBatch.hh"
 #include "IORequestGeneratorGeneric.hh"
@@ -24,11 +25,12 @@
 
 // Command usage.
 
-const char *globalProgArgs = "b:mw:";
+const char *globalProgArgs = "b:ms:w:";
 
 const char *globalProgUsage = \
 "[-m] " \
 "[-b block_size] " \
+"[-s prob_cache_size] " \
 "[-w warmup_time] " \
 "trace_files...";
 
@@ -50,10 +52,12 @@ main(int argc,
      char *argv[])
 {
   uint32_t blockSize = globalBlockSize;
+  uint32_t probArrayCacheSize = 0;
   uint32_t warmupCount = 0;
   double warmupTime = 0;
 
   bool useMamboFlag = false;
+  bool useSLRUcacheFlag = false;
 
   // Process command-line args.
 
@@ -66,6 +70,10 @@ main(int argc,
       break;
     case 'm':
       useMamboFlag = true;
+      break;
+    case 's':
+      useSLRUcacheFlag = true;
+      probArrayCacheSize = atol(optarg);
       break;
     case 'w':
       warmupTime = strtod(optarg, NULL);
@@ -94,18 +102,27 @@ main(int argc,
 
   // Create a single array cache for all client-missed I/Os to feed into.
 
-  BlockStoreCache arrayCache("array",
-			     blockSize,
-			     globalArrayCacheSize,
-			     globalArrayReplPolicy,
-			     None);
-  generators->StatisticsAdd(&arrayCache);
-  Node array(&arrayCache, NULL);
+  BlockStore *arrayCache;
+  if (useSLRUcacheFlag) {
+    arrayCache = new BlockStoreCacheSegmented("array",
+					      blockSize,
+					      globalArrayCacheSize,
+					      probArrayCacheSize);
+  }
+  else {
+    arrayCache = new BlockStoreCache("array",
+				     blockSize,
+				     globalArrayCacheSize,
+				     globalArrayReplPolicy,
+				     None);
+  }
+  generators->StatisticsAdd(arrayCache);
+  Node array(arrayCache, NULL);
 
   for (int i = optind; i < argc; i++) {
-    char buffer[20];
+    char buffer[40];
 
-    sprintf(buffer, "client-%d", i);
+    sprintf(buffer, "%s", basename(argv[i]));
     BlockStoreCache *cache = new BlockStoreCache(buffer,
 						 blockSize,
 						 globalHostCacheSize,
