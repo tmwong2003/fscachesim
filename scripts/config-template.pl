@@ -1,4 +1,4 @@
-# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/scripts/fscachesim-config-template.pl,v 1.1 2002/02/18 00:23:49 tmwong Exp $
+# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/scripts/fscachesim-config-template.pl,v 1.2 2002/02/18 20:55:24 tmwong Exp $
 # Description: Template file for fscachesim-run.pl configuration file.
 # Author:      T.M. Wong <tmwong+@cs.cmu.edu>
 

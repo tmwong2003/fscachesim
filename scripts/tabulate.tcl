@@ -23,6 +23,30 @@ proc nameGet {stanza} {
     return $subName
 }
 
+proc latencyGet {stats} {
+    upvar $stats a
+
+    foreach client [lsort [array names a]] {
+	lappend latencies [format "%.2f" [lindex $a($client) 9]]
+    }
+
+    return $latencies
+}
+
+proc speedupGet {base exp} {
+    upvar $base b
+    upvar $exp e
+
+    foreach cl [lsort [array names b]] {
+	lappend speedups \
+	    [format "%.2f" [expr [lindex $b($cl) 9] / [lindex $e($cl) 9]]]
+    }
+
+    lappend speedups [format "%.2f" [meanGeo $speedups]]
+
+    return $speedups
+}
+
 proc basename {name} {
     set path [split $name "/"]
 
@@ -74,8 +98,20 @@ proc StoreCacheSimpleParse {stanza readHits readMisses demoteMisses} {
     StoreCacheParse [lindex $stanza 4] rh rm dm
 }
 
-proc resultsParse {resultsRaw resultsParsed} {
+proc resultsParse {resultsFilename resultsParsed} {
     upvar $resultsParsed stats
+
+    set resultsFileH [open $resultsFilename r]
+
+    set resultsText {};
+
+    while {[gets $resultsFileH line] >= 0} {
+	lappend resultsText $line
+    }
+
+    close $resultsFileH
+
+    eval set resultsRaw {[join $resultsText " "]}
 
     set resultsArray [lindex $resultsRaw 0]
 
@@ -146,70 +182,30 @@ proc resultsParse {resultsRaw resultsParsed} {
     }
 }
 
-if {$argc != 2} {
-    error "Usage: fscachesim-tabulate.tcl baselineFilename expFilename"
+if {$argc < 1} {
+    error "Usage: fscachesim-tabulate.tcl baselineFilename expFilenames..."
 }
 
 set baseFilename [lindex $argv 0]
-set expFilename [lindex $argv 1]
 
-set baseFileH [open $baseFilename r]
-
-set baseText {};
-
-while {[gets $baseFileH line] >= 0} {
-    lappend baseText $line
-}
-
-close $baseFileH
-
-eval set baseList {[join $baseText " "]}
-
-resultsParse $baseList baseStats
-
-set expFileH [open $expFilename r]
-
-set expText {};
-
-while {[gets $expFileH line] >= 0} {
-    lappend expText $line
-}
-
-close $expFileH
-
-eval set expList {[join $expText " "]}
-
-resultsParse $expList expStats
-
-foreach client [lsort [array names baseStats]] {
-    lappend baseLat \
-	[format "%.2f" [lindex $baseStats($client) 9]]
-    lappend expLat \
-	[format "%.2f" [lindex $expStats($client) 9]]
-    lappend expSpeedup \
-	[format "%.2f" [expr [lindex $baseStats($client) 9] / [lindex $expStats($client) 9]]]
-#     lappend expLatZero \
-#  	[format "%.2f" [lindex $expStats($client) 10]]
-#     lappend expSpeedupZero \
-# 	[format "%.2f" [expr [lindex $baseStats($client) 9] / [lindex $expStats($client) 10]]]
-}
-
-lappend expSpeedup [format "%.2f" [meanGeo $expSpeedup]]
-
-# lappend expSpeedupZero [format "%.2f" [meanGeo $expSpeedupZero]]
+resultsParse $baseFilename baseStats
+set baseLatencies [latencyGet baseStats]
 
 puts [basename $baseFilename]
-
 puts -nonewline "Mean lat\t"
-puts [join $baseLat "\t"]
+puts [join $baseLatencies "\t"]
 
-puts [basename $expFilename]
+foreach i [lrange $argv 1 end] {
+    resultsParse $i expStats
+    set expLatencies [latencyGet expStats]
+    set expSpeedups [speedupGet baseStats expStats]
 
-puts -nonewline "Mean lat.\t"
-puts [join $expLat "\t"]
-
-puts -nonewline "Speedup\t\t"
-puts [join $expSpeedup "\t"]
+    puts [basename $i]
+    puts -nonewline "Mean lat.\t"
+    puts [join $expLatencies "\t"]
+    puts -nonewline "Speedup\t\t"
+    puts [join $expSpeedups "\t"]
+}
 
 # puts [join $expLatZero "\t"]
 # puts [join $expSpeedupZero "\t"]
