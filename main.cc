@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/main.cc,v 1.14 2001/07/19 01:12:00 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/main.cc,v 1.15 2001/07/19 02:53:35 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -193,6 +193,7 @@ main(int argc,
     printf("%s\n",
 	   (hostDemotePolicy == DemoteDemand ? "LRU" : "NONE"));
   }
+  printf("Block size %ld\n", blockSize);
   generators->statisticsShow();
 
   // Clean up after ourselves.

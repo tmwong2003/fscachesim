@@ -1,9 +1,10 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCacheGhost.cc,v 1.1 2001/07/18 03:16:35 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCacheGhost.cc,v 1.2 2001/07/18 20:36:11 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -80,6 +81,19 @@ BlockStoreCacheGhost::IORequestDown(const IORequest& inIOReq,
       // stupid not to cache when we have space available.
 
       double prob = (double)rand() / RAND_MAX;
+#if 0
+      // Here's a heuristic: workloads that demote lots of blocks that are
+      // already in the array get penalized.
+
+      double demoteProbFactor =
+	(blockDemoteMisses > 0 ?
+	 (pow((double)blockDemoteMisses / (blockDemoteHits + blockDemoteMisses), 2)) :
+	 0);
+      if (!cache.isFull() ||
+	  (op == Read && prob <= ghost.probGet(op)) ||
+	  (op == Demote && prob <= (ghost.probGet(op) * demoteProbFactor))) {
+      }
+#endif /* 0 */
       if (!cache.isFull() || prob <= ghost.probGet(op)) {
 	// Eject the LRU block from the actual LRU queue.
 

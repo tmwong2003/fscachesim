@@ -1,4 +1,4 @@
-# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Makefile.am,v 1.10 2001/07/18 20:36:11 tmwong Exp $
+# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Makefile.am,v 1.11 2001/07/19 01:12:00 tmwong Exp $
 # Description: fscachesim Makefile.am
 # Created by:  T.M. Wong <tmwong+@cs.cmu.edu>
 
@@ -14,6 +14,7 @@ bin_PROGRAMS = fscachesim sharestats tracestats
 fscachesim_SOURCES = \
 	CacheGhost.cc \
 	BlockStoreCache.cc \
+	BlockStoreCacheGhost.cc \
 	BlockStoreCacheSegVariable.cc \
 	BlockStoreCacheSegmented.cc \
 	IORequestGeneratorBatch.cc \

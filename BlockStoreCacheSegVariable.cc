@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCacheSegVariable.cc,v 1.1 2001/07/19 01:11:58 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCacheSegVariable.cc,v 1.2 2001/07/19 02:53:34 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -118,7 +118,6 @@ BlockStoreCacheSegVariable::BlockStoreCacheSegVariable(const char *inName,
   if (cacheSizeUnallocated != 0 || (int)(segFracTotal) != 1) {
     abort();
   }
-  exit(0);
 }
 
 BlockStoreCacheSegVariable::~BlockStoreCacheSegVariable()
@@ -190,6 +189,15 @@ BlockStoreCacheSegVariable::IORequestDown(const IORequest& inIOReq,
       // (i.e. the LRU end).
 
       int insertSeg = (int)(cacheSegCount * ghost.probGet(op));
+#if 0
+      // Here's a heuristic: workloads that demote lots of blocks that are
+      // already in the array get penalized.
+
+      if (op == Demote && blockDemoteMisses > 0) {
+	insertSeg = (double)insertSeg *
+	  ((double)blockDemoteMisses / (blockDemoteHits + blockDemoteMisses));
+      }
+#endif /* 0 */
       if (insertSeg == cacheSegCount) {
 	insertSeg--;
       }
