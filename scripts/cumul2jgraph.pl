@@ -1,11 +1,11 @@
 #!/usr/bin/perl -w
 #
-# RCS:         $Header: $
+# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/scripts/cumul2jgraph.pl,v 1.1 2000/10/26 16:12:28 tmwong Exp $
 # Description: Convert a raw LRU cumulative file to a .jgraph file.
 # Author:      T.M. Wong <tmwong+@cs.cmu.edu>
 
 use strict;
-use vars qw($glblProgname $glblSRT2txtOptions $glblSectorSize $opt_d);
+use vars qw($glblProgname);
 use Getopt::Std;
 
 $glblProgname = $0;
