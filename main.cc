@@ -12,8 +12,8 @@
 #include <unistd.h>
 
 #include "BlockStoreCache.hh"
-#include "BlockStoreCacheGhost.hh"
 #include "BlockStoreCacheSegmented.hh"
+#include "BlockStoreCacheSegVariable.hh"
 #include "IORequest.hh"
 #include "IORequestGeneratorBatch.hh"
 #include "IORequestGeneratorGeneric.hh"
@@ -129,9 +129,10 @@ main(int argc,
 					      arrayProbCacheSize);
   }
   else if (useGhostFlag) {
-    arrayCache = new BlockStoreCacheGhost("array",
-					  blockSize,
-					  arrayCacheSize);
+    arrayCache = new BlockStoreCacheSegVariable("array",
+						blockSize,
+						arrayCacheSize,
+						8);
   }
   else {
     arrayCache = new BlockStoreCache("array",
@@ -182,8 +183,8 @@ main(int argc,
 	   (hostDemotePolicy == DemoteDemand ? "SLRU" : "NONE"));
   }
   else if (useGhostFlag) {
-    printf("Array cache policy GHOST-%s\n",
-	   (hostDemotePolicy == DemoteDemand ? "GHOST" : "NONE"));
+    printf("Array cache policy SEGVAR-%s\n",
+	   (hostDemotePolicy == DemoteDemand ? "SEGVAR" : "NONE"));
   }
   else {
     printf("Array cache policy %s-",
