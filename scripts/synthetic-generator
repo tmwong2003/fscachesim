@@ -1,17 +1,23 @@
 #!/usr/bin/perl -w
 #
-# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/scripts/synthetic-generator.pl,v 1.1 2000/10/30 01:12:47 tmwong Exp $
+# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/scripts/synthetic-generator.pl,v 1.2 2001/06/30 21:56:02 tmwong Exp $
 # Description: Generate a synthetic trace of 1-block read I/Os.
 # Author:      T.M. Wong <tmwong+@cs.cmu.edu>
 
 use strict;
-use vars qw($glblProgname);
+use vars qw($glblProgname $opt_f $opt_n $opt_r $opt_z);
+
+use File::Basename;
 use Getopt::Std;
 
-$glblProgname = $0;
+$glblProgname = basename($0);
 
 sub usage {
-  print "$glblProgname: $glblProgname\n";
+  print "Usage: $glblProgname [VARIABLES]\n\n";
+  print "\t-f\t\tfile size in blocks\n";
+  print "\t-n\t\tnumber of batches\n";
+  print "\t-r\t\tRANDOM workload\n";
+  print "\t-z\t\tZIPF workload\n";
   exit(0);
 }
 
@@ -74,5 +80,14 @@ sub IOGenerateZipf {
   }
 }
 
-# IOGenerateZipf(1, 5406720, 4096, 49152);
-IOGenerateRandom(1, 3276800, 4096, 32768);
+# Start of the "main" routine.
+
+getopts('f:n:rz');
+
+if ($opt_r) {
+    IOGenerateRandom(1, $opt_f * $opt_n, 4096, $opt_f);
+} elsif ($opt_z) {
+    IOGenerateZipf(1, $opt_f * $opt_n, 4096, $opt_f);
+} else {
+    usage();
+}
