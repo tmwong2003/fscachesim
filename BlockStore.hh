@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStore.hh,v 1.6 2001/11/16 23:32:46 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStore.hh,v 1.7 2001/11/20 02:20:13 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -7,7 +7,7 @@
 #ifndef _BLOCKSTORE_HH_
 #define _BLOCKSTORE_HH_
 
-using namespace ::std;
+using namespace std;
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -21,22 +21,6 @@ using namespace ::std;
 
 #include "IORequest.hh"
 #include "Statistics.hh"
-
-class Block {
-public:
-  uint64_t devID;
-  uint64_t objectID;
-  uint64_t blockID;
-};
-
-struct BlockLessThan
-{
-  bool operator()(const Block block1, const Block block2) const {
-    return (block1.objectID < block2.objectID ||
-	    (block1.objectID == block2.objectID &&
-	     block1.blockID < block2.blockID));
-  }
-};
 
 class BlockStore : public Statistics {
 protected:

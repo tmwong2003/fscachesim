@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Cache.hh,v 1.5 2001/11/20 02:20:13 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Cache.hh,v 1.6 2002/02/08 16:54:10 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -7,7 +7,7 @@
 #ifndef _CACHE_HH_
 #define _CACHE_HH_
 
-using namespace ::std;
+using namespace std;
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -22,14 +22,15 @@ using namespace ::std;
 #include <stdint.h>
 #endif /* HAVE_STDINT_H */
 
+#include "Block.hh"
 #include "BlockStore.hh"
 
 class Cache {
 protected:
-  typedef map<Block, list<Block>::iterator, BlockLessThan> CacheIndex;
+  typedef map<Block::block_t, list<Block::block_t>::iterator, Block::LessThan> CacheIndex;
   typedef CacheIndex::iterator CacheIndexIter;
 
-  list<Block> cache;
+  list<Block::block_t> cache;
   CacheIndex cacheIndex;
 
   uint64_t blockCount;
@@ -44,21 +45,21 @@ public:
 
   ~Cache() { ; };
 
-  void blockGet(Block inBlock);
+  void blockGet(Block::block_t inBlock);
 
-  void blockGetAtHead(Block &outBlock);
-  void blockPutAtHead(Block inBlock);
+  void blockGetAtHead(Block::block_t &outBlock);
+  void blockPutAtHead(Block::block_t inBlock);
 
-  void blockPutAtTail(Block inBlock);
+  void blockPutAtTail(Block::block_t inBlock);
 
   uint64_t sizeGet() { return (blockCountMax);};
 
-  bool isCached(Block inBlock);
+  bool isCached(Block::block_t inBlock);
   bool isFull();
 };
 
 inline void
-Cache::blockGet(Block inBlock)
+Cache::blockGet(Block::block_t inBlock)
 {
   CacheIndexIter blockIter = cacheIndex.find(inBlock);
   if (blockIter != cacheIndex.end()) {
@@ -70,7 +71,7 @@ Cache::blockGet(Block inBlock)
 };
 
 inline void
-Cache::blockGetAtHead(Block &outBlock)
+Cache::blockGetAtHead(Block::block_t &outBlock)
 {
   if (!cache.empty()) {
     outBlock = *cache.begin();
@@ -82,7 +83,7 @@ Cache::blockGetAtHead(Block &outBlock)
 };
 
 inline void
-Cache::blockPutAtHead(Block inBlock)
+Cache::blockPutAtHead(Block::block_t inBlock)
 {
   blockCount++;
   cache.push_front(inBlock);
@@ -91,7 +92,7 @@ Cache::blockPutAtHead(Block inBlock)
 };
 
 inline void
-Cache::blockPutAtTail(Block inBlock)
+Cache::blockPutAtTail(Block::block_t inBlock)
 {
   blockCount++;
   cache.push_back(inBlock);
@@ -100,7 +101,7 @@ Cache::blockPutAtTail(Block inBlock)
 };
 
 inline bool
-Cache::isCached(Block inBlock)
+Cache::isCached(Block::block_t inBlock)
 {
   return (cacheIndex.find(inBlock) != cacheIndex.end());
 };

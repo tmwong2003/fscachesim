@@ -1,6 +1,6 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreInfinite.hh,v 1.7 2001/11/20 02:20:13 tmwong Exp $
-  Description:  
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreInfinite.hh,v 1.8 2002/02/08 16:54:10 tmwong Exp $
+  Description:  Model infinite LRU cache.
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -18,30 +18,17 @@ extern "C" {
 #include "top-down-size-splay.h"
 }
 
+#include "Block.hh"
 #include "BlockStore.hh"
 #include "Cache.hh"
-
-struct uint64LessThan
-{
-  bool operator()(const uint64_t i1, const uint64_t i2) const
-    {
-      return (i1 < i2);
-    }
-};
-
-typedef map<uint64_t, uint64_t, uint64LessThan> uint64Map;
-typedef map<uint64_t, uint64_t, uint64LessThan>::iterator uint64MapIter;
-typedef map<uint64_t, uint64_t, uint64LessThan>::const_iterator uint64MapConstIter;
+#include "UInt64.hh"
 
 class BlockStoreInfinite : public BlockStore {
 private:
-  typedef map<Block, uint64_t, BlockLessThan> BlockMap;
-  typedef BlockMap::iterator BlockMapIter;
-  typedef BlockMap::const_iterator BlockMapConstIter;
 
   // These data structures together form the 'cache'.
 
-  BlockMap blockTimestampMap;
+  Block::Counter blockTimestampMap;
   uint64_t blockTimestampClock;
   Tree *LRUTree;
 
@@ -51,8 +38,8 @@ private:
 
   // These keep stats on the cache.
 
-  uint64Map LRUMap; // LRU stack depth
-  BlockMap freqMap; // Block access frequency
+  UInt64::Counter LRUMap; // LRU stack depth
+  Block::Counter freqMap; // Block access frequency
 
   // Keep the frequency count or not?
 

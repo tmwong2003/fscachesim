@@ -1,6 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreInfinite.cc,v 1.7 2001/11/20 02:20:13 tmwong Exp $
-  Description:  
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreInfinite.cc,v 1.8 2002/02/08 16:54:10 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -13,7 +12,9 @@
 #include <assert.h>
 #include <stdio.h>
 
+#include "Block.hh"
 #include "IORequest.hh"
+#include "UInt64.hh"
 
 #include "BlockStoreInfinite.hh"
 
@@ -21,17 +22,18 @@ bool
 BlockStoreInfinite::IORequestDown(const IORequest& inIOReq,
 				  list<IORequest>& outIOReqList)
 {
-  Block block = {0, inIOReq.objectIDGet(), inIOReq.blockOffsetGet(blockSize)};
+  Block::block_t block =
+    {inIOReq.objectIDGet(), inIOReq.blockOffsetGet(blockSize)};
   uint64_t reqBlockLength = inIOReq.blockLengthGet(blockSize);
 
   for (uint64_t i = 0; i < reqBlockLength; i++) {
     // See if the block is cached.
 
-    BlockMapIter blockIter = blockTimestampMap.find(block);
+    Block::Counter::iterator blockIter = blockTimestampMap.find(block);
     if (blockIter != blockTimestampMap.end()) {
       uint64_t blockTimestamp = blockIter->second;
       uint64_t blockLRUDepth;
-      uint64MapIter LRUIter;
+      UInt64::Counter::iterator LRUIter;
 
       blockReadHits++;
 
@@ -67,7 +69,7 @@ BlockStoreInfinite::IORequestDown(const IORequest& inIOReq,
 
       if (cache.sizeGet() != 0) {
 	if (cache.isFull()) {
-	  Block ejectBlock;
+	  Block::block_t ejectBlock;
 
 	  // ... eject the head block if necessary...
 
@@ -75,7 +77,8 @@ BlockStoreInfinite::IORequestDown(const IORequest& inIOReq,
 	  
 	  // ... and remove it from the splay tree.
 
-	  BlockMapIter blockIter = blockTimestampMap.find(ejectBlock);
+	  Block::Counter::iterator blockIter =
+	    blockTimestampMap.find(ejectBlock);
 	  assert(blockIter != blockTimestampMap.end());
 
 	  uint64_t ejectBlockTimestamp = blockIter->second;
@@ -142,7 +145,9 @@ BlockStoreInfinite::statisticsShow() const
 void
 BlockStoreInfinite::statisticsFreqShow() const
 {
-  for (BlockMapConstIter i = freqMap.begin(); i != freqMap.end(); i++) {
+  for (Block::Counter::const_iterator i = freqMap.begin();
+       i != freqMap.end();
+       i++) {
     printf("%llu,%llu %llu\n", i->first.objectID, i->first.blockID, i->second);
   }
   fflush(stdout);
@@ -151,9 +156,12 @@ BlockStoreInfinite::statisticsFreqShow() const
 void
 BlockStoreInfinite::statisticsLRUShow() const
 {
-  for (uint64MapConstIter i = LRUMap.begin(); i != LRUMap.end(); i++) {
+  for (UInt64::Counter::const_iterator i = LRUMap.begin();
+       i != LRUMap.end();
+       i++) {
     // Convert the x-axis to MB instead of block size - the latter is not
-    // an intuitive measure of size.
+    // an intuitive measure of size. The ordering of divisions is
+    // important: it avoids integer round-off problems.
 
     printf("%llu %llu\n", ((i->first * (blockSize / 1024)) / 1024), i->second);
   }
@@ -169,15 +177,22 @@ BlockStoreInfinite::statisticsLRUCumulShow() const
   // cumulTotal doesn't start at zero since we need to account for
   // compulsory misses.
 
-  for (uint64MapConstIter i = LRUMap.begin(); i != LRUMap.end(); i++) {
+  for (UInt64::Counter::const_iterator i = LRUMap.begin();
+       i != LRUMap.end();
+       i++) {
     cumulTotal += i->second;
   }
-  for (uint64MapConstIter i = LRUMap.begin(); i != LRUMap.end(); i++) {
+  for (UInt64::Counter::const_iterator i = LRUMap.begin();
+       i != LRUMap.end();
+       i++) {
     // Convert the x-axis to MB instead of block size - the latter is not
-    // an intuitive measure of size.
+    // an intuitive measure of size. The ordering of divisions is
+    // important: it avoids integer round-off problems.
 
     cumul += i->second;
-    printf("%llu %4.3f\n", ((i->first * (blockSize / 1024)) / 1024), ((double)cumul / cumulTotal));
+    printf("%llu %4.3f\n",
+	   ((i->first * (blockSize / 1024)) / 1024),
+	   ((double)cumul / cumulTotal));
   }
   fflush(stdout);
 }
