@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequestGeneratorFile.cc,v 1.5 2000/10/26 16:14:24 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/experimentParams.hh,v 1.1 2000/10/30 01:12:45 tmwong Exp $
   Description:  fscachesim parameter file. HACK.
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -8,9 +8,9 @@
 #define _EXPERIMENTPARAMS_HH_
 
 const int globalHostCacheSize = 16384;
-const CacheDemotePolicy_t globalHostDemotePolicy = DemoteDemand;
+const CacheDemotePolicy_t globalHostDemotePolicy = None;
 
 const int globalArrayCacheSize = 16384;
-const CacheReplPolicy_t globalArrayReplPolicy = MRU;
+const CacheReplPolicy_t globalArrayReplPolicy = LRU;
 
 #endif /* _EXPERIMENTPARAMS_HH_ */

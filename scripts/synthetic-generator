@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# RCS:         $Header: $
+# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/scripts/synthetic-generator.pl,v 1.1 2000/10/30 01:12:47 tmwong Exp $
 # Description: Generate a synthetic trace of 1-block read I/Os.
 # Author:      T.M. Wong <tmwong+@cs.cmu.edu>
 
@@ -74,4 +74,5 @@ sub IOGenerateZipf {
   }
 }
 
-IOGenerateZipf(1, 5406720, 4096, 49152);
+# IOGenerateZipf(1, 5406720, 4096, 49152);
+IOGenerateRandom(1, 3276800, 4096, 32768);

@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/tracestats.cc,v 1.5 2000/10/26 16:14:24 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/tracestats.cc,v 1.6 2000/10/30 01:12:45 tmwong Exp $
   Description:  Generate LRU and frequency trace stats using fscachesim
                 objects.
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
@@ -9,6 +9,8 @@
 #include <functional>
 #include <stdio.h>
 #include <stdlib.h>
+#define __USE_GNU 1
+#include <string.h>
 #include <unistd.h>
 
 #include "BlockStoreInfinite.hh"
