@@ -19,24 +19,19 @@
 #include "IORequestGeneratorMambo.hh"
 #include "Node.hh"
 
-// tmwong XXX: this is a big hack. Include the experimental parameters.
-
-#include "experimentParams.hh"
-
 // Command usage.
 
-const char *globalProgArgs = "b:ms:w:";
+const char *globalProgArgs = "b:dms:w:";
 
 const char *globalProgUsage = \
+"[-d] " \
 "[-m] " \
 "[-b block_size] " \
 "[-s prob_cache_size] " \
 "[-w warmup_time] " \
-"trace_files...";
+"client_cache_size array_cache_size trace_files...";
 
-// Default command-line argument values.
-
-const int globalBlockSize = 4096;
+const int globalMBToB = 1048576;
 
 void
 usage(char *inProgName,
@@ -51,8 +46,13 @@ int
 main(int argc,
      char *argv[])
 {
-  uint32_t blockSize = globalBlockSize;
-  uint32_t probArrayCacheSize = 0;
+  uint32_t arrayProbCacheSize = 0;
+  CacheReplPolicy_t arrayReplPolicy = LRU;
+
+  uint32_t blockSize = 4096;
+
+  CacheDemotePolicy_t hostDemotePolicy = None;
+
   uint32_t warmupCount = 0;
   double warmupTime = 0;
 
@@ -68,12 +68,16 @@ main(int argc,
     case 'b':
       blockSize = atol(optarg);
       break;
+    case 'd':
+      hostDemotePolicy = DemoteDemand;
+      arrayReplPolicy = MRU;
+      break;
     case 'm':
       useMamboFlag = true;
       break;
     case 's':
       useSLRUcacheFlag = true;
-      probArrayCacheSize = atol(optarg);
+      arrayProbCacheSize = atol(optarg) * globalMBToB / blockSize;
       break;
     case 'w':
       warmupTime = strtod(optarg, NULL);
@@ -100,35 +104,40 @@ main(int argc,
     generators = new IORequestGeneratorBatch();
   }
 
+  // Get the cache sizes.
+
+  uint32_t hostCacheSize = atol(argv[optind]) * globalMBToB / blockSize;
+  uint32_t arrayCacheSize = atol(argv[optind + 1]) * globalMBToB / blockSize;
+
   // Create a single array cache for all client-missed I/Os to feed into.
 
   BlockStore *arrayCache;
   if (useSLRUcacheFlag) {
     arrayCache = new BlockStoreCacheSegmented("array",
 					      blockSize,
-					      globalArrayCacheSize,
-					      probArrayCacheSize);
+					      arrayCacheSize,
+					      arrayProbCacheSize);
   }
   else {
     BlockStoreCache *ac =  new BlockStoreCache("array",
 					       blockSize,
-					       globalArrayCacheSize,
-					       globalArrayReplPolicy,
+					       arrayCacheSize,
+					       arrayReplPolicy,
 					       None);
     arrayCache = ac;
   }
   generators->StatisticsAdd(arrayCache);
   Node array(arrayCache, NULL);
 
-  for (int i = optind; i < argc; i++) {
+  for (int i = (optind + 2); i < argc; i++) {
     char buffer[40];
 
     sprintf(buffer, "%s", basename(argv[i]));
     BlockStoreCache *cache = new BlockStoreCache(buffer,
 						 blockSize,
-						 globalHostCacheSize,
+						 hostCacheSize,
 						 LRU,
-						 globalHostDemotePolicy);
+						 hostDemotePolicy);
     generators->StatisticsAdd(cache);
     Node *host = new Node(cache, &array);
 
@@ -147,6 +156,21 @@ main(int argc,
   // Run until we have no more I/Os to process.
 
   while (generators->IORequestDown());
+
+  // Show stats.
+
+  printf("Client cache size %ld\n", hostCacheSize * blockSize / globalMBToB);
+  printf("Array cache size %ld\n", arrayCacheSize * blockSize / globalMBToB);
+  if (useSLRUcacheFlag) {
+    printf("Array prob cache size %ld\n",
+	   arrayProbCacheSize * blockSize / globalMBToB);
+    printf("Array cache policy %s\n",
+	   (hostDemotePolicy == DemoteDemand ? "SLRU-SLRU" : "SLRU-NONE"));
+  }
+  else {
+    printf("Array cache policy %s\n",
+	   (hostDemotePolicy == DemoteDemand ? "MRU-LRU" : "LRU-NONE"));
+  }
   generators->statisticsShow();
 
   // Clean up after ourselves.
