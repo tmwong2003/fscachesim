@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/scripts/cumul2jgraph.pl,v 1.2 2000/10/28 22:22:17 tmwong Exp $
+# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/scripts/cumul2jgraph.pl,v 1.3 2001/07/06 01:35:24 tmwong Exp $
 # Description: Convert a raw LRU cumulative file to a .jgraph file.
 # Author:      T.M. Wong <tmwong+@cs.cmu.edu>
 
@@ -27,7 +27,7 @@ open(CUMULFILE, "<$ARGV[1]")
 print <<EOF;
 newgraph
   legend defaults font Helvetica
-  title y 1.1 font Helvetica : Cumulative hit fraction vs. cache size - $ARGV[0]
+  title y 1.1 font Helvetica : Cumulative hit rate vs. cache size - $ARGV[0]
 
 xaxis
   hash_labels font Helvetica
@@ -36,7 +36,7 @@ xaxis
 
 yaxis
   hash_labels font Helvetica
-  label font Helvetica : Cumulative hit fraction
+  label font Helvetica : Cumulative hit rate
   min 0
   max 1.0
 
