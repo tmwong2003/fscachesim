@@ -1,6 +1,6 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequestGeneratorMambo.hh,v 1.2 2000/10/24 19:54:41 tmwong Exp $
-  Description:  
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequestGeneratorMambo.hh,v 1.1 2000/10/25 03:32:30 tmwong Exp $
+  Description:  Generate I/O requests from a Mambo trace file.
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -17,19 +17,19 @@ extern "C" {
 
 #include "IORequestGenerator.hh"
 
+struct lt_string
+{
+  bool operator()(const char *str1, const char *str2) const {
+    return (strcmp(str1, str2) < 0);
+  }
+};
+
+typedef map<const char *, int, lt_string> dir_t;
+
 class IORequestGeneratorMambo : public IORequestGenerator {
 private:
-  struct lt_string
-  {
-    bool operator()(const char *str1, const char *str2) const {
-      return (strcmp(str1, str2) < 0);
-    }
-  };
-
-  typedef map<const char *, int, lt_string> dir_t;
-  typedef dir_t::iterator dir_iter_t;
-
-  static dir_t static_dir_map;
+  static dir_t staticDir;
+  static int staticDirID;
 
   traceHeader_t traceHeader;
 private:
@@ -50,7 +50,7 @@ public:
     IORequestQueue();
   };
 
-  ~IORequestGeneratorMambo() { ; };
+  ~IORequestGeneratorMambo();
 };
 
 #endif /* _IOREQUESTGENERATORMAMBO_HH_ */

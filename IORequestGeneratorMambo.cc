@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequestGenerator.cc,v 1.3 2000/10/24 19:54:41 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequestGeneratorMambo.cc,v 1.1 2000/10/25 03:32:30 tmwong Exp $
   Description:  Generate I/O requests from a Mambo trace file.
   Author:       A. Acharya <acha@cs.umd.edu>, T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -11,6 +11,9 @@
 #include "IORequestGeneratorMambo.hh"
 
 #define MAMBO_MAX_LINE_LEN 1024
+
+int IORequestGeneratorMambo::staticDirID = 1;
+dir_t IORequestGeneratorMambo::staticDir;
 
 // tmwong 27 SEP 2000: I will replace abort() calls with exceptions "soon".
 
@@ -50,6 +53,13 @@ IORequestGeneratorMambo::headerProcess()
     assert(traceHeader.fileNames[i].name);
     memcpy(traceHeader.fileNames[i].name,line,linelen);
     len += linelen;
+
+    // Add files from the data set to the global directory if they are not
+    // already listed.
+
+    if (staticDir.find(traceHeader.fileNames[i].name) == staticDir.end()) {
+      staticDir[traceHeader.fileNames[i].name] = staticDirID++;
+    }
   }
 
   traceHeader.offsetToTraceRecords = len;
@@ -118,22 +128,32 @@ IORequestGeneratorMambo::IORequestQueue()
 	}
 	assert(record.pid >= 0);
 	assert(record.fileId >= 0);
+	assert(strcmp(traceHeader.fileNames[record.fileId].name, "others")
+	       != 0);
 	assert(record.wallClock >= 0.0L);
 	assert(record.processClock >= 0.0L);
 	assert(record.offset >= 0L);
 	assert(record.length >= 0);
 
-	if (strcmp(traceHeader.fileNames[record.fileId].name, "others") == 0) {
-	  fprintf(stderr, "O");
-	}
+	// Convert the fileID to a unique ID.
 
+	uint32_t uniqueFileID =
+	  staticDir[traceHeader.fileNames[record.fileId].name];
 	nextRequest = new IORequest(basename(filename),
 				    Read,
 				    record.wallClock,
-				    record.fileId,
+				    uniqueFileID,
 				    record.offset,
 				    record.length);
       }
     } while (!gotEOF && !nextRequest);
   }
+}
+
+IORequestGeneratorMambo::~IORequestGeneratorMambo()
+{
+  for (int i = 0; i < traceHeader.numOfFiles; i++) {
+    delete traceHeader.fileNames[i].name;
+  }
+  delete traceHeader.fileNames;
 }
