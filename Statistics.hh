@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequest.hh,v 1.5 2000/10/24 19:54:41 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Statistics.hh,v 1.1 2000/10/30 01:12:45 tmwong Exp $
   Description:  Statistics interface for functions that keep and print stats.
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -13,9 +13,10 @@
 
 #include "string.h"
 
-// class Statistics is an interface class - classes that subclass it must
-// implement its methods.
-
+/**
+ * Interface for objects that keep block access statistics. Classes that
+ * inherit from Statistics must implement all methods.
+ */
 class Statistics {
 private:
   const char *name;
@@ -27,19 +28,37 @@ private:
   Statistics& operator=(const Statistics&);
 
 public:
+  /**
+   * Create an object that keeps block access statistics.
+   */
   Statistics(const char *inName) {
     name = strdup(inName);
   };
 
+  /**
+   * Destroy the object.
+   */
   virtual ~Statistics() {
     delete name;
   };
 
+  /**
+   * Get the name of the object.
+   *
+   * @return The name.
+   */
   const char *nameGet() const {
     return (name);
   };
 
+  /**
+   * Reset block access statistics.
+   */
   virtual void statisticsReset() = 0;
+
+  /**
+   * Show block access statistics.
+   */
   virtual void statisticsShow() const = 0;
 };
 

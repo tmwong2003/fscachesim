@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/IORequest.hh,v 1.7 2001/11/16 23:32:46 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/IORequest.hh,v 1.8 2001/11/20 02:20:13 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -19,18 +19,17 @@
 enum IORequestOp_t {Demote, Read};
 
 class IORequest {
-protected:
-  const char *originator;
-  const uint64_t requestID;
+private:
+  const char *orig;
+  const uint64_t reqID;
 
   IORequestOp_t op;
 
   double timeIssued;
 
-  uint64_t devID;
-  uint64_t objectID;
-  uint64_t offset;
-  uint64_t length;
+  uint64_t objID;
+  uint64_t off;
+  uint64_t len;
 
 private:
   // Copy constructors - declared private and never defined
@@ -40,40 +39,39 @@ private:
 public:
   // Constructors and destructors
 
-  IORequest(const char *inOriginator,
+  IORequest(const char *inOrig,
 	    IORequestOp_t inOp,
 	    double inTimeIssued,
 	    uint64_t inObjectID,
-	    uint64_t inOffset,
-	    uint64_t inLength) :
-    originator(inOriginator),
-    requestID(0),
+	    uint64_t inOff,
+	    uint64_t inLen) :
+    orig(inOrig),
+    reqID(0),
     op(inOp),
     timeIssued(inTimeIssued),
-    objectID(inObjectID),
-    offset(inOffset),
-    length(inLength) { ; };
+    objID(inObjectID),
+    off(inOff),
+    len(inLen) { ; };
 
   IORequest(const IORequest& inIOReq) :
-    originator(inIOReq.originator),
-    requestID(inIOReq.requestID),
+    orig(inIOReq.orig),
+    reqID(inIOReq.reqID),
     op(inIOReq.op),
     timeIssued(inIOReq.timeIssued),
-    devID(inIOReq.devID),
-    objectID(inIOReq.objectID),
-    offset(inIOReq.offset),
-    length(inIOReq.length) { ; };
+    objID(inIOReq.objID),
+    off(inIOReq.off),
+    len(inIOReq.len) { ; };
 
   ~IORequest() { ; };
 
   // Accessors
 
-  const char *originatorGet() const {
-    return (originator);
+  const char *origGet() const {
+    return (orig);
   };
 
-  uint64_t requestIDGet() const {
-    return (requestID);
+  uint64_t reqIDGet() const {
+    return (reqID);
   };
 
   IORequestOp_t opGet() const {
@@ -84,28 +82,28 @@ public:
     return (timeIssued);
   };
 
-  uint64_t objectIDGet() const {
-    return (objectID);
+  uint64_t objIDGet() const {
+    return (objID);
   };
 
-  uint64_t offsetGet() const {
-    return (offset);
+  uint64_t offGet() const {
+    return (off);
   };
 
-  uint64_t lengthGet() const {
-    return (length);
+  uint64_t lenGet() const {
+    return (len);
   };
 
-  uint64_t blockOffsetGet(const uint64_t inBlockSize) const {
-    return (offset / inBlockSize);
+  uint64_t blockOffGet(const uint64_t inBlockSize) const {
+    return (off / inBlockSize);
   };
 
-  uint64_t blockLengthGet(const uint64_t inBlockSize) const {
-    //  The following expression is length + starting fill + ending fill.
+  uint64_t blockLenGet(const uint64_t inBlockSize) const {
+    //  The following expression is len + starting fill + ending fill.
 
-    return ((length + (offset % inBlockSize) +
-	     ((length + offset) % inBlockSize ?
-	      inBlockSize - ((length + offset) % inBlockSize) : 0)) / inBlockSize);
+    return ((len + (off % inBlockSize) +
+	     ((len + off) % inBlockSize ?
+	      inBlockSize - ((len + off) % inBlockSize) : 0)) / inBlockSize);
   };
 };
 

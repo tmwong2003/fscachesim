@@ -1,4 +1,4 @@
-# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Makefile.am,v 1.13 2001/11/18 07:48:46 tmwong Exp $
+# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Makefile.am,v 1.14 2001/11/20 02:20:14 tmwong Exp $
 # Description: fscachesim Makefile.am
 # Created by:  T.M. Wong <tmwong+@cs.cmu.edu>
 
@@ -12,25 +12,22 @@ AUTOMAKE_OPTIONS = foreign
 bin_PROGRAMS = fscachesim sharestats tracestats
 
 fscachesim_SOURCES = \
-	CacheGhost.cc \
 	BlockStoreCache.cc \
-	BlockStoreCacheSegVariable.cc \
-	BlockStoreCacheSegVariableMulti.cc \
-	BlockStoreCacheSegmented.cc \
+	BlockStoreCacheSimple.cc \
 	IORequestGeneratorBatch.cc \
 	IORequestGeneratorFile.cc \
-	IORequestGeneratorGeneric.cc \
-	IORequestGeneratorMambo.cc \
+	IORequestGeneratorFileGeneric.cc \
+	IORequestGeneratorFileMambo.cc \
 	Node.cc \
-	main.cc \
+	fscachesim.cc \
 	top-down-size-splay.c
 
 sharestats_SOURCES = \
 	BlockStoreShareStats.cc \
 	IORequestGeneratorBatch.cc \
 	IORequestGeneratorFile.cc \
-	IORequestGeneratorGeneric.cc \
-	IORequestGeneratorMambo.cc \
+	IORequestGeneratorFileGeneric.cc \
+	IORequestGeneratorFileMambo.cc \
 	Node.cc \
 	top-down-size-splay.c \
 	sharestats.cc
@@ -39,8 +36,8 @@ tracestats_SOURCES = \
 	BlockStoreInfinite.cc \
 	IORequestGeneratorBatch.cc \
 	IORequestGeneratorFile.cc \
-	IORequestGeneratorGeneric.cc \
-	IORequestGeneratorMambo.cc \
+	IORequestGeneratorFileGeneric.cc \
+	IORequestGeneratorFileMambo.cc \
 	Node.cc \
 	top-down-size-splay.c \
 	tracestats.cc

@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCache.hh,v 1.9 2001/11/16 23:32:46 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCache.hh,v 1.10 2001/11/20 02:20:13 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -11,42 +11,25 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#include <list>
-#include <map>
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
 #endif /* HAVE_STDINT_H */
 #include <stdio.h>
 
 #include "BlockStore.hh"
-#include "Cache.hh"
+#include "Char.hh"
 
-enum CacheDemotePolicy_t {None, DemoteDemand};
-enum CacheReplPolicy_t {LRU, MRU};
-
+/**
+ * Interface for finite block caches. Classes that inherit from
+ * BlockStoreCache must implement all abstract methods.
+ */
 class BlockStoreCache : public BlockStore {
-private:
-  struct CharStarLessThan {
-    bool operator()(const char *str1, const char *str2) const {
-      return (strcmp(str1, str2) < 0);
-    };
-  };
+protected:
+  Char::Counter demoteHitsPerOrig;
+  Char::Counter demoteMissesPerOrig;
 
-  typedef map<const char *, uint64_t, CharStarLessThan> StatMap;
-  typedef StatMap::iterator StatMapIter;
-  typedef StatMap::const_iterator StatMapConstIter;
-
-  Cache cache;
-  CacheReplPolicy_t cacheReplPolicy;
-  CacheDemotePolicy_t cacheDemotePolicy;
-
-  bool logRequestFlag;
-
-  StatMap blockDemoteHitsMap;
-  StatMap blockDemoteMissesMap;
-
-  StatMap blockReadHitsMap;
-  StatMap blockReadMissesMap;
+  Char::Counter readHitsPerOrig;
+  Char::Counter readMissesPerOrig;
 
 private:
   // Copy constructors - declared private and never defined
@@ -55,25 +38,23 @@ private:
   BlockStoreCache& operator=(const BlockStoreCache&);
 
 public:
+  // Constructors and destructors
+
+  /**
+   * Create a block cache.
+   *
+   * @param inName A string name for the cache.
+   * @param inBlockSize The size of each block, in bytes.
+   * @param inSize The size of the cache, in blocks.
+   */
   BlockStoreCache(const char *inName,
-		  uint64_t inBlockSize,
-		  uint64_t inCacheSize,
-		  CacheReplPolicy_t inCacheReplPolicy,
-		  CacheDemotePolicy_t inCacheDemotePolicy) :
-    BlockStore(inName, inBlockSize),
-    cache(inCacheSize),
-    cacheReplPolicy(inCacheReplPolicy),
-    cacheDemotePolicy(inCacheDemotePolicy),
-    logRequestFlag(false) { ; };
+		  uint64_t inBlockSize) :
+    BlockStore(inName, inBlockSize) { ; };
 
+  /**
+   * Destroy a block cache.
+   */
   ~BlockStoreCache() { ; };
-
-  virtual bool IORequestDown(const IORequest& inIOReq,
-			     list<IORequest>& outIOReq);
-
-  void logRequestToggle() {
-    logRequestFlag = (logRequestFlag ? false : true);
-  };
 
   // Statistics management
 

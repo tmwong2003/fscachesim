@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/IORequestGeneratorBatch.cc,v 1.1 2000/10/30 01:12:44 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/IORequestGeneratorBatch.cc,v 1.2 2001/11/20 02:20:13 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -55,13 +55,16 @@ IORequestGeneratorBatch::IORequestDown()
     }
   }
 
-  requestsIssued++;
   if (recordsPerDot > 0 && (requestsIssued % recordsPerDot == 0)) {
     fprintf(stderr, ".");
     fflush(stderr);
   }
 
-  return (generators.front()->IORequestDown());
+  bool retval;
+  if (retval = generators.front()->IORequestDown()) {
+    requestsIssued++;
+  }
+  return (retval);
 }
 
 void

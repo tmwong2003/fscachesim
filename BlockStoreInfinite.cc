@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreInfinite.cc,v 1.8 2002/02/08 16:54:10 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreInfinite.cc,v 1.9 2002/02/11 20:08:22 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -18,15 +18,16 @@
 
 #include "BlockStoreInfinite.hh"
 
+using Block::block_t;
+
 bool
 BlockStoreInfinite::IORequestDown(const IORequest& inIOReq,
 				  list<IORequest>& outIOReqList)
 {
-  Block::block_t block =
-    {inIOReq.objectIDGet(), inIOReq.blockOffsetGet(blockSize)};
-  uint64_t reqBlockLength = inIOReq.blockLengthGet(blockSize);
+  block_t block = {inIOReq.objIDGet(), inIOReq.blockOffGet(blockSize)};
+  uint64_t reqBlockLen = inIOReq.blockLenGet(blockSize);
 
-  for (uint64_t i = 0; i < reqBlockLength; i++) {
+  for (uint64_t i = 0; i < reqBlockLen; i++) {
     // See if the block is cached.
 
     Block::Counter::iterator blockIter = blockTimestampMap.find(block);
@@ -35,7 +36,7 @@ BlockStoreInfinite::IORequestDown(const IORequest& inIOReq,
       uint64_t blockLRUDepth;
       UInt64::Counter::iterator LRUIter;
 
-      blockReadHits++;
+      readHits++;
 
       // Splay to find the LRU depth.
 
@@ -63,13 +64,13 @@ BlockStoreInfinite::IORequestDown(const IORequest& inIOReq,
       }
     }
     else {
-      blockReadMisses++;
+      readMisses++;
 
       // If we're using a finite cache...
 
       if (cache.sizeGet() != 0) {
 	if (cache.isFull()) {
-	  Block::block_t ejectBlock;
+	  block_t ejectBlock;
 
 	  // ... eject the head block if necessary...
 
@@ -148,7 +149,7 @@ BlockStoreInfinite::statisticsFreqShow() const
   for (Block::Counter::const_iterator i = freqMap.begin();
        i != freqMap.end();
        i++) {
-    printf("%llu,%llu %llu\n", i->first.objectID, i->first.blockID, i->second);
+    printf("%llu,%llu %llu\n", i->first.objID, i->first.blockID, i->second);
   }
   fflush(stdout);
 }
@@ -172,7 +173,7 @@ void
 BlockStoreInfinite::statisticsLRUCumulShow() const
 {
   uint64_t cumul = 0;
-  uint64_t cumulTotal = blockReadMisses;
+  uint64_t cumulTotal = readMisses;
 
   // cumulTotal doesn't start at zero since we need to account for
   // compulsory misses.
@@ -195,12 +196,15 @@ BlockStoreInfinite::statisticsLRUCumulShow() const
 	   ((double)cumul / cumulTotal));
   }
   fflush(stdout);
+  fprintf(stderr, "\n");
+  fprintf(stderr, "Cumul = %llu\n", cumul);
+  fprintf(stderr, "Cumul total = %llu\n", cumulTotal);
 }
 
 void
 BlockStoreInfinite::statisticsSummaryShow() const
 {
-  printf("Block hits %llu\n", blockReadHits);
-  printf("Block misses %llu\n", blockReadMisses);
+  printf("Block hits %llu\n", readHits);
+  printf("Block misses %llu\n", readMisses);
   fflush(stdout);
 }

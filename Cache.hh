@@ -1,6 +1,6 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Cache.hh,v 1.6 2002/02/08 16:54:10 tmwong Exp $
-  Description:  
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Cache.hh,v 1.7 2002/02/11 20:08:22 tmwong Exp $
+  Description:  Simple cache object. Supports insertions at the head and tail.
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -25,43 +25,113 @@ using namespace std;
 #include "Block.hh"
 #include "BlockStore.hh"
 
+/**
+ * Cache object that supports insertions an its head and tail ends. A major
+ * failing of this class is that it does not perform comprehensive bounds
+ * checking during block insertions.
+ */
 class Cache {
-protected:
-  typedef map<Block::block_t, list<Block::block_t>::iterator, Block::LessThan> CacheIndex;
-  typedef CacheIndex::iterator CacheIndexIter;
+private:
+  typedef map<Block::block_t,
+	      list<Block::block_t>::iterator,
+	      Block::LessThan> CacheIndex;
 
+  /**
+   * The cache.
+   */
   list<Block::block_t> cache;
+
+  /**
+   * An index into the cache, keyed by blocks.
+   */
   CacheIndex cacheIndex;
 
+  /**
+   * The block count.
+   */
   uint64_t blockCount;
+
+  /**
+   * The maximum block count.
+   */
   uint64_t blockCountMax;
 
 public:
+  /**
+   * Create a Cache object.
+   *
+   * @param inCacheSize The maximum number of blocks the cache can hold.
+   */
   Cache(uint64_t inCacheSize) :
     cache(),
     cacheIndex(),
     blockCount(0),
     blockCountMax(inCacheSize) { ; };
 
+  /**
+   * Destroy a Cache object.
+   */
   ~Cache() { ; };
 
+  /**
+   * Get a block from the cache. Decrement the block count if the block is
+   * found. Otherwise, do nothing.
+   *
+   * @param inBlock The block to get.
+   */
   void blockGet(Block::block_t inBlock);
 
+  /**
+   * Get the block at the head of the cache. Copy the block into outBlock
+   * and decrement the block count if the cache is not empty. Otherwise, do
+   * nothing.
+   *
+   * @param outBlock An output block.
+   */
   void blockGetAtHead(Block::block_t &outBlock);
+
+  /**
+   * Put a block at the head of the cache.
+   *
+   * @warning Does not check if the cache is already full.
+   *
+   * @param outBlock The block to put.
+   */
   void blockPutAtHead(Block::block_t inBlock);
 
+  /**
+   * Put a block at the tail of the cache.
+   *
+   * @warning Does not check if the cache is already full.
+   *
+   * @param outBlock The block to put.
+   */
   void blockPutAtTail(Block::block_t inBlock);
 
+  /**
+   * Get the count of blocks in the cache.
+   */
   uint64_t sizeGet() { return (blockCountMax);};
 
+  /**
+   * Find out if inBlock is cached. If it is, return true. Otherwise,
+   * return false.
+   *
+   * @param inBlock The block to find.
+   */
   bool isCached(Block::block_t inBlock);
+
+  /**
+   * Find out if the cache is full. If it is, return true. Otherwise,
+   * return false.
+   */
   bool isFull();
 };
 
 inline void
 Cache::blockGet(Block::block_t inBlock)
 {
-  CacheIndexIter blockIter = cacheIndex.find(inBlock);
+  CacheIndex::iterator blockIter = cacheIndex.find(inBlock);
   if (blockIter != cacheIndex.end()) {
     cacheIndex.erase(blockIter);
     cache.erase(blockIter->second);

@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStore.hh,v 1.7 2001/11/20 02:20:13 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Block.hh,v 1.1 2002/02/11 20:08:22 tmwong Exp $
   Description:  Disk block type abstraction
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -20,15 +20,15 @@ namespace Block {
   using std::map;
 
   typedef struct {
-    uint64_t objectID;
+    uint64_t objID;
     uint64_t blockID;
   } block_t;
 
   class LessThan {
   public:
     bool operator()(const block_t &block1, const block_t &block2) const {
-      return (block1.objectID < block2.objectID ||
-	      (block1.objectID == block2.objectID &&
+      return (block1.objID < block2.objID ||
+	      (block1.objID == block2.objID &&
 	       block1.blockID < block2.blockID));
     }
   };

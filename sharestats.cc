@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/sharestats.cc,v 1.2 2001/11/19 14:57:00 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/sharestats.cc,v 1.3 2001/11/20 02:20:14 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -8,7 +8,6 @@
 #include <functional>
 #include <stdio.h>
 #include <stdlib.h>
-#define __USE_GNU 1
 #include <string.h>
 #include <unistd.h>
 
