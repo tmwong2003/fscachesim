@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Cache.hh,v 1.2 2001/07/04 17:49:30 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Cache.hh,v 1.3 2001/07/19 00:11:00 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -7,13 +7,20 @@
 #ifndef _CACHE_HH_
 #define _CACHE_HH_
 
+using namespace ::std;
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
+
 #define NDEBUG
+
 #include <assert.h>
 #include <list>
 #include <map>
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif /* HAVE_STDINT_H */
 
 #include "BlockStore.hh"
 

@@ -1,5 +1,5 @@
 #!/bin/sh
-aclocal --output=config/aclocal.m4
-autoreconf -l config
+aclocal
+autoconf
 automake --add-missing --foreign
 exit
