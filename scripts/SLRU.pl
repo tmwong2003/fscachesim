@@ -1,21 +1,26 @@
 #!/usr/bin/perl -w
 #
-# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/scripts/cumul2jgraph.pl,v 1.2 2000/10/28 22:22:17 tmwong Exp $
+# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/scripts/SLRU.pl,v 1.1 2001/07/06 01:35:23 tmwong Exp $
 # Description: 
 # Author:      T.M. Wong <tmwong+@cs.cmu.edu>
 
-$arraySize = 32768;
-$arraySizeMB = $arraySize * 4 / 1024;
+sub runSim {
+    my ($arraySizeMB, $traceFamily) = @_;
 
-for ($i = 1; $i < 8; $i++) {
-    $probSize = $arraySize * $i / 8;
-    $probSizeMB = $probSize * 4 / 1024;
-    $protSizeMB = $arraySizeMB - $probSizeMB;
+    $arraySize = $arraySizeMB * 1024 / 4;
 
-    $filename = "httpd-LRU-LRU-SLRU-16-$probSizeMB-$protSizeMB";
+    for ($i = 1; $i < 8; $i++) {
+	$probSize = $arraySize * $i / 8;
+	$probSizeMB = $probSize * 4 / 1024;
+	$protSizeMB = $arraySizeMB - $probSizeMB;
 
-    $cmdline = "./fscachesim -m -s $probSize mambo/httpd/httpd.server.* | tee $filename";
+	$filename = "$traceFamily-LRU-LRU-SLRU-16-$probSizeMB-$protSizeMB";
 
-    print "$cmdline\n";
-    `$cmdline`;
+	$cmdline = "./fscachesim -m -s $probSize mambo/$traceFamily/$traceFamily.server.* | tee $filename";
+
+	print "$cmdline\n";
+	`$cmdline`;
+    }
 }
+
+runSim($ARGV[0], $ARGV[1]);
