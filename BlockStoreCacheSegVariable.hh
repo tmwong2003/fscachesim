@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCacheSegVariable.hh,v 1.1 2001/07/04 17:49:30 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCacheSegVariable.hh,v 1.1 2001/07/19 01:12:00 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -15,7 +15,7 @@
 #include "CacheGhost.hh"
 
 class BlockStoreCacheSegVariable : public BlockStore {
-private:
+protected:
   struct CharStarLessThan {
     bool operator()(const char *str1, const char *str2) const {
       return (strcmp(str1, str2) < 0);
@@ -47,6 +47,7 @@ private:
   BlockStoreCacheSegVariable(const BlockStoreCacheSegVariable&);
   BlockStoreCacheSegVariable& operator=(const BlockStoreCacheSegVariable&);
 
+protected:
   int blockGetCascade(Block inBlock);
   void blockPutAtSegCascade(Block inBlock,
 			    int inSeg);
@@ -56,6 +57,12 @@ public:
 			     uint32_t inBlockSize,
 			     uint32_t inCacheSize,
 			     int inSegCount);
+
+  BlockStoreCacheSegVariable(const char *inName,
+			     uint32_t inBlockSize,
+			     uint32_t inCacheSize,
+			     int inSegCount,
+			     double inSegBase);
 
   ~BlockStoreCacheSegVariable();
 

@@ -1,9 +1,10 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCacheSegVariable.cc,v 1.1 2001/07/18 03:16:35 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCacheSegVariable.cc,v 1.1 2001/07/19 01:11:58 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -61,21 +62,63 @@ BlockStoreCacheSegVariable::BlockStoreCacheSegVariable(const char *inName,
   cacheSegCount(inSegCount),
   ghost(inCacheSize)
 {
-  uint32_t segSize = inCacheSize / inSegCount;
+  uint32_t cacheSegSize = inCacheSize / cacheSegCount;
   uint32_t cacheSizeUnallocated = inCacheSize;
 
-  cacheSegs = new Cache *[inSegCount];
-  segHits = new uint32_t[inSegCount];
+  cacheSegs = new Cache *[cacheSegCount];
+  segHits = new uint32_t[cacheSegCount];
   for (int i = 0; i < cacheSegCount; i++) {
-    uint32_t thisSegSize = (cacheSizeUnallocated < segSize ?
-			    cacheSizeUnallocated :
-			    segSize);
+    uint32_t thisSegSize = (i < cacheSegCount - 1 ?
+			    cacheSegSize :
+			    cacheSizeUnallocated);
 
-    cacheSegs[i] = new Cache(inCacheSize / inSegCount);
+    cacheSegs[i] = new Cache(thisSegSize);
     segHits[i] = 0;
 
-    cacheSizeUnallocated -= segSize;
+    cacheSizeUnallocated -= thisSegSize;
   }
+  if (cacheSizeUnallocated != 0) {
+    abort();
+  }
+}
+
+BlockStoreCacheSegVariable::BlockStoreCacheSegVariable(const char *inName,
+						       uint32_t inBlockSize,
+						       uint32_t inCacheSize,
+						       int inSegCount,
+						       double inSegBase) :
+  BlockStore(inName, inBlockSize),
+  cacheSegCount(inSegCount),
+  ghost(inCacheSize)
+{
+  cacheSegs = new Cache *[cacheSegCount];
+  segHits = new uint32_t[cacheSegCount];
+
+  // Tail segment is the largest.
+
+  uint32_t cacheSizeUnallocated = inCacheSize;
+  double segFracTotal = 0;
+  for (int i = 0; i < cacheSegCount; i++) {
+    // Compute fraction of entire cache. The last segment (the tail) is the
+    // largest.
+
+    double thisSegFrac = 
+	log((double)(cacheSegCount + 1 - i) / (cacheSegCount - i)) /
+	log(inSegBase);
+    uint32_t thisSegSize = (i < cacheSegCount - 1 ?
+			    (uint32_t)(inCacheSize * thisSegFrac) :
+			    cacheSizeUnallocated);
+
+    cacheSegs[i] = new Cache(thisSegSize);
+    segHits[i] = 0;
+    fprintf(stderr, "%d %lf %ld\n", i, thisSegFrac, thisSegSize);
+    cacheSizeUnallocated -= thisSegSize;
+    segFracTotal += thisSegFrac;
+  }
+  if (cacheSizeUnallocated != 0 || (int)(segFracTotal) != 1) {
+    abort();
+  }
+  exit(0);
 }
 
 BlockStoreCacheSegVariable::~BlockStoreCacheSegVariable()
