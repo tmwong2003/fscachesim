@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCache.cc,v 1.8 2001/07/04 17:49:30 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCache.cc,v 1.9 2001/07/06 01:45:41 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -56,20 +56,8 @@ BlockStoreCache::IORequestDown(const IORequest& inIOReq,
       }
     }
     else {
-      switch (inIOReq.opGet()) {
-      case Demote:
-	blockDemoteMissesMap[inIOReq.originatorGet()]++;
-	blockDemoteMisses++;
-	break;
-      case Read:
-	blockReadMissesMap[inIOReq.originatorGet()]++;
-	blockReadMisses++;
-	break;
-      default:
-	abort();
-      }
 
-      // If the cache is full, eject the front block.
+      // Eject the front block if the cache is full.
 
       if (cache.isFull()) {
 	Block demoteBlock;
@@ -88,14 +76,28 @@ BlockStoreCache::IORequestDown(const IORequest& inIOReq,
 	}
       }
 
-      // Create a new IORequest to pass on to the next-level node.
+      switch (inIOReq.opGet()) {
+      case Demote:
+	blockDemoteMissesMap[inIOReq.originatorGet()]++;
+	blockDemoteMisses++;
+	break;
+      case Read:
+	blockReadMissesMap[inIOReq.originatorGet()]++;
+	blockReadMisses++;
 
-      outIOReqList.push_back(IORequest(inIOReq.originatorGet(),
-				       Read,
-				       inIOReq.timeIssuedGet(),
-				       inIOReq.objectIDGet(),
-				       block.blockID * blockSize,
-				       blockSize));
+	// Create a new IORequest to pass on to the next-level node.
+
+	outIOReqList.push_back(IORequest(inIOReq.originatorGet(),
+					 Read,
+					 inIOReq.timeIssuedGet(),
+					 inIOReq.objectIDGet(),
+					 block.blockID * blockSize,
+					 blockSize));
+
+	break;
+      default:
+	abort();
+      }
     }
 
     switch (cacheReplPolicy) {
