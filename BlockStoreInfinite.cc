@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreInfinite.cc,v 1.1.1.1 2000/09/21 16:25:41 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreInfinite.cc,v 1.1 2000/09/22 16:15:39 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong@cs.cmu.edu>
 */
@@ -15,8 +15,9 @@ BlockStoreInfinite::IORequestDown(const IORequest& inIOReq,
 				  list<IORequest>& outIOReqList)
 {
   Block block = {0, inIOReq.objectIDGet(), inIOReq.blockOffsetGet(blockSize)};
+  uint32_t reqBlockLength = inIOReq.blockLengthGet(blockSize);
 
-  for (uint32_t i = 0; i < inIOReq.blockLengthGet(blockSize); i++) {
+  for (uint32_t i = 0; i < reqBlockLength; i++) {
     // See if the block is cached.
 
     BlockMapIter blockIter = blockTimestampMap.find(block);
@@ -54,10 +55,10 @@ BlockStoreInfinite::IORequestDown(const IORequest& inIOReq,
 
     // Increment the access count for this sector.
 
-//     freq_iter = freq_map.find(sect);
-//     freq_map[sect] = (freq_iter != freq_map.end() ?
-// 		      ++(freq_iter->second) :
-// 		      1);
+    blockIter = freqMap.find(block);
+    freqMap[block] = (blockIter != freqMap.end() ?
+		      ++(blockIter->second) :
+		      1);
 
     // Increment the sector access clock.
 
@@ -70,10 +71,14 @@ BlockStoreInfinite::IORequestDown(const IORequest& inIOReq,
 }
 
 void
-BlockStoreInfinite::StatisticsShow()
+BlockStoreInfinite::statisticsShow() const
 {
-  for (uint32MapIter i = LRUMap.begin(); i != LRUMap.end(); i++) {
+  for (uint32MapConstIter i = LRUMap.begin(); i != LRUMap.end(); i++) {
     printf("%d %d\n", i->first, i->second);
+  }
+  printf("Frequency:\n");
+  for (BlockMapConstIter i = freqMap.begin(); i != freqMap.end(); i++) {
+    printf("%u,%u %d\n", i->first.objectID, i->first.blockID, i->second);
   }
   printf("Block hits %u\n", blockReadHits);
   printf("Block misses %u\n", blockReadMisses);

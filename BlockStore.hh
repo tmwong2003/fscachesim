@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStore.hh,v 1.1 2000/09/22 16:15:38 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong@cs.cmu.edu>
 */
@@ -25,17 +25,19 @@ public:
 
 struct BlockLessThan
 {
-  bool operator()(const Block block1, const Block block2) const
-    {
-      return (block1.objectID < block2.objectID ||
-	      (block1.objectID == block2.objectID &&
-	       block1.blockID < block2.blockID));
-    }
+  bool operator()(const Block block1, const Block block2) const {
+    return (block1.objectID < block2.objectID ||
+	    (block1.objectID == block2.objectID &&
+	     block1.blockID < block2.blockID));
+  }
 };
 
 class BlockStore {
 protected:
   uint32_t blockSize;
+
+  uint32_t blockDemoteHits;
+  uint32_t blockDemoteMisses;
 
   uint32_t blockReadHits;
   uint32_t blockReadMisses;
@@ -51,11 +53,11 @@ public:
 
   BlockStore(uint32_t inBlockSize) :
     blockSize(inBlockSize),
+    blockDemoteHits(0),
+    blockDemoteMisses(0),
     blockReadHits(0),
-    blockReadMisses(0)
-    { ; };
-  virtual ~BlockStore()
-    { ; };
+    blockReadMisses(0) { ; };
+  virtual ~BlockStore() { ; };
 
   // Process incoming I/O requests
 
@@ -64,7 +66,7 @@ public:
 
   // Output statistics
 
-  virtual void StatisticsShow() = 0;
+  virtual void statisticsShow() const = 0;
 };
 
 #endif /* _BLOCKSTORE_HH_ */

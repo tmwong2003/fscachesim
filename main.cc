@@ -1,9 +1,10 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/main.cc,v 1.1.1.1 2000/09/21 16:25:41 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/main.cc,v 1.2 2000/09/22 16:15:39 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong@cs.cmu.edu>
 */
 
+#include <functional>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -11,65 +12,63 @@
 #include "BlockStoreDisk.hh"
 #include "BlockStoreInfinite.hh"
 #include "IORequest.hh"
+#include "IORequestGenerator.hh"
 #include "Node.hh"
 
 const int globalBlockSize = 4096;
+const int globalHostCacheSize = 16384;
+const int globalArrayCacheSize = 16384;
 
 const int globalRecordsPerDot = 1000;
+
+class IORequestGeneratorLess:
+  public binary_function<IORequestGenerator *, IORequestGenerator *, bool> {
+public:
+  bool operator()(const IORequestGenerator *inGenL,
+		  const IORequestGenerator *inGenR)
+    {
+      return (*inGenL < *inGenR);
+    };
+};
 
 int
 main(int argc, char *argv[])
 {
-  FILE *trace_file = stdin;
-  //  BlockStoreInfinite cache(0, globalBlockSize);
-  BlockStoreCache disk(globalBlockSize, 10000);
-  BlockStoreCache cache(globalBlockSize, 10000);
-  Node array(&disk, NULL);
-  Node host(&cache, &array);
+  list<IORequestGenerator *> generators;
+  BlockStoreCache arrayCache(globalBlockSize, globalArrayCacheSize, MRU, None);
+  Node array(&arrayCache, NULL);
   int records = 0;
 
-  // Get the file name.
+  for (int i = 1; i < argc; i++) {
+    BlockStoreCache *cache = new BlockStoreCache(globalBlockSize,
+						 globalHostCacheSize,
+						 LRU,
+						 DemoteDemand);
+    Node *host = new Node(cache, &array);
+    IORequestGenerator *generator = new IORequestGenerator(host, argv[i]);
 
-  if (argc > 1) {
-    if ((trace_file = fopen(argv[1], "r")) == NULL) {
-      fprintf(stderr, "ERROR: could not open %s\n", argv[1]);
-
-      exit(EXIT_FAILURE);
-    }
+    generators.push_back(generator);
   }
 
+  bool requestProcessed;
   do {
-    uint32_t objectID, offset, length;
-    int rc;
-
-    // Read I/O request.
-
-    rc = fscanf(trace_file, "%u %u %u", &objectID, &offset, &length);
-    if (rc == EOF) {
-      break;
-    }
-
-    IORequest req(Read, 0, objectID, offset, length);
-    host.IORequestDown(req);
-
-    // Increment the record count.
+    generators.sort(IORequestGeneratorLess());
+    requestProcessed = generators.front()->IORequestDown();
 
     records++;
     if (records % globalRecordsPerDot == 0) {
       fprintf(stderr, ".");
       fflush(stderr);
     }
-  } while (!feof(trace_file));
+  } while (requestProcessed);
   fprintf(stderr, "\n");
 
-  // Close the file.
+  for (list<IORequestGenerator *>::iterator i; i != generators.end(); i++) {
+    IORequestGenerator *generator = *i;
 
-  if (fclose(trace_file)) {
-    fprintf(stderr, "WARNING: could not close %s\n", argv[1]);
-
-    exit(EXIT_FAILURE);
+    printf("Stats for IORequestGenerator %s\n", generator->filenameGet());
+    generator->nodeGet()->statisticsShow();
   }
-
-  host.StatisticsShow();
-  array.StatisticsShow();
+  printf("Stats for array\n");
+  array.statisticsShow();
 }

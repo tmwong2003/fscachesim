@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/Node.hh,v 1.1.1.1 2000/09/21 16:25:41 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/Node.hh,v 1.2 2000/09/22 16:15:39 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong@cs.cmu.edu>
 */
@@ -28,10 +28,8 @@ public:
   Node(BlockStore *inBlockStore,
        Node *inNextNode) :
     blockStore(inBlockStore),
-    nextNode(inNextNode)
-    { ; };
-  ~Node()
-    { ; };
+    nextNode(inNextNode) { ; };
+  ~Node() { ; };
 
   // Process incoming I/O requests
 
@@ -40,7 +38,9 @@ public:
 
   // Output statistics
 
-  void StatisticsShow();
+  void statisticsShow() const {
+    blockStore->statisticsShow();
+  };
 };
 
 #endif /* _NODE_HH_ */

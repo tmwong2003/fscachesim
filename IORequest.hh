@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequest.hh,v 1.1.1.1 2000/09/21 16:25:41 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequest.hh,v 1.2 2000/09/22 16:15:39 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong@cs.cmu.edu>
 */
@@ -11,13 +11,15 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-enum IORequestOp_t {Read};
+#include <stdio.h>
+
+enum IORequestOp_t {Demote, Read};
 
 class IORequest {
 protected:
   IORequestOp_t op;
 
-  uint32_t timeIssued;
+  double timeIssued;
 
   uint32_t devID;
   uint32_t objectID;
@@ -33,7 +35,7 @@ public:
   // Constructors and destructors
 
   IORequest(IORequestOp_t inOp,
-	    uint32_t inTimeIssued,
+	    double inTimeIssued,
 	    uint32_t inObjectID,
 	    uint32_t inOffset,
 	    uint32_t inLength) :
@@ -41,49 +43,52 @@ public:
     timeIssued(inTimeIssued),
     objectID(inObjectID),
     offset(inOffset),
-    length(inLength)
-    { ; };
+    length(inLength) { ; };
 
-  IORequest(const IORequest& inIOReq)
-    {
-      op = inIOReq.op;
-      timeIssued = inIOReq.timeIssued;
-      devID = inIOReq.devID;
-      objectID = inIOReq.objectID;
-      offset = inIOReq.offset;
-      length = inIOReq.length;
-    };
+  IORequest(const IORequest& inIOReq) {
+    op = inIOReq.op;
+    timeIssued = inIOReq.timeIssued;
+    devID = inIOReq.devID;
+    objectID = inIOReq.objectID;
+    offset = inIOReq.offset;
+    length = inIOReq.length;
+  };
 
-  ~IORequest()
-    { ; };
+  ~IORequest() { ; };
 
   // Accessors
 
-  uint32_t objectIDGet() const
-    {
-      return (objectID);
-    };
-  uint32_t offsetGet() const
-    {
-      return (offset);
-    };
-  uint32_t lengthGet() const
-    {
-      return (length);
-    };
+  IORequestOp_t opGet() const {
+    return (op);
+  };
 
-  uint32_t blockOffsetGet(const uint32_t inBlockSize) const
-    {
-      return (offset / inBlockSize);
-    };
-  uint32_t blockLengthGet(const uint32_t inBlockSize) const
-    {
-      //  The following expression is length + starting fill + ending fill.
+  double timeIssuedGet() const {
+    return (timeIssued);
+  };
 
-      return ((length + (offset % inBlockSize) +
-	      ((length + offset) % inBlockSize ?
-	       inBlockSize - ((length + offset) % inBlockSize) : 0)) / inBlockSize);
-    };
+  uint32_t objectIDGet() const {
+    return (objectID);
+  };
+
+  uint32_t offsetGet() const {
+    return (offset);
+  };
+
+  uint32_t lengthGet() const {
+    return (length);
+  };
+
+  uint32_t blockOffsetGet(const uint32_t inBlockSize) const {
+    return (offset / inBlockSize);
+  };
+
+  uint32_t blockLengthGet(const uint32_t inBlockSize) const {
+    //  The following expression is length + starting fill + ending fill.
+
+    return ((length + (offset % inBlockSize) +
+	     ((length + offset) % inBlockSize ?
+	      inBlockSize - ((length + offset) % inBlockSize) : 0)) / inBlockSize);
+  };
 };
 
 #endif /* _IOREQUEST_HH_ */

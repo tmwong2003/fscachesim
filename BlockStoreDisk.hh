@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreDisk.hh,v 1.1 2000/09/22 16:15:38 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong@cs.cmu.edu>
 */
@@ -25,14 +25,11 @@ private:
 
 public:
   BlockStoreDisk(uint32_t inBlockSize) :
-    BlockStore(inBlockSize)
-    { ; };
-  ~BlockStoreDisk()
-    { ; };
+    BlockStore(inBlockSize) { ; };
+  ~BlockStoreDisk() { ; };
 
   virtual bool IORequestDown(const IORequest& inIOReq,
-			     list<IORequest>& outIOReqList)
-    {
+			     list<IORequest>& outIOReqList) {
       blockReadHits++;
 
       return (true);
@@ -40,8 +37,7 @@ public:
 
   // Output statistics
 
-  virtual void StatisticsShow()
-    {
+  virtual void statisticsShow() const {
       printf("Block hits %u\n", blockReadHits);
     };
 };

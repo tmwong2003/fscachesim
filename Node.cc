@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/Node.cc,v 1.1.1.1 2000/09/21 16:25:41 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/Node.cc,v 1.2 2000/09/22 16:15:39 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong@cs.cmu.edu>
 */
@@ -26,10 +26,4 @@ Node::IORequestDown(IORequest& inIOReq)
   }
 
   return (true);
-}
-
-void
-Node::StatisticsShow()
-{
-  blockStore->StatisticsShow();
 }

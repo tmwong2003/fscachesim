@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreInfinite.hh,v 1.1.1.1 2000/09/21 16:25:41 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreInfinite.hh,v 1.1 2000/09/22 16:15:39 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong@cs.cmu.edu>
 */
@@ -30,19 +30,21 @@ struct uint32LessThan
 
 typedef map<uint32_t, uint32_t, uint32LessThan> uint32Map;
 typedef map<uint32_t, uint32_t, uint32LessThan>::iterator uint32MapIter;
+typedef map<uint32_t, uint32_t, uint32LessThan>::const_iterator uint32MapConstIter;
 
 class BlockStoreInfinite : public BlockStore {
 private:
   typedef map<Block, uint32_t, BlockLessThan> BlockMap;
   typedef BlockMap::iterator BlockMapIter;
+  typedef BlockMap::const_iterator BlockMapConstIter;
 
   BlockMap blockTimestampMap;
   uint32_t blockTimestampClock;
 
-  BlockMap freqMap;
-
   uint32Map LRUMap;
   Tree *LRUTree;
+
+  BlockMap freqMap;
 
 private:
   // Copy constructors - declared private and never defined
@@ -58,10 +60,8 @@ public:
     blockTimestampClock(0),
     freqMap(),
     LRUMap(),
-    LRUTree(NULL)
-    { ; };
-  ~BlockStoreInfinite()
-    { ; };
+    LRUTree(NULL) { ; };
+  ~BlockStoreInfinite() { ; };
 
   // Process incoming I/O requests
 
@@ -70,7 +70,7 @@ public:
 
   // Output statistics
 
-  virtual void StatisticsShow();
+  virtual void statisticsShow() const;
 };
 
 #endif /* _BLOCKSTOREINFINITE_HH_ */
