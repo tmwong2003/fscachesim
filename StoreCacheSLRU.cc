@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSLRU.cc,v 1.3 2002/02/15 15:44:25 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSLRU.cc,v 1.4 2002/02/15 18:17:30 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -155,7 +155,7 @@ StoreCacheSLRU::statisticsShow() const
 {
   printf("{StoreCacheSLRU.%s\n", nameGet());
 
-  printf("\t{size {total %llu} {prob %llu} {prob %llu} }\n",
+  printf("\t{size {total=%llu} {prob=%llu} {prob=%llu} }\n",
 	 (probCache.sizeGet() + protCache.sizeGet()) * blockSizeGet(),
 	 probCache.sizeGet() * blockSizeGet(),
 	 protCache.sizeGet() * blockSizeGet());
@@ -164,7 +164,7 @@ StoreCacheSLRU::statisticsShow() const
   for (Char::Counter::const_iterator i = probReadHitsPerOrig.begin();
        i != probReadHitsPerOrig.end();
        i++) {
-    printf("{%s %llu} ", i->first, i->second);
+    printf("{%s=%llu} ", i->first, i->second);
   }
   printf("}\n");
 
@@ -172,7 +172,7 @@ StoreCacheSLRU::statisticsShow() const
   for (Char::Counter::const_iterator i = probDemoteHitsPerOrig.begin();
        i != probDemoteHitsPerOrig.end();
        i++) {
-    printf("{%s %llu} ", i->first, i->second);
+    printf("{%s=%llu} ", i->first, i->second);
   }
   printf("}\n");
 
@@ -180,7 +180,7 @@ StoreCacheSLRU::statisticsShow() const
   for (Char::Counter::const_iterator i = protReadHitsPerOrig.begin();
        i != protReadHitsPerOrig.end();
        i++) {
-    printf("{%s %llu} ", i->first, i->second);
+    printf("{%s=%llu} ", i->first, i->second);
   }
   printf("}\n");
 
@@ -188,7 +188,7 @@ StoreCacheSLRU::statisticsShow() const
   for (Char::Counter::const_iterator i = protDemoteHitsPerOrig.begin();
        i != protDemoteHitsPerOrig.end();
        i++) {
-    printf("{%s %llu} ", i->first, i->second);
+    printf("{%s=%llu} ", i->first, i->second);
   }
   printf("}\n");
 
@@ -196,18 +196,18 @@ StoreCacheSLRU::statisticsShow() const
   for (Char::Counter::const_iterator i = probToProtXfersPerOrig.begin();
        i != probToProtXfersPerOrig.end();
        i++) {
-    printf("{%s %llu} ", i->first, i->second);
+    printf("{%s=%llu} ", i->first, i->second);
   }
   printf("}\n");
   printf("\t{protToProbXfersPerOrig ");
   for (Char::Counter::const_iterator i = protToProbXfersPerOrig.begin();
        i != protToProbXfersPerOrig.end();
        i++) {
-    printf("{%s %llu} ", i->first, i->second);
+    printf("{%s=%llu} ", i->first, i->second);
   }
   printf("}\n");
 
-  printf("}\n");
-
   StoreCache::statisticsShow();
+
+  printf("}\n");
 }

@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSeg.cc,v 1.2 2002/02/15 15:44:25 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSeg.cc,v 1.3 2002/02/15 18:17:30 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -246,27 +246,27 @@ StoreCacheSeg::statisticsShow() const
 {
   printf("{StoreCacheSeg.%s\n", nameGet());
 
-  printf("\t{segSizes %s}\n", (segSizesUniformFlag ? "uniform" : "exp"));
+  printf("\t{segSizes=%s}\n", (segSizesUniformFlag ? "uniform" : "exp"));
 
   printf("\t{size ");
   uint64_t sizeTotal = 0;
   for (int i = 0; i < cacheSegCount; i++) {
-    printf("{seg%d %llu} ", i, cacheSegs[i]->sizeGet() * blockSizeGet());
+    printf("{seg%d=%llu} ", i, cacheSegs[i]->sizeGet() * blockSizeGet());
     sizeTotal += cacheSegs[i]->sizeGet();
   }
-  printf("{total %llu} }\n", sizeTotal * blockSizeGet());
+  printf("{total=%llu} }\n", sizeTotal * blockSizeGet());
 
   printf("\t{segHits ");
   uint64_t segHitsTotal = 0;
   for (int i = 0; i < cacheSegCount; i++) {
-    printf("{seg%d %llu} ", i, segHits[i]);
+    printf("{seg%d=%llu} ", i, segHits[i]);
     segHitsTotal += segHits[i];
   }
-  printf("{total %llu} }\n", segHitsTotal);
+  printf("{total=%llu} }\n", segHitsTotal);
 
   ghost.statisticsShow();
 
-  printf("}\n");
-
   StoreCache::statisticsShow();
+
+  printf("}\n");
 }

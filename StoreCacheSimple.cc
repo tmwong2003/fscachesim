@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSimple.cc,v 1.3 2002/02/15 15:44:25 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSimple.cc,v 1.4 2002/02/15 18:17:30 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -119,11 +119,11 @@ StoreCacheSimple::statisticsShow() const
 {
   printf("{StoreCacheSimple.%s\n", nameGet());
 
-  printf("\t{size {total %llu} }\n", cache.sizeGet() * blockSizeGet());
-  printf("\t{ejectPolicy %s}\n", (ejectPolicy == LRU ? "LRU" : "MRU"));
-  printf("\t{demotePolicy %s}\n", (demotePolicy == None ? "None" : "Demote"));
-
-  printf("}\n");
+  printf("\t{size {total=%llu} }\n", cache.sizeGet() * blockSizeGet());
+  printf("\t{ejectPolicy=%s}\n", (ejectPolicy == LRU ? "LRU" : "MRU"));
+  printf("\t{demotePolicy=%s}\n", (demotePolicy == None ? "None" : "Demote"));
 
   StoreCache::statisticsShow();
+
+  printf("}\n");
 }

@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/fscachesim.cc,v 1.4 2002/02/15 15:44:25 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/fscachesim.cc,v 1.5 2002/02/15 18:17:30 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -7,6 +7,7 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
+#include <fcntl.h>
 #include <functional>
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
@@ -27,31 +28,50 @@
 #include "IORequestGeneratorFileMambo.hh"
 #include "Store.hh"
 #include "StoreCache.hh"
-#include "StoreCacheSLRU.hh"
 #include "StoreCacheSeg.hh"
 #include "StoreCacheSimple.hh"
 
 // Command usage.
 
-const char *globalProgArgs = "b:DdGgmns:uw:";
+const char *globalProgArgs = "b:dmo:w:";
 
 const char *globalProgUsage = \
-"[-D] " \
-"[-d] " \
-"[-g] " \
-"[-m] " \
-"[-n] " \
-"[-u] " \
 "[-b block_size] " \
-"[-s prob_cache_size] " \
+"[-d] " \
+"[-m] " \
+"[-o output_file_prefix] " \
 "[-w warmup_time] " \
-"client_cache_size array_cache_size trace_files...";
+"array_cache_type client_cache_size array_cache_size trace_files...";
 
 const int globalMBToB = 1048576;
 
 const int globalStoreCacheSegSegCount = 10;
 
 const int globalStoreCacheSegSegMultiplier = 2;
+
+bool
+stdoutRedirect(const char *inFilename)
+{
+  int newStdoutFD;
+
+  if ((newStdoutFD = open(inFilename, O_CREAT|O_TRUNC|O_WRONLY, 0666)) < 0) {
+    perror(inFilename);
+ 
+    return (false);
+  }
+  if (dup2(newStdoutFD, fileno(stdout)) < 0) {
+    perror(inFilename);
+ 
+    return (false);
+  }
+  if (close(newStdoutFD) < 0) {
+    perror(inFilename);
+ 
+    return (false);
+  }
+ 
+  return (true);
+}
 
 void
 usage(char *inProgName,
@@ -70,17 +90,9 @@ main(int argc,
 
   uint64_t blockSize = 4096;
 
-  // Default array parameters.
+  // Default output file prefix.
 
-  uint64_t arrayProbSize = 0;
-  uint64_t arrayProbSizeMB = 0;
-  StoreCacheSimple::EjectPolicy_t arrayEjectPolicy =
-    StoreCacheSimple::LRU;
-
-  // Default client parameters.
-
-  StoreCacheSimple::DemotePolicy_t clientDemotePolicy = 
-    StoreCacheSimple::None;
+  const char *outFilePrefix = NULL;
 
   // Default warmups.
 
@@ -89,13 +101,11 @@ main(int argc,
 
   // Default flags.
 
+  bool useDemoteFlag = false;
+
   bool useMamboFlag = false;
 
-  bool useArraySegFlag = false;
   bool useArraySLRUFlag = false;
-
-  bool useArraySegUniformFlag = false;
-  bool useArraySegNormalizeGhostFlag = false;
 
   // Process command-line args.
 
@@ -106,29 +116,13 @@ main(int argc,
     case 'b':
       blockSize = atol(optarg);
       break;
-    case 'D':
-      clientDemotePolicy = StoreCacheSimple::Demand;
-      break;
     case 'd':
-      clientDemotePolicy = StoreCacheSimple::Demand;
-      arrayEjectPolicy = StoreCacheSimple::MRU;
+      useDemoteFlag = true;
       break;
-    case 'g':
-      useArraySegFlag = true;
-      break;
+    case 'o':
+      outFilePrefix = optarg;
     case 'm':
       useMamboFlag = true;
-      break;
-    case 'n':
-      useArraySegNormalizeGhostFlag = true;
-      break;
-    case 's':
-      useArraySLRUFlag = true;
-      arrayProbSizeMB = atol(optarg);
-      arrayProbSize = arrayProbSizeMB * (globalMBToB / blockSize);
-      break;
-    case 'u':
-      useArraySegUniformFlag = true;
       break;
     case 'w':
       warmupTime = strtod(optarg, NULL);
@@ -157,76 +151,120 @@ main(int argc,
 
   // Get the cache sizes.
 
-  uint64_t clientSizeMB = atol(argv[optind]);
+  if (optind + 1 >= argc || atol(argv[optind + 1]) == 0) {
+    usage(argv[0], EXIT_FAILURE);
+  }
+
+  uint64_t clientSizeMB = atol(argv[optind + 1]);
   uint64_t clientSize = clientSizeMB * (globalMBToB / blockSize);
-  uint64_t arraySizeMB = atol(argv[optind + 1]);
+
+  if (optind + 2 >= argc || atol(argv[optind + 2]) == 0) {
+    usage(argv[0], EXIT_FAILURE);
+  }
+
+  uint64_t arraySizeMB = atol(argv[optind + 2]);
   uint64_t arraySize = arraySizeMB * (globalMBToB / blockSize);
 
-  // Create a single array cache for all client-missed I/Os to feed into.
+  // Create an array cache to receive all I/O requests that miss in the
+  // clients.
 
+  const char *arrayType = argv[optind];
   Store *array;
-  if (useArraySLRUFlag) {
-    array = new StoreCacheSLRU("array",
-			       blockSize,
-			       arraySize,
-			       arrayProbSize);
-    fprintf(stderr,
-	    "SLRU array, prob size %llu size %llu\n",
-	    arrayProbSize,
-	    arraySize);
-  }
-  else if (useArraySegFlag) {
-    if (useArraySegUniformFlag) {
-      array = new StoreCacheSeg("array",
-				blockSize,
-				arraySize,
-				globalStoreCacheSegSegCount,
-				useArraySegNormalizeGhostFlag);
-      fprintf(stderr,
-	      "Segmented %s adaptive array, size %llu uniform segs %d \n",
-	      (useArraySegNormalizeGhostFlag ? "normalized" : "raw"),
-	      arraySize,
-	      globalStoreCacheSegSegCount);
-    }
-    else {
-      array = new StoreCacheSeg("array",
-				blockSize,
-				arraySize,
-				globalStoreCacheSegSegCount,
-				globalStoreCacheSegSegMultiplier,
-				useArraySegNormalizeGhostFlag);
-      fprintf(stderr,
-	      "Segmented %s adaptive array, size %llu exp segs %d\n",
-	      (useArraySegNormalizeGhostFlag ? "normalized" : "raw"),
-	      arraySize,
-	      globalStoreCacheSegSegCount);
-    }
-  }
-  else {
+  if (!strcmp("LRU", arrayType)) {
     array = new StoreCacheSimple("array",
 				 blockSize,
 				 arraySize,
-				 arrayEjectPolicy,
+				 StoreCacheSimple::LRU,
 				 StoreCacheSimple::None);
     fprintf(stderr,
-	    "Simple array, size %llu eject policy %s\n",
-	    arraySize,
-	    (arrayEjectPolicy == StoreCacheSimple::LRU ? "LRU" : "MRU"));
+	    "LRU: "
+	    "Simple array, size %llu MB eject policy LRU\n",
+	    arraySizeMB);
+  }
+  else if (!strcmp("MRULRU", arrayType)) {
+    array = new StoreCacheSimple("array",
+				 blockSize,
+				 arraySize,
+				 StoreCacheSimple::MRU,
+				 StoreCacheSimple::None);
+    fprintf(stderr,
+	    "MRULRU: "
+	    "Simple array, size %llu MB eject policy MRULRU\n",
+	    arraySizeMB);
+  }
+  else if (!strcmp("NSEGEXP", arrayType)) {
+    array = new StoreCacheSeg("array",
+			      blockSize,
+			      arraySize,
+			      globalStoreCacheSegSegCount,
+			      globalStoreCacheSegSegMultiplier,
+			      true);
+    fprintf(stderr,
+	    "NSEGEXP: "
+	    "Segmented normalized adaptive array, size %llu MB exp segs %d\n",
+	    arraySizeMB,
+	    globalStoreCacheSegSegCount);
+  }
+  else if (!strcmp("NSEGUNI", arrayType)) {
+    array = new StoreCacheSeg("array",
+			      blockSize,
+			      arraySize,
+			      globalStoreCacheSegSegCount,
+			      true);
+    fprintf(stderr,
+	    "NSEGUNI: "
+	    "Segmented normalized adaptive array, size %llu MB uni segs %d \n",
+	    arraySizeMB,
+	    globalStoreCacheSegSegCount);
+  }
+  else if (!strcmp("RSEGEXP", arrayType)) {
+    array = new StoreCacheSeg("array",
+			      blockSize,
+			      arraySize,
+			      globalStoreCacheSegSegCount,
+			      globalStoreCacheSegSegMultiplier,
+			      false);
+    fprintf(stderr,
+	    "RSEGEXP: "
+	    "Segmented raw adaptive array, size %llu MB exp segs %d\n",
+	    arraySizeMB,
+	    globalStoreCacheSegSegCount);
+  }
+  else if (!strcmp("RSEGUNI", arrayType)) {
+    array = new StoreCacheSeg("array",
+			      blockSize,
+			      arraySize,
+			      globalStoreCacheSegSegCount,
+			      false);
+    fprintf(stderr,
+	    "RSEGUNI: "
+	    "Segmented raw adaptive array, size %llu MB uni segs %d \n",
+	    arraySizeMB,
+	    globalStoreCacheSegSegCount);
+  }
+  else {
+    fprintf(stderr,
+	    "%s: Unrecognized array cache type\n",
+	    basename (argv[0]));
+    usage(argv[0], EXIT_FAILURE);
   }
   generators->StatisticsAdd(array);
 
   // Create a client cache for each I/O request stream.
 
-  for (int i = (optind + 2); i < argc; i++) {
+  for (int i = (optind + 3); i < argc; i++) {
     char buffer[40];
 
     sprintf(buffer, "%s", basename(argv[i]));
-    StoreCacheSimple *client = new StoreCacheSimple(buffer,
-						    array,
-						    blockSize,
-						    clientSize,
-						    StoreCacheSimple::LRU,
-						    clientDemotePolicy);
+    StoreCacheSimple *client =
+      new StoreCacheSimple(buffer,
+			   array,
+			   blockSize,
+			   clientSize,
+			   StoreCacheSimple::LRU,
+			   (useDemoteFlag ?
+			    StoreCacheSimple::Demand :
+			    StoreCacheSimple::None));
     generators->StatisticsAdd(client);
 
     // Create I/O generator based on the input trace type.
@@ -241,9 +279,28 @@ main(int argc,
     generators->IORequestGeneratorAdd(generator);
   }
 
+  // Prepare output files.
+
+  {
+    char filename[1024];
+
+    sprintf(filename,
+	    "%s-%s-%s-%llu-%llu",
+	    outFilePrefix,
+	    (useDemoteFlag ? "DEMOTE" : "NONE"),
+	    arrayType,
+	    clientSizeMB,
+	    arraySizeMB);
+    if (!stdoutRedirect(filename)) {
+      exit(EXIT_FAILURE);
+    }
+  }
+
   // Run until we have no more I/Os to process.
 
   while (generators->IORequestDown());
+
+  // Dump out the statistics.
 
   generators->statisticsShow();
 
