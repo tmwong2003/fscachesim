@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCacheGhost.hh,v 1.1 2001/07/04 17:49:30 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCacheGhost.hh,v 1.1 2001/07/18 03:16:35 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -15,38 +15,8 @@
 
 #include "BlockStore.hh"
 #include "Cache.hh"
+#include "CacheGhost.hh"
 #include "IORequest.hh"
-
-class CacheGhost {
-private:
-  Cache demoteGhost;
-  uint32_t demoteGhostReadHits;
-
-  Cache readGhost;
-  uint32_t readGhostReadHits;
-
-  double demoteProb;
-  double readProb;
-
-public:
-  CacheGhost(uint32_t inCacheSize) :
-    demoteGhost(inCacheSize),
-    demoteGhostReadHits(1),
-    readGhost(inCacheSize),
-    readGhostReadHits(1),
-    demoteProb(0),
-    readProb(0) { ; };
-
-  void blockPut(IORequestOp_t op,
-		Block block);
-
-  void probUpdate(Block block);
-
-  double probGet(IORequestOp_t op) {
-    return (op == Demote ? demoteProb : readProb); };
-
-  void statisticsShow() const;
-};
 
 class BlockStoreCacheGhost : public BlockStore {
 private:
@@ -64,7 +34,10 @@ private:
   // read block
 
   Cache cache;
-  uint32_t requestsUncached;
+  uint32_t demotesCached;
+  uint32_t demotesUncached;
+  uint32_t readsCached;
+  uint32_t readsUncached;
 
   // The ghost caches, for demote and read operations
 
@@ -86,7 +59,10 @@ public:
 		       uint32_t inCacheSize) :
     BlockStore(inName, inBlockSize),
     cache(inCacheSize),
-    requestsUncached(0),
+    demotesCached(0),
+    demotesUncached(0),
+    readsCached(0),
+    readsUncached(0),
     ghost(inCacheSize) {
       // I know, I know...
 

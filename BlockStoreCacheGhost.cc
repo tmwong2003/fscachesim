@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCache.cc,v 1.10 2001/07/17 01:55:54 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCacheGhost.cc,v 1.1 2001/07/18 03:16:35 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -8,83 +8,10 @@
 #include <stdlib.h>
 
 #include "Cache.hh"
+#include "CacheGhost.hh"
 #include "IORequest.hh"
 
 #include "BlockStoreCacheGhost.hh"
-
-void
-CacheGhost::blockPut(IORequestOp_t inOp,
-		     Block block)
-{
-  switch(inOp) {
-  case Demote:
-    if (demoteGhost.isCached(block)) {
-
-      demoteGhost.blockGet(block);
-    }
-    else if (demoteGhost.isFull()) {
-      Block ejectBlock;
-      demoteGhost.blockGetAtHead(ejectBlock);
-    }
-    demoteGhost.blockPutAtTail(block);
-    break;
-  case Read:
-    if (readGhost.isCached(block)) {
-
-      readGhost.blockGet(block);
-    }
-    else if (readGhost.isFull()) {
-      Block ejectBlock;
-      readGhost.blockGetAtHead(ejectBlock);
-    }
-    readGhost.blockPutAtTail(block);
-    break;
-  default:
-    abort();
-  }
-}
-
-void
-CacheGhost::probUpdate(Block block)
-{
-  if (demoteGhost.isCached(block)) {
-    // If all we cached was demotes, we would have won.
-
-    demoteGhost.blockGet(block);
-    demoteGhostReadHits++;
-  }
-  if (readGhost.isCached(block)) {
-    // If all we cached was reads, we would have won.
-
-    readGhost.blockGet(block);
-    readGhostReadHits++;
-  }
-
-  // Update probabilities.
-
-  demoteProb =
-    (double)demoteGhostReadHits / (demoteGhostReadHits + readGhostReadHits);
-  readProb =
-    (double)readGhostReadHits / (demoteGhostReadHits + readGhostReadHits);
-  //  printf("%lf %lf ", demoteProb, readProb);
-
-  if (demoteProb < readProb) {
-    demoteProb = demoteProb / readProb;
-    readProb = 1;
-  }
-  else {
-    readProb = readProb / demoteProb;
-    demoteProb = 1;
-  }
-  //  printf("%lf %lf\n", demoteProb, readProb);
-}
-
-void
-CacheGhost::statisticsShow() const
-{
-  printf("Read hits (demote ghost) %u\n", demoteGhostReadHits);
-  printf("Read hits (read ghost) %u\n", readGhostReadHits);
-}
 
 bool
 BlockStoreCacheGhost::IORequestDown(const IORequest& inIOReq,
@@ -164,9 +91,29 @@ BlockStoreCacheGhost::IORequestDown(const IORequest& inIOReq,
 	// For now, cache the block at the MRU end of the actual LRU queue.
 
 	cache.blockPutAtTail(block);
+
+	switch (op) {
+	case Demote:
+	  demotesCached++;
+	  break;
+	case Read:
+	  readsCached++;
+	  break;
+	default:
+	  abort();
+	}
       }
       else {
-	requestsUncached++;
+	switch (op) {
+	case Demote:
+	  demotesUncached++;
+	  break;
+	case Read:
+	  readsUncached++;
+	  break;
+	default:
+	  abort();
+	}
       }
     }
     ghost.blockPut(op, block);
@@ -192,6 +139,8 @@ BlockStoreCacheGhost::statisticsReset()
 void
 BlockStoreCacheGhost::statisticsShow() const
 {
+  printf("Statistics for BlockStoreCacheGhost.%s\n", nameGet());
+
   for (StatMapConstIter i = demoteHitsMap.begin();
        i != demoteHitsMap.end();
        i++) {
@@ -206,7 +155,9 @@ BlockStoreCacheGhost::statisticsShow() const
   printf("Demote hits %u\n", blockDemoteHits);
   printf("Demote misses %u\n", blockDemoteMisses);
 
-  printf("Statistics for BlockStoreCacheGhost.%s\n", nameGet());
+  printf("Demote cached %u\n", demotesCached);
+  printf("Demote uncached %u\n", demotesUncached);
+
   for (StatMapConstIter i = readHitsMap.begin();
        i != readHitsMap.end();
        i++) {
@@ -223,5 +174,6 @@ BlockStoreCacheGhost::statisticsShow() const
 
   ghost.statisticsShow();
 
-  printf("Uncached %u\n", requestsUncached);
+  printf("Read cached %u\n", readsCached);
+  printf("Read uncached %u\n", readsUncached);
 }
