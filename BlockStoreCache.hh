@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCache.hh,v 1.6 2000/10/30 01:12:44 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCache.hh,v 1.7 2001/07/02 23:29:57 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -37,6 +37,8 @@ private:
   CacheReplPolicy_t cacheReplPolicy;
   CacheDemotePolicy_t cacheDemotePolicy;
 
+  bool logRequestFlag;
+
   StatMap blockDemoteHitsMap;
   StatMap blockDemoteMissesMap;
 
@@ -58,12 +60,17 @@ public:
     BlockStore(inName, inBlockSize),
     cache(inCacheSize),
     cacheReplPolicy(inCacheReplPolicy),
-    cacheDemotePolicy(inCacheDemotePolicy) { ; };
+    cacheDemotePolicy(inCacheDemotePolicy),
+    logRequestFlag(false) { ; };
 
   ~BlockStoreCache() { ; };
 
   virtual bool IORequestDown(const IORequest& inIOReq,
 			     list<IORequest>& outIOReq);
+
+  void logRequestToggle() {
+    logRequestFlag = (logRequestFlag ? false : true);
+  };
 
   // Statistics management
 
