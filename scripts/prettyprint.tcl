@@ -10,7 +10,7 @@ proc stanzaPrint {stanza indentLevel} {
     # stanza is an attribute.
 
     set name [lindex $stanza 0]
-    if {[regexp -nocase {^[a-z0-9]+=} $name]} {
+    if {[regexp -nocase {.*=} $name]} {
 	puts "$indent\{$name\}"
     } else {
 	puts "$indent\{$name"

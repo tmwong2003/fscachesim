@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/scripts/cumul2jgraph.pl,v 1.3 2001/07/06 01:35:24 tmwong Exp $
+# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/scripts/cumul2jgraph.pl,v 1.4 2001/07/17 01:50:32 tmwong Exp $
 # Description: Convert a raw LRU cumulative file to a .jgraph file.
 # Author:      T.M. Wong <tmwong+@cs.cmu.edu>
 
@@ -31,12 +31,12 @@ newgraph
 
 xaxis
   hash_labels font Helvetica
-  label font Helvetica : Cache size (MB)
+  label font Helvetica-Oblique : Cache size (MB)
   min 0
 
 yaxis
   hash_labels font Helvetica
-  label font Helvetica : Cumulative hit rate
+  label font Helvetica-Oblique : Cumulative hit rate
   min 0
   max 1.0
 
@@ -49,8 +49,17 @@ newcurve
 0 0
 EOF
 
+my ($cacheSizePrev) = 0;
+my ($cumulHitRatePrev) = 0.0;
 while (<CUMULFILE>) {
-  print $_;
+  my ($cacheSize, $cumulHitRate) = split(/\s/, $_);
+
+  if ($cumulHitRate != $cumulHitRatePrev) {
+    print "$cacheSizePrev $cumulHitRatePrev\n";
+
+    $cacheSizePrev = $cacheSize;
+    $cumulHitRatePrev = $cumulHitRate;
+  }
 }
 
 close(CUMULFILE)

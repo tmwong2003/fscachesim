@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/scripts/run.pl,v 1.1 2002/02/18 21:16:44 tmwong Exp $
+# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/scripts/run.pl,v 1.2 2002/02/18 21:44:44 tmwong Exp $
 # Description: Wrapper script for fscachesim
 # Author:      T.M. Wong <tmwong+@cs.cmu.edu>
 
@@ -40,6 +40,19 @@ use vars qw($config_bin %config_trPathTable $config_resultPath);
 
 my ($progName) = basename($0);
 
+my (%blockSizeTable) =
+  (
+   "db2", "",
+   "db2single", "",
+   "httpd", "",
+   "httpdsingle", "",
+   "httpdtest", "",
+   "openmail", "",
+   "randompanth", "",
+   "tpch", "-b 16384",
+   "zipfpanth", ""
+  );
+
 my (%demoteTable) =
   (
    "LRU", "",
@@ -50,6 +63,19 @@ my (%demoteTable) =
    "RSEGUNI", "-d"
   );
 
+my (%warmupTimeTable) =
+  (
+   "db2", "-w 1800",
+   "db2single", "-w 1800",
+   "httpd", "-w 3600",
+   "httpdsingle", "-w 3600",
+   "httpdtest", "",
+   "openmail", "-w 600",
+   "randompanth", "-c 32768",
+   "tpch", "-w 600",
+   "zipfpanth", "-c 49152"
+  );
+
 my (%trTypeTable) =
   (
    "db2", "-m",
@@ -57,7 +83,10 @@ my (%trTypeTable) =
    "httpd", "-m",
    "httpdsingle", "",
    "httpdtest", "-m",
-   "openmail", ""
+   "openmail", "",
+   "randompanth", "",
+   "tpch", "",
+   "zipfpanth", ""
   );
 
 my (%trFilesTable) =
@@ -67,7 +96,10 @@ my (%trFilesTable) =
    "httpd", "httpd.server.1.trace httpd.server.2.trace httpd.server.3.trace httpd.server.4.trace httpd.server.5.trace httpd.server.6.trace httpd.server.7.trace",
    "httpdsingle", "httpd.server.single",
    "httpdtest", "httpd.server.1.trace",
-   "openmail", "i3125om1.fscachesim i3125om2.fscachesim i3125om3.fscachesim i3125om4.fscachesim i3125om5.fscachesim i3125om6.fscachesim"
+   "openmail", "i3125om1.fscachesim i3125om2.fscachesim i3125om3.fscachesim i3125om4.fscachesim i3125om5.fscachesim i3125om6.fscachesim",
+   "randompanth", "random-panth-11",
+   "tpch", "tput0.trace.fscachesim",
+   "zipfpanth", "zipf-panth-11"
   );
 
 sub usage {
@@ -89,8 +121,12 @@ sub trFilesGet{
 sub runSim {
   my ($trSet, $clientSize, $arraySize, @arrayTypes) = @_;
 
+  my ($blockSize) = $blockSizeTable{$trSet};
+
   my ($trFiles) = trFilesGet($trSet, $config_trPathTable{$trSet});
   my ($trType) = $trTypeTable{$trSet};
+
+  my ($warmupTime) = $warmupTimeTable{$trSet};
 
   my ($arrayType);
   foreach $arrayType (@arrayTypes) {
@@ -98,9 +134,11 @@ sub runSim {
 
     my ($cmdline) =
       "$config_bin " .
+      "$blockSize " .
       "$demoteFlag " .
       "$trType " .
       "-o $config_resultPath/$trSet " .
+      "$warmupTime " .
       "$arrayType " .
       "$clientSize $arraySize " .
       "$trFiles";

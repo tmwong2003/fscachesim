@@ -33,6 +33,36 @@ proc latencyGet {stats} {
     return $latencies
 }
 
+proc latencyZeroGet {stats} {
+    upvar $stats a
+
+    foreach client [lsort [array names a]] {
+	lappend latencies [format "%.2f" [lindex $a($client) 10]]
+    }
+
+    return $latencies
+}
+
+proc clientHitRateGet {stats} {
+    upvar $stats a
+
+    foreach client [lsort [array names a]] {
+	lappend rates [expr round([lindex $a($client) 6] * 100)]
+    }
+
+    return $rates
+}
+
+proc arrayHitRateGet {stats} {
+    upvar $stats a
+
+    foreach client [lsort [array names a]] {
+	lappend rates [expr round([lindex $a($client) 7] * 100)]
+    }
+
+    return $rates
+}
+
 proc speedupGet {base exp} {
     upvar $base b
     upvar $exp e
@@ -40,6 +70,20 @@ proc speedupGet {base exp} {
     foreach cl [lsort [array names b]] {
 	lappend speedups \
 	    [format "%.2f" [expr [lindex $b($cl) 9] / [lindex $e($cl) 9]]]
+    }
+
+    lappend speedups [format "%.2f" [meanGeo $speedups]]
+
+    return $speedups
+}
+
+proc speedupZeroGet {base exp} {
+    upvar $base b
+    upvar $exp e
+
+    foreach cl [lsort [array names b]] {
+	lappend speedups \
+	    [format "%.2f" [expr [lindex $b($cl) 9] / [lindex $e($cl) 10]]]
     }
 
     lappend speedups [format "%.2f" [meanGeo $speedups]]
@@ -159,6 +203,8 @@ proc resultsParse {resultsFilename resultsParsed} {
 	set rhra [expr double($rha) / $total]
 	set dmra [expr double($dma) / $total]
 
+	# Change latencies here.
+
 	set lat [expr 0.2 * ($rhra + $dmra) + 5.2 * (1 - $rhrc - $rhra)]
 	set latzero [expr 0.2 * $rhra + 5.2 * (1 - $rhrc - $rhra)]
 
@@ -189,20 +235,27 @@ if {$argc < 1} {
 set baseFilename [lindex $argv 0]
 
 resultsParse $baseFilename baseStats
-set baseLatencies [latencyGet baseStats]
 
 puts [basename $baseFilename]
-puts -nonewline "Mean lat. & "
-puts [join $baseLatencies " & "]
+puts -nonewline "Cli. hit rate\t"
+puts [join [clientHitRateGet baseStats] "\t"]
+puts -nonewline "Arr. hit rate\t"
+puts [join [arrayHitRateGet baseStats] "\t"]
+puts -nonewline "Mean lat.\t"
+puts [join [latencyGet baseStats] "\t"]
 
 foreach i [lrange $argv 1 end] {
     resultsParse $i expStats
-    set expLatencies [latencyGet expStats]
-    set expSpeedups [speedupGet baseStats expStats]
 
     puts [basename $i]
-    puts -nonewline "Mean lat. & "
-    puts [join $expLatencies " & "]
-    puts -nonewline "Speedup   & "
-    puts [join $expSpeedups " & "]
+    puts -nonewline "Arr. hit rate\t"
+    puts [join [arrayHitRateGet expStats] "%\t"]
+    puts -nonewline "Mean lat. (ms)\t"
+    puts [join [latencyGet expStats] "\t"]
+    puts -nonewline "Speedup  \t"
+    puts [join [speedupGet baseStats expStats] "\t"]
+    puts -nonewline "Mean lat0. (ms)\t"
+    puts [join [latencyZeroGet expStats] "\t"]
+    puts -nonewline "Speedup0\t"
+    puts [join [speedupZeroGet baseStats expStats] "\t"]
 }
