@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCache.cc,v 1.10 2001/07/17 01:55:54 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCache.cc,v 1.11 2001/07/19 22:55:36 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -23,17 +23,17 @@ BlockStoreCache::IORequestDown(const IORequest& inIOReq,
   Block block = {0, inIOReq.objectIDGet(), inIOReq.blockOffsetGet(blockSize)};
   uint32_t reqBlockLength = inIOReq.blockLengthGet(blockSize);
 
+  // Log incoming request if desired.
+
+  if (logRequestFlag) {
+    printf("%lf %u %u %u\n",
+	   inIOReq.timeIssuedGet(),
+	   inIOReq.objectIDGet(),
+	   inIOReq.offsetGet(),
+	   inIOReq.lengthGet());
+  }
+
   for (uint32_t i = 0; i < reqBlockLength; i++) {
-    // Log incoming request if desired.
-
-    if (logRequestFlag) {
-      printf("%lf %u %u %u\n",
-	     inIOReq.timeIssuedGet(),
-	     inIOReq.objectIDGet(),
-	     inIOReq.offsetGet(),
-	     inIOReq.lengthGet());
-    }
-
     // See if the block is cached.
 
     if (cache.isCached(block)) {
