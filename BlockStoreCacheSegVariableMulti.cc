@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCacheSegVariableMulti.cc,v 1.3 2001/07/19 20:24:53 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCacheSegVariableMulti.cc,v 1.1 2001/11/18 07:48:46 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -56,21 +56,23 @@ BlockStoreCacheSegVariableMulti::blockPutAtSegCascade(Block inBlock,
 
 BlockStoreCacheSegVariableMulti::
 BlockStoreCacheSegVariableMulti(const char *inName,
-				uint32_t inBlockSize,
-				uint32_t inCacheSize,
-				int inSegCount) :
+				uint64_t inBlockSize,
+				uint64_t inCacheSize,
+				int inSegCount,
+				bool inNormalizeFlag) :
   BlockStore(inName, inBlockSize),
   cacheSegCount(inSegCount),
   ghostMap(),
-  ghostCacheSize(inCacheSize)
+  ghostCacheSize(inCacheSize),
+  normalizeFlag(inNormalizeFlag)
 {
-  uint32_t cacheSegSize = inCacheSize / cacheSegCount;
-  uint32_t cacheSizeRemain = inCacheSize;
+  uint64_t cacheSegSize = inCacheSize / cacheSegCount;
+  uint64_t cacheSizeRemain = inCacheSize;
 
   cacheSegs = new Cache *[cacheSegCount];
-  segHits = new uint32_t[cacheSegCount];
+  segHits = new uint64_t[cacheSegCount];
   for (int i = 0; i < cacheSegCount; i++) {
-    uint32_t thisSegSize = (i < cacheSegCount - 1 ?
+    uint64_t thisSegSize = (i < cacheSegCount - 1 ?
 			    cacheSegSize :
 			    cacheSizeRemain);
 
@@ -89,22 +91,24 @@ BlockStoreCacheSegVariableMulti(const char *inName,
 
 BlockStoreCacheSegVariableMulti::
 BlockStoreCacheSegVariableMulti(const char *inName,
-				uint32_t inBlockSize,
-				uint32_t inCacheSize,
+				uint64_t inBlockSize,
+				uint64_t inCacheSize,
 				int inSegCount,
-				int inSegMultiplier) :
+				int inSegMultiplier,
+				bool inNormalizeFlag) :
   BlockStore(inName, inBlockSize),
   cacheSegCount(inSegCount),
   ghostMap(),
-  ghostCacheSize(inCacheSize)
+  ghostCacheSize(inCacheSize),
+  normalizeFlag(inNormalizeFlag)
 {
   cacheSegs = new Cache *[cacheSegCount];
-  segHits = new uint32_t[cacheSegCount];
+  segHits = new uint64_t[cacheSegCount];
 
   // Track how much cache space remains after allocating space for each
   // segment. We will sweep remaining space into the tail segment.
 
-  uint32_t cacheSizeRemain = inCacheSize;
+  uint64_t cacheSizeRemain = inCacheSize;
 
   // Each cache segment size is a fraction of the cache size. Determine the
   // denominator of the fractions. For example, if each segment is twice
@@ -120,18 +124,18 @@ BlockStoreCacheSegVariableMulti(const char *inName,
   for (int i = 0; i < cacheSegCount; i++) {
     cacheShareCount += ((int)pow(inSegMultiplier, i));
   }
-  uint32_t cacheShareSize = inCacheSize / cacheShareCount;
+  uint64_t cacheShareSize = inCacheSize / cacheShareCount;
 
   for (int i = 0; i < cacheSegCount; i++) {
     // Assign shares to this segment. The last (tail) segment gets the most
     // shares, and also any slop hasn't already been allocated due to
     // round-off.
 
-    uint32_t thisSegSize = (i < cacheSegCount - 1 ?
+    uint64_t thisSegSize = (i < cacheSegCount - 1 ?
 			    ((int)(pow(inSegMultiplier, i))) * cacheShareSize :
 			    cacheSizeRemain);
 
-    fprintf(stderr, "%d %u\n", i, thisSegSize);
+    fprintf(stderr, "%d %llu\n", i, thisSegSize);
 
     cacheSegs[i] = new Cache(thisSegSize);
     segHits[i] = 0;
@@ -166,7 +170,7 @@ BlockStoreCacheSegVariableMulti::IORequestDown(const IORequest& inIOReq,
   Block block = {0, inIOReq.objectIDGet(), inIOReq.blockOffsetGet(blockSize)};
   const char* reqOriginator = inIOReq.originatorGet();
   IORequestOp_t op = inIOReq.opGet();
-  uint32_t reqBlockLength = inIOReq.blockLengthGet(blockSize);
+  uint64_t reqBlockLength = inIOReq.blockLengthGet(blockSize);
 
   // If a ghost cache doesn't already exist for the originator, make one.
 
@@ -175,10 +179,10 @@ BlockStoreCacheSegVariableMulti::IORequestDown(const IORequest& inIOReq,
     fprintf(stderr,
 	    "tmwong: Made ghost cache for originator %s\n",
 	    reqOriginator);
-    ghostMap[reqOriginator] = new CacheGhost(ghostCacheSize);
+    ghostMap[reqOriginator] = new CacheGhost(ghostCacheSize, false);
   }
 
-  for (uint32_t i = 0; i < reqBlockLength; i++) {
+  for (uint64_t i = 0; i < reqBlockLength; i++) {
     // See if we have cached this block.
 
     int blockSeg = blockGetCascade(block);
@@ -213,6 +217,9 @@ BlockStoreCacheSegVariableMulti::IORequestDown(const IORequest& inIOReq,
       case Read:
 	readMissesMap[reqOriginator]++;
 	blockReadMisses++;
+
+	// Per-client ghost caching.
+
 	ghostMap[reqOriginator]->probUpdate(block);
 
 	// Create a new IORequest to pass on to the next-level node.
@@ -232,8 +239,29 @@ BlockStoreCacheSegVariableMulti::IORequestDown(const IORequest& inIOReq,
       // it. Remember, the 0th segment is the closest to head of the queue
       // (i.e. the LRU end).
 
-      int insertSeg = (int)(cacheSegCount *
-			    ghostMap[reqOriginator]->probGet(op));
+      // If we are normalizing, we need to find the maximum probability
+      // value (ouch) across all clients and block types.
+
+      double prob = ghostMap[reqOriginator]->probGet(op);
+      double normProb = prob;
+
+      if (normalizeFlag) {
+	for (GhostMapConstIter i = ghostMap.begin();
+	     i != ghostMap.end();
+	     i++) {
+	  normProb = max(normProb, i->second->probGet(Demote));
+	  normProb = max(normProb, i->second->probGet(Read));
+	}
+	prob = prob / normProb;
+
+	if (prob > 1) {
+	  fprintf(stderr,
+		  "ERROR: normalized prob should not be greater than 1!\n");
+	  abort();
+	}
+      }
+
+      int insertSeg = (int)(cacheSegCount * prob);
 #if 0
       // Here's a heuristic: workloads that demote lots of blocks that are
       // already in the array get penalized.
@@ -277,40 +305,40 @@ BlockStoreCacheSegVariableMulti::statisticsShow() const
 {
   printf("Statistics for BlockStoreCacheSegVariableMulti.%s\n", nameGet());
 
-  uint32_t segHitsTotal = 0;
+  uint64_t segHitsTotal = 0;
   for (int i = cacheSegCount - 1; i >= 0; i--) {
-    printf("Hits in segment %d %ld\n", i, segHits[i]);
+    printf("Hits in segment %d %llu\n", i, segHits[i]);
     segHitsTotal += segHits[i];
   }
-  printf("Total hits in segments %ld\n", segHitsTotal);
+  printf("Total hits in segments %llu\n", segHitsTotal);
 
   for (StatMapConstIter i = demoteHitsMap.begin();
        i != demoteHitsMap.end();
        i++) {
-    printf("Demote hits for %s %u\n", i->first, i->second);
+    printf("Demote hits for %s %llu\n", i->first, i->second);
   }
   for (StatMapConstIter i = demoteMissesMap.begin();
        i != demoteMissesMap.end();
        i++) {
-    printf("Demote misses for %s %u\n", i->first, i->second);
+    printf("Demote misses for %s %llu\n", i->first, i->second);
   }
 
-  printf("Demote hits %u\n", blockDemoteHits);
-  printf("Demote misses %u\n", blockDemoteMisses);
+  printf("Demote hits %llu\n", blockDemoteHits);
+  printf("Demote misses %llu\n", blockDemoteMisses);
 
   for (StatMapConstIter i = readHitsMap.begin();
        i != readHitsMap.end();
        i++) {
-    printf("Read hits for %s %u\n", i->first, i->second);
+    printf("Read hits for %s %llu\n", i->first, i->second);
   }
   for (StatMapConstIter i = readMissesMap.begin();
        i != readMissesMap.end();
        i++) {
-    printf("Read misses for %s %u\n", i->first, i->second);
+    printf("Read misses for %s %llu\n", i->first, i->second);
   }
 
-  printf("Read hits %u\n", blockReadHits);
-  printf("Read misses %u\n", blockReadMisses);
+  printf("Read hits %llu\n", blockReadHits);
+  printf("Read misses %llu\n", blockReadMisses);
 
   for (GhostMapConstIter i = ghostMap.begin();
        i != ghostMap.end();

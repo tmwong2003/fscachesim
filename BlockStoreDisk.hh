@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreDisk.hh,v 1.2 2000/09/28 02:54:49 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreDisk.hh,v 1.3 2000/10/24 19:54:41 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -24,7 +24,7 @@ private:
   BlockStoreDisk& operator=(const BlockStoreDisk&);
 
 public:
-  BlockStoreDisk(uint32_t inBlockSize) :
+  BlockStoreDisk(uint64_t inBlockSize) :
     BlockStore(inBlockSize) { ; };
   ~BlockStoreDisk() { ; };
 

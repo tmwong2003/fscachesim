@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreInfinite.hh,v 1.6 2000/10/30 01:12:44 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreShareStats.hh,v 1.1 2001/07/04 17:49:30 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -22,15 +22,15 @@ extern "C" {
 
 struct uint32LessThan
 {
-  bool operator()(const uint32_t i1, const uint32_t i2) const
+  bool operator()(const uint64_t i1, const uint32_t i2) const
     {
       return (i1 < i2);
     }
 };
 
-typedef map<uint32_t, uint32_t, uint32LessThan> uint32Map;
-typedef map<uint32_t, uint32_t, uint32LessThan>::iterator uint32MapIter;
-typedef map<uint32_t, uint32_t, uint32LessThan>::const_iterator uint32MapConstIter;
+typedef map<uint64_t, uint32_t, uint32LessThan> uint32Map;
+typedef map<uint64_t, uint32_t, uint32LessThan>::iterator uint32MapIter;
+typedef map<uint64_t, uint32_t, uint32LessThan>::const_iterator uint32MapConstIter;
 
 class BlockStoreShareStats : public BlockStore {
 private:
@@ -40,7 +40,7 @@ private:
     };
   };
 
-  typedef map<Block, uint32_t, BlockLessThan> BlockMap;
+  typedef map<Block, uint64_t, BlockLessThan> BlockMap;
 
   typedef map<const char *, BlockMap *, CharStarLessThan> OrigMap;
 

@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Cache.hh,v 1.3 2001/07/19 00:11:00 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Cache.hh,v 1.4 2001/11/16 23:32:46 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -32,11 +32,11 @@ protected:
   list<Block> cache;
   CacheIndex cacheIndex;
 
-  uint32_t blockCount;
-  uint32_t blockCountMax;
+  uint64_t blockCount;
+  uint64_t blockCountMax;
 
 public:
-  Cache(uint32_t inCacheSize) :
+  Cache(uint64_t inCacheSize) :
     cache(),
     cacheIndex(),
     blockCount(0),

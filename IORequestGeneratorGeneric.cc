@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/IORequestGeneratorGeneric.cc,v 1.2 2000/10/28 22:20:59 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/IORequestGeneratorGeneric.cc,v 1.3 2001/06/30 21:56:02 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -26,10 +26,10 @@ IORequestGeneratorGeneric::IORequestQueue()
   if (file != NULL) {
     double timeIssued;
     int rc;
-    uint32_t objectID, offset, length;
+    uint64_t objectID, offset, length;
 
     rc = fscanf(file,
-		"%lf %u %u %u",
+		"%lf %llu %llu %llu",
 		&timeIssued,
 		&objectID,
 		&offset,

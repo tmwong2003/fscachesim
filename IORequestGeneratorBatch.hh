@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequestGenerator.hh,v 1.4 2000/10/26 16:14:24 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/IORequestGeneratorBatch.hh,v 1.1 2000/10/30 01:12:44 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -30,14 +30,14 @@ protected:
   list<IORequestGenerator *> generators;
 
   list<Statistics *> statistics;
-  uint32_t requestsIssued;
+  uint64_t requestsIssued;
 
   enum {WarmupNone, WarmupCount, WarmupTime} warmupType;
-  uint32_t warmupCount;
+  uint64_t warmupCount;
   double warmupTime;
   bool warmupDoneFlag;
 
-  uint32_t recordsPerDot;
+  uint64_t recordsPerDot;
 
 private:
   IORequestGeneratorBatch(const IORequestGeneratorBatch&);
@@ -55,7 +55,7 @@ public:
     warmupDoneFlag(true),
     recordsPerDot(1000) { ; };
 
-  IORequestGeneratorBatch(uint32_t inWarmupCount) :
+  IORequestGeneratorBatch(uint64_t inWarmupCount) :
     IORequestGenerator(),
     Statistics(""),
     generators(),

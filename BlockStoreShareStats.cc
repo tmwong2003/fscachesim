@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCache.cc,v 1.7 2001/07/02 23:29:57 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreShareStats.cc,v 1.1 2001/07/04 17:49:30 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -27,9 +27,9 @@ BlockStoreShareStats::IORequestDown(const IORequest& inIOReq,
 {
   Block block = {0, inIOReq.objectIDGet(), inIOReq.blockOffsetGet(blockSize)};
   const char *orig = inIOReq.originatorGet();
-  uint32_t reqBlockLength = inIOReq.blockLengthGet(blockSize);
+  uint64_t reqBlockLength = inIOReq.blockLengthGet(blockSize);
 
-  for (uint32_t i = 0; i < reqBlockLength; i++) {
+  for (uint64_t i = 0; i < reqBlockLength; i++) {
     BlockMap *theMap = NULL;
     OrigMap::iterator origIter = origToAccessMap.find(orig);
 

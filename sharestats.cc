@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/sharestats.cc,v 1.1 2001/07/04 17:49:30 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/sharestats.cc,v 1.2 2001/11/19 14:57:00 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -72,7 +72,7 @@ int
 main(int argc, char *argv[])
 {
   char *filePrefix = "results";
-  uint32_t blockSize = globalBlockSize;
+  uint64_t blockSize = globalBlockSize;
 
   bool useMamboFlag = false;
 

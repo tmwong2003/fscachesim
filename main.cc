@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/main.cc,v 1.17 2001/07/19 22:55:36 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/main.cc,v 1.18 2001/11/18 07:48:47 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -14,6 +14,7 @@
 #include "BlockStoreCache.hh"
 #include "BlockStoreCacheSegmented.hh"
 #include "BlockStoreCacheSegVariable.hh"
+#include "BlockStoreCacheSegVariableMulti.hh"
 #include "IORequest.hh"
 #include "IORequestGeneratorBatch.hh"
 #include "IORequestGeneratorGeneric.hh"
@@ -55,15 +56,15 @@ int
 main(int argc,
      char *argv[])
 {
-  uint32_t arrayProbCacheSize = 0;
-  uint32_t arrayProbCacheSizeMB = 0;
+  uint64_t arrayProbCacheSize = 0;
+  uint64_t arrayProbCacheSizeMB = 0;
   CacheReplPolicy_t arrayReplPolicy = LRU;
 
-  uint32_t blockSize = 4096;
+  uint64_t blockSize = 4096;
 
   CacheDemotePolicy_t hostDemotePolicy = None;
 
-  uint32_t warmupCount = 0;
+  uint64_t warmupCount = 0;
   double warmupTime = 0;
 
   bool useGhostFlag = false;
@@ -136,10 +137,10 @@ main(int argc,
 
   // Get the cache sizes.
 
-  uint32_t hostCacheSizeMB = atol(argv[optind]);
-  uint32_t hostCacheSize = hostCacheSizeMB * (globalMBToB / blockSize);
-  uint32_t arrayCacheSizeMB = atol(argv[optind + 1]);
-  uint32_t arrayCacheSize = arrayCacheSizeMB * (globalMBToB / blockSize);
+  uint64_t hostCacheSizeMB = atol(argv[optind]);
+  uint64_t hostCacheSize = hostCacheSizeMB * (globalMBToB / blockSize);
+  uint64_t arrayCacheSizeMB = atol(argv[optind + 1]);
+  uint64_t arrayCacheSize = arrayCacheSizeMB * (globalMBToB / blockSize);
 
   // Create a single array cache for all client-missed I/Os to feed into.
 
@@ -167,6 +168,25 @@ main(int argc,
 				       globalCacheSegVariableSegCount,
 				       globalCacheSegVariableSegMultiplier,
 				       useNormalizeFlag);
+    }
+  }
+  else if (useGhostMultiFlag) {
+    if (useUniformFlag) {
+      arrayCache = 
+	new BlockStoreCacheSegVariableMulti("array",
+					    blockSize,
+					    arrayCacheSize,
+					    globalCacheSegVariableSegCount,
+					    useNormalizeFlag);
+    }
+    else {
+      arrayCache = 
+	new BlockStoreCacheSegVariableMulti("array",
+					    blockSize,
+					    arrayCacheSize,
+					    globalCacheSegVariableSegCount,
+					    globalCacheSegVariableSegMultiplier,
+					    useNormalizeFlag);
     }
   }
   else {
@@ -209,10 +229,10 @@ main(int argc,
 
   // Show stats.
 
-  printf("Client cache size %u\n", hostCacheSizeMB);
-  printf("Array cache size %u\n", arrayCacheSizeMB);
+  printf("Client cache size %llu\n", hostCacheSizeMB);
+  printf("Array cache size %llu\n", arrayCacheSizeMB);
   if (useSLRUcacheFlag) {
-    printf("Array prob cache size %ld\n", arrayProbCacheSizeMB);
+    printf("Array prob cache size %llu\n", arrayProbCacheSizeMB);
     printf("Array cache policy SLRU-%s\n",
 	   (hostDemotePolicy == DemoteDemand ? "SLRU" : "NONE"));
   }
@@ -231,8 +251,18 @@ main(int argc,
     }
   }
   else if (useGhostMultiFlag) {
-    printf("Array cache policy SEGEXPMULTI-%s\n",
-	   (hostDemotePolicy == DemoteDemand ? "SEGEXPMULTI" : "NONE"));
+    if (useUniformFlag) {
+      printf("Array cache policy %sSEGMULTI-%s%s\n",
+	     (useNormalizeFlag ? "N" : "U"),
+	     (useNormalizeFlag ? "N" : "U"),
+	     (hostDemotePolicy == DemoteDemand ? "SEGMULTI" : "NONE"));
+    }
+    else {
+      printf("Array cache policy %sSEGEXPMULTI-%s%s\n",
+	     (useNormalizeFlag ? "N" : "U"),
+	     (useNormalizeFlag ? "N" : "U"),
+	     (hostDemotePolicy == DemoteDemand ? "SEGEXPMULTI" : "NONE"));
+    }
   }
   else {
     printf("Array cache policy %s-",
@@ -240,7 +270,7 @@ main(int argc,
     printf("%s\n",
 	   (hostDemotePolicy == DemoteDemand ? "LRU" : "NONE"));
   }
-  printf("Block size %ld\n", blockSize);
+  printf("Block size %llu\n", blockSize);
   generators->statisticsShow();
 
   // Clean up after ourselves.

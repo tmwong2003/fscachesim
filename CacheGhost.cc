@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/CacheGhost.cc,v 1.1 2001/07/18 20:36:11 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/CacheGhost.cc,v 1.2 2001/11/18 07:48:46 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -83,6 +83,6 @@ CacheGhost::statisticsReset()
 void
 CacheGhost::statisticsShow() const
 {
-  printf("Read hits (demote ghost) %u\n", demoteGhostReadHits);
-  printf("Read hits (read ghost) %u\n", readGhostReadHits);
+  printf("Read hits (demote ghost) %llu\n", demoteGhostReadHits);
+  printf("Read hits (read ghost) %llu\n", readGhostReadHits);
 }

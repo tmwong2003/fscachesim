@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCache.hh,v 1.8 2001/07/06 01:45:40 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCache.hh,v 1.9 2001/11/16 23:32:46 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -32,7 +32,7 @@ private:
     };
   };
 
-  typedef map<const char *, uint32_t, CharStarLessThan> StatMap;
+  typedef map<const char *, uint64_t, CharStarLessThan> StatMap;
   typedef StatMap::iterator StatMapIter;
   typedef StatMap::const_iterator StatMapConstIter;
 
@@ -56,8 +56,8 @@ private:
 
 public:
   BlockStoreCache(const char *inName,
-		  uint32_t inBlockSize,
-		  uint32_t inCacheSize,
+		  uint64_t inBlockSize,
+		  uint64_t inCacheSize,
 		  CacheReplPolicy_t inCacheReplPolicy,
 		  CacheDemotePolicy_t inCacheDemotePolicy) :
     BlockStore(inName, inBlockSize),

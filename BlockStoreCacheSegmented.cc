@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCacheSegmented.cc,v 1.2 2001/07/06 01:46:10 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCacheSegmented.cc,v 1.3 2001/07/17 01:56:26 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -25,9 +25,9 @@ BlockStoreCacheSegmented::IORequestDown(const IORequest& inIOReq,
 					list<IORequest>& outIOReqList)
 {
   Block block = {0, inIOReq.objectIDGet(), inIOReq.blockOffsetGet(blockSize)};
-  uint32_t reqBlockLength = inIOReq.blockLengthGet(blockSize);
+  uint64_t reqBlockLength = inIOReq.blockLengthGet(blockSize);
 
-  for (uint32_t i = 0; i < reqBlockLength; i++) {
+  for (uint64_t i = 0; i < reqBlockLength; i++) {
     if (protCache.isCached(block)) {
 
       // Block is in the protected cache.
@@ -158,30 +158,30 @@ BlockStoreCacheSegmented::statisticsShow() const
   for (StatMapConstIter i = probReadHitsMap.begin();
        i != probReadHitsMap.end();
        i++) {
-    printf("Block probationary read hits for %s %u\n", i->first, i->second);
+    printf("Block probationary read hits for %s %llu\n", i->first, i->second);
   }
   for (StatMapConstIter i = protReadHitsMap.begin();
        i != protReadHitsMap.end();
        i++) {
-    printf("Block protected read hits for %s %u\n", i->first, i->second);
+    printf("Block protected read hits for %s %llu\n", i->first, i->second);
   }
   for (StatMapConstIter i = probToProtXfersMap.begin();
        i != probToProtXfersMap.end();
        i++) {
-    printf("Block prob-to-prot transfers for %s %u\n", i->first, i->second);
+    printf("Block prob-to-prot transfers for %s %llu\n", i->first, i->second);
   }
   for (StatMapConstIter i = protToProbXfersMap.begin();
        i != protToProbXfersMap.end();
        i++) {
-    printf("Block prot-to-prob transfers for %s %u\n", i->first, i->second);
+    printf("Block prot-to-prob transfers for %s %llu\n", i->first, i->second);
   }
   for (StatMapConstIter i = blockReadMissesMap.begin();
        i != blockReadMissesMap.end();
        i++) {
-    printf("Block read misses for %s %u\n", i->first, i->second);
+    printf("Block read misses for %s %llu\n", i->first, i->second);
   }
-  printf("Block demote hits %u\n", blockDemoteHits);
-  printf("Block demote misses %u\n", blockDemoteMisses);
-  printf("Block read hits %u\n", blockReadHits);
-  printf("Block read misses %u\n", blockReadMisses);
+  printf("Block demote hits %llu\n", blockDemoteHits);
+  printf("Block demote misses %llu\n", blockDemoteMisses);
+  printf("Block read hits %llu\n", blockReadHits);
+  printf("Block read misses %llu\n", blockReadMisses);
 }

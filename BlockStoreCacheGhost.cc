@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCacheGhost.cc,v 1.2 2001/07/18 20:36:11 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCacheGhost.cc,v 1.3 2001/07/19 20:24:52 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -20,9 +20,9 @@ BlockStoreCacheGhost::IORequestDown(const IORequest& inIOReq,
 {
   Block block = {0, inIOReq.objectIDGet(), inIOReq.blockOffsetGet(blockSize)};
   IORequestOp_t op = inIOReq.opGet();
-  uint32_t reqBlockLength = inIOReq.blockLengthGet(blockSize);
+  uint64_t reqBlockLength = inIOReq.blockLengthGet(blockSize);
 
-  for (uint32_t i = 0; i < reqBlockLength; i++) {
+  for (uint64_t i = 0; i < reqBlockLength; i++) {
     // See if we have cached this block.
 
     if (cache.isCached(block)) {

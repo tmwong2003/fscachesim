@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/IORequest.hh,v 1.6 2000/10/28 22:20:59 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/IORequest.hh,v 1.7 2001/11/16 23:32:46 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -21,16 +21,16 @@ enum IORequestOp_t {Demote, Read};
 class IORequest {
 protected:
   const char *originator;
-  const uint32_t requestID;
+  const uint64_t requestID;
 
   IORequestOp_t op;
 
   double timeIssued;
 
-  uint32_t devID;
-  uint32_t objectID;
-  uint32_t offset;
-  uint32_t length;
+  uint64_t devID;
+  uint64_t objectID;
+  uint64_t offset;
+  uint64_t length;
 
 private:
   // Copy constructors - declared private and never defined
@@ -43,9 +43,9 @@ public:
   IORequest(const char *inOriginator,
 	    IORequestOp_t inOp,
 	    double inTimeIssued,
-	    uint32_t inObjectID,
-	    uint32_t inOffset,
-	    uint32_t inLength) :
+	    uint64_t inObjectID,
+	    uint64_t inOffset,
+	    uint64_t inLength) :
     originator(inOriginator),
     requestID(0),
     op(inOp),
@@ -72,7 +72,7 @@ public:
     return (originator);
   };
 
-  uint32_t requestIDGet() const {
+  uint64_t requestIDGet() const {
     return (requestID);
   };
 
@@ -84,23 +84,23 @@ public:
     return (timeIssued);
   };
 
-  uint32_t objectIDGet() const {
+  uint64_t objectIDGet() const {
     return (objectID);
   };
 
-  uint32_t offsetGet() const {
+  uint64_t offsetGet() const {
     return (offset);
   };
 
-  uint32_t lengthGet() const {
+  uint64_t lengthGet() const {
     return (length);
   };
 
-  uint32_t blockOffsetGet(const uint32_t inBlockSize) const {
+  uint64_t blockOffsetGet(const uint64_t inBlockSize) const {
     return (offset / inBlockSize);
   };
 
-  uint32_t blockLengthGet(const uint32_t inBlockSize) const {
+  uint64_t blockLengthGet(const uint64_t inBlockSize) const {
     //  The following expression is length + starting fill + ending fill.
 
     return ((length + (offset % inBlockSize) +

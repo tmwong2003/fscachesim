@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreInfinite.cc,v 1.5 2001/06/30 22:54:06 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreInfinite.cc,v 1.6 2001/07/02 23:25:27 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -15,15 +15,15 @@ BlockStoreInfinite::IORequestDown(const IORequest& inIOReq,
 				  list<IORequest>& outIOReqList)
 {
   Block block = {0, inIOReq.objectIDGet(), inIOReq.blockOffsetGet(blockSize)};
-  uint32_t reqBlockLength = inIOReq.blockLengthGet(blockSize);
+  uint64_t reqBlockLength = inIOReq.blockLengthGet(blockSize);
 
-  for (uint32_t i = 0; i < reqBlockLength; i++) {
+  for (uint64_t i = 0; i < reqBlockLength; i++) {
     // See if the block is cached.
 
     BlockMapIter blockIter = blockTimestampMap.find(block);
     if (blockIter != blockTimestampMap.end()) {
-      uint32_t blockTimestamp = blockIter->second;
-      uint32_t blockLRUDepth;
+      uint64_t blockTimestamp = blockIter->second;
+      uint64_t blockLRUDepth;
       uint32MapIter LRUIter;
 
       blockReadHits++;
@@ -98,7 +98,7 @@ void
 BlockStoreInfinite::statisticsFreqShow() const
 {
   for (BlockMapConstIter i = freqMap.begin(); i != freqMap.end(); i++) {
-    printf("%u,%u %d\n", i->first.objectID, i->first.blockID, i->second);
+    printf("%llu,%llu %llu\n", i->first.objectID, i->first.blockID, i->second);
   }
   fflush(stdout);
 }
@@ -110,7 +110,7 @@ BlockStoreInfinite::statisticsLRUShow() const
     // Convert the x-axis to kilobytes instead of block size - the
     // latter is not an intuitive measure of size.
 
-    printf("%d %d\n", ((i->first * (blockSize / 1024)) / 1024), i->second);
+    printf("%llu %d\n", ((i->first * (blockSize / 1024)) / 1024), i->second);
   }
   fflush(stdout);
 }
@@ -118,8 +118,8 @@ BlockStoreInfinite::statisticsLRUShow() const
 void
 BlockStoreInfinite::statisticsLRUCumulShow() const
 {
-  uint32_t cumul = 0;
-  uint32_t cumulTotal = blockReadMisses;
+  uint64_t cumul = 0;
+  uint64_t cumulTotal = blockReadMisses;
 
   // cumulTotal doesn't start at zero since we need to account for
   // compulsory misses.
@@ -132,7 +132,7 @@ BlockStoreInfinite::statisticsLRUCumulShow() const
     // latter is not an intuitive measure of size.
 
     cumul += i->second;
-    printf("%d %4.3f\n", ((i->first * (blockSize / 1024)) / 1024), ((double)cumul / cumulTotal));
+    printf("%llu %4.3f\n", ((i->first * (blockSize / 1024)) / 1024), ((double)cumul / cumulTotal));
   }
   fflush(stdout);
 }
@@ -140,7 +140,7 @@ BlockStoreInfinite::statisticsLRUCumulShow() const
 void
 BlockStoreInfinite::statisticsSummaryShow() const
 {
-  printf("Block hits %u\n", blockReadHits);
-  printf("Block misses %u\n", blockReadMisses);
+  printf("Block hits %llu\n", blockReadHits);
+  printf("Block misses %llu\n", blockReadMisses);
   fflush(stdout);
 }

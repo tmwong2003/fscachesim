@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCacheGhost.hh,v 1.2 2001/07/18 20:36:11 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCacheGhost.hh,v 1.3 2001/11/16 23:32:46 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -30,7 +30,7 @@ private:
     };
   };
 
-  typedef map<const char *, uint32_t, CharStarLessThan> StatMap;
+  typedef map<const char *, uint64_t, CharStarLessThan> StatMap;
   typedef StatMap::iterator StatMapIter;
   typedef StatMap::const_iterator StatMapConstIter;
 
@@ -38,10 +38,10 @@ private:
   // read block
 
   Cache cache;
-  uint32_t demotesCached;
-  uint32_t demotesUncached;
-  uint32_t readsCached;
-  uint32_t readsUncached;
+  uint64_t demotesCached;
+  uint64_t demotesUncached;
+  uint64_t readsCached;
+  uint64_t readsUncached;
 
   // The ghost caches, for demote and read operations
 
@@ -59,8 +59,8 @@ private:
 
 public:
   BlockStoreCacheGhost(const char *inName,
-		       uint32_t inBlockSize,
-		       uint32_t inCacheSize) :
+		       uint64_t inBlockSize,
+		       uint64_t inCacheSize) :
     BlockStore(inName, inBlockSize),
     cache(inCacheSize),
     demotesCached(0),

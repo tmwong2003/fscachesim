@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStore.hh,v 1.5 2000/10/30 01:12:44 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStore.hh,v 1.6 2001/11/16 23:32:46 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -24,9 +24,9 @@ using namespace ::std;
 
 class Block {
 public:
-  uint32_t devID;
-  uint32_t objectID;
-  uint32_t blockID;
+  uint64_t devID;
+  uint64_t objectID;
+  uint64_t blockID;
 };
 
 struct BlockLessThan
@@ -40,13 +40,13 @@ struct BlockLessThan
 
 class BlockStore : public Statistics {
 protected:
-  uint32_t blockSize;
+  uint64_t blockSize;
 
-  uint32_t blockDemoteHits;
-  uint32_t blockDemoteMisses;
+  uint64_t blockDemoteHits;
+  uint64_t blockDemoteMisses;
 
-  uint32_t blockReadHits;
-  uint32_t blockReadMisses;
+  uint64_t blockReadHits;
+  uint64_t blockReadMisses;
 
 private:
   // Copy constructors - declared private and never defined
@@ -58,7 +58,7 @@ public:
   // Constructors
 
   BlockStore(const char *inName,
-	     uint32_t inBlockSize);
+	     uint64_t inBlockSize);
 
   virtual ~BlockStore() { ; };
 
@@ -79,7 +79,7 @@ public:
 
 inline
 BlockStore::BlockStore(const char *inName,
-		       uint32_t inBlockSize) :
+		       uint64_t inBlockSize) :
   Statistics(inName),
   blockSize(inBlockSize)
 {

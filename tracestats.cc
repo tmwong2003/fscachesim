@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/tracestats.cc,v 1.7 2001/06/30 21:56:02 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/tracestats.cc,v 1.8 2001/07/21 00:07:06 tmwong Exp $
   Description:  Generate LRU and frequency trace stats using fscachesim
                 objects.
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
@@ -77,8 +77,8 @@ int
 main(int argc, char *argv[])
 {
   char *filePrefix = "results";
-  uint32_t blockSize = globalBlockSize;
-  uint32_t warmupCount = 0;
+  uint64_t blockSize = globalBlockSize;
+  uint64_t warmupCount = 0;
   double warmupTime = 0;
 
   bool useMamboFlag = false;

@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCacheSegVariable.hh,v 1.2 2001/07/19 02:53:35 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCacheSegVariableMulti.hh,v 1.1 2001/11/18 07:48:46 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -22,14 +22,14 @@ protected:
     };
   };
 
-  typedef map<const char *, uint32_t, CharStarLessThan> StatMap;
+  typedef map<const char *, uint64_t, CharStarLessThan> StatMap;
   typedef StatMap::iterator StatMapIter;
   typedef StatMap::const_iterator StatMapConstIter;
 
   Cache **cacheSegs;
   int cacheSegCount;
 
-  uint32_t *segHits;
+  uint64_t *segHits;
 
   // The ghost caches, for demote and read operations
 
@@ -38,7 +38,9 @@ protected:
   typedef GhostMap::const_iterator GhostMapConstIter;
 
   GhostMap ghostMap;
-  uint32_t ghostCacheSize;
+  uint64_t ghostCacheSize;
+
+  bool normalizeFlag;
 
   StatMap demoteHitsMap;
   StatMap demoteMissesMap;
@@ -59,15 +61,17 @@ protected:
 
 public:
   BlockStoreCacheSegVariableMulti(const char *inName,
-				  uint32_t inBlockSize,
-				  uint32_t inCacheSize,
-				  int inSegCount);
+				  uint64_t inBlockSize,
+				  uint64_t inCacheSize,
+				  int inSegCount,
+				  bool inNormalizeFlag);
 
   BlockStoreCacheSegVariableMulti(const char *inName,
-				  uint32_t inBlockSize,
-				  uint32_t inCacheSize,
+				  uint64_t inBlockSize,
+				  uint64_t inCacheSize,
 				  int inSegCount,
-				  int inSegMultiplier);
+				  int inSegMultiplier,
+				  bool inNormalizeFlag);
 
   ~BlockStoreCacheSegVariableMulti();
 

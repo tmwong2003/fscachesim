@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/IORequestGeneratorMambo.cc,v 1.4 2000/10/28 22:20:59 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/IORequestGeneratorMambo.cc,v 1.5 2001/06/30 21:56:02 tmwong Exp $
   Description:  Generate I/O requests from a Mambo trace file.
   Author:       A. Acharya <acha@cs.umd.edu>, T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -138,7 +138,7 @@ IORequestGeneratorMambo::IORequestQueue()
 	if (strcmp(traceHeader.fileNames[record.fileId].name, "others") != 0) {
 	  // Convert the fileID to a unique ID.
 
-	  uint32_t uniqueFileID =
+	  uint64_t uniqueFileID =
 	    staticDir[traceHeader.fileNames[record.fileId].name];
 	  nextRequest = new IORequest(basename(filename),
 				      Read,

@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequestGeneratorFile.cc,v 1.5 2000/10/26 16:14:24 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/IORequestGeneratorBatch.cc,v 1.1 2000/10/30 01:12:44 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -11,7 +11,7 @@
 IORequestGeneratorBatch::~IORequestGeneratorBatch()
 {
   if (recordsPerDot > 0) {
-    fprintf(stderr, "\nProcessed %d requests.\n", requestsIssued);
+    fprintf(stderr, "\nProcessed %llu requests.\n", requestsIssued);
   }
 }
 
@@ -34,7 +34,7 @@ IORequestGeneratorBatch::IORequestDown()
 	statisticsReset();
 	warmupDoneFlag = true;
 	fprintf(stderr,
-		"\nWarmups done after %d request(s)\n",
+		"\nWarmups done after %llu request(s)\n",
 		requestsIssued);
       }
       break;
@@ -43,7 +43,7 @@ IORequestGeneratorBatch::IORequestDown()
 	statisticsReset();
 	warmupDoneFlag = true;
 	fprintf(stderr,
-		"\nWarmups done at %f second(s) after %d request(s)\n",
+		"\nWarmups done at %f second(s) after %llu request(s)\n",
 		warmupTime,
 		requestsIssued);
       }

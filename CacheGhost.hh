@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/CacheGhost.hh,v 1.1 2001/07/18 20:36:11 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/CacheGhost.hh,v 1.2 2001/11/18 07:48:46 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -17,10 +17,10 @@
 class CacheGhost {
 private:
   Cache demoteGhost;
-  uint32_t demoteGhostReadHits;
+  uint64_t demoteGhostReadHits;
 
   Cache readGhost;
-  uint32_t readGhostReadHits;
+  uint64_t readGhostReadHits;
 
   double demoteProb;
   double readProb;
@@ -28,7 +28,7 @@ private:
   bool normalizeFlag;
 
 public:
-  CacheGhost(uint32_t inCacheSize, bool inNormalizeFlag) :
+  CacheGhost(uint64_t inCacheSize, bool inNormalizeFlag) :
     demoteGhost(inCacheSize),
     demoteGhostReadHits(1),
     readGhost(inCacheSize),

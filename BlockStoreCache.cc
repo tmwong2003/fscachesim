@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCache.cc,v 1.11 2001/07/19 22:55:36 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCache.cc,v 1.12 2001/07/21 00:07:28 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -21,19 +21,19 @@ BlockStoreCache::IORequestDown(const IORequest& inIOReq,
 			       list<IORequest>& outIOReqList)
 {
   Block block = {0, inIOReq.objectIDGet(), inIOReq.blockOffsetGet(blockSize)};
-  uint32_t reqBlockLength = inIOReq.blockLengthGet(blockSize);
+  uint64_t reqBlockLength = inIOReq.blockLengthGet(blockSize);
 
   // Log incoming request if desired.
 
   if (logRequestFlag) {
-    printf("%lf %u %u %u\n",
+    printf("%lf %llu %llu %llu\n",
 	   inIOReq.timeIssuedGet(),
 	   inIOReq.objectIDGet(),
 	   inIOReq.offsetGet(),
 	   inIOReq.lengthGet());
   }
 
-  for (uint32_t i = 0; i < reqBlockLength; i++) {
+  for (uint64_t i = 0; i < reqBlockLength; i++) {
     // See if the block is cached.
 
     if (cache.isCached(block)) {
@@ -146,28 +146,28 @@ BlockStoreCache::statisticsShow() const
   for (StatMapConstIter i = blockDemoteHitsMap.begin();
        i != blockDemoteHitsMap.end();
        i++) {
-    printf("Demote hits for %s %u\n", i->first, i->second);
+    printf("Demote hits for %s %llu\n", i->first, i->second);
   }
   for (StatMapConstIter i = blockDemoteMissesMap.begin();
        i != blockDemoteMissesMap.end();
        i++) {
-    printf("Demote misses for %s %u\n", i->first, i->second);
+    printf("Demote misses for %s %llu\n", i->first, i->second);
   }
 
-  printf("Demote hits %u\n", blockDemoteHits);
-  printf("Demote misses %u\n", blockDemoteMisses);
+  printf("Demote hits %llu\n", blockDemoteHits);
+  printf("Demote misses %llu\n", blockDemoteMisses);
 
   for (StatMapConstIter i = blockReadHitsMap.begin();
        i != blockReadHitsMap.end();
        i++) {
-    printf("Read hits for %s %u\n", i->first, i->second);
+    printf("Read hits for %s %llu\n", i->first, i->second);
   }
   for (StatMapConstIter i = blockReadMissesMap.begin();
        i != blockReadMissesMap.end();
        i++) {
-    printf("Read misses for %s %u\n", i->first, i->second);
+    printf("Read misses for %s %llu\n", i->first, i->second);
   }
 
-  printf("Read hits %u\n", blockReadHits);
-  printf("Read misses %u\n", blockReadMisses);
+  printf("Read hits %llu\n", blockReadHits);
+  printf("Read misses %llu\n", blockReadMisses);
 }

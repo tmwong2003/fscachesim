@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Blockstorecachesegmented.hh,v 1.5 2000/10/30 01:12:44 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCacheSegmented.hh,v 1.1 2001/07/04 17:49:30 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -21,7 +21,7 @@ private:
     };
   };
 
-  typedef map<const char *, uint32_t, CharStarLessThan> StatMap;
+  typedef map<const char *, uint64_t, CharStarLessThan> StatMap;
   typedef StatMap::iterator StatMapIter;
   typedef StatMap::const_iterator StatMapConstIter;
 
@@ -42,9 +42,9 @@ private:
 
 public:
   BlockStoreCacheSegmented(const char *inName,
-			   uint32_t inBlockSize,
-			   uint32_t inCacheSize,
-			   uint32_t inProbCacheSize) :
+			   uint64_t inBlockSize,
+			   uint64_t inCacheSize,
+			   uint64_t inProbCacheSize) :
     BlockStore(inName, inBlockSize),
     probCache(inProbCacheSize),
     protCache(inCacheSize - inProbCacheSize) { ; };
