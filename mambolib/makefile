@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -g 
+CFLAGS = -g
 
 all: iotracelib.o bin2asc asc2bin
 
