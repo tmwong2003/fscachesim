@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/tracestats.cc,v 1.7 2001/06/30 21:56:02 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/sharestats.cc,v 1.1 2001/07/04 17:49:30 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -22,7 +22,7 @@
 
 // Command usage.
 
-const char *globalProgArgs = "bf:m";
+const char *globalProgArgs = "b:f:m";
 
 const char *globalProgUsage = "[-m] " \
 "[-b block_size] " \
