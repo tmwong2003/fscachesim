@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSeg.hh,v 1.1 2002/02/13 20:21:08 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSeg.hh,v 1.2 2002/02/15 15:44:25 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -50,6 +50,8 @@ private:
    * The number of hits in each segment.
    */
   uint64_t *segHits;
+
+  bool segSizesUniformFlag;
 
 private:
   // Copy constructors - declared private and never defined

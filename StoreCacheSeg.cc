@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSeg.cc,v 1.1 2002/02/13 20:21:08 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSeg.cc,v 1.2 2002/02/15 15:44:25 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -70,7 +70,8 @@ StoreCacheSeg::StoreCacheSeg(const char *inName,
 			     bool inNormalizeFlag) :
   StoreCache(inName, inBlockSize),
   cacheSegCount(inSegCount),
-  ghost(inName, inSize, inNormalizeFlag)
+  ghost(inName, inSize, inNormalizeFlag),
+  segSizesUniformFlag(true)
 {
   uint64_t cacheSegSize = inSize / cacheSegCount;
   uint64_t cacheSizeRemain = inSize;
@@ -103,7 +104,8 @@ StoreCacheSeg::StoreCacheSeg(const char *inName,
 			     bool inNormalizeFlag) :
   StoreCache(inName, inBlockSize),
   cacheSegCount(inSegCount),
-  ghost(inName, inSize, inNormalizeFlag)
+  ghost(inName, inSize, inNormalizeFlag),
+  segSizesUniformFlag(false)
 {
   cacheSegs = new Cache *[cacheSegCount];
   segHits = new uint64_t[cacheSegCount];
@@ -137,8 +139,6 @@ StoreCacheSeg::StoreCacheSeg(const char *inName,
     uint64_t thisSegSize = (i < cacheSegCount - 1 ?
 			    ((int)(pow(inSegMultiplier, i))) * cacheShareSize :
 			    cacheSizeRemain);
-
-    fprintf(stderr, "%d %llu\n", i, thisSegSize);
 
     cacheSegs[i] = new Cache(thisSegSize);
     segHits[i] = 0;
@@ -244,15 +244,29 @@ StoreCacheSeg::statisticsReset()
 void
 StoreCacheSeg::statisticsShow() const
 {
-  printf("Statistics for StoreCacheSeg.%s\n", nameGet());
+  printf("{StoreCacheSeg.%s\n", nameGet());
 
+  printf("\t{segSizes %s}\n", (segSizesUniformFlag ? "uniform" : "exp"));
+
+  printf("\t{size ");
+  uint64_t sizeTotal = 0;
+  for (int i = 0; i < cacheSegCount; i++) {
+    printf("{seg%d %llu} ", i, cacheSegs[i]->sizeGet() * blockSizeGet());
+    sizeTotal += cacheSegs[i]->sizeGet();
+  }
+  printf("{total %llu} }\n", sizeTotal * blockSizeGet());
+
+  printf("\t{segHits ");
   uint64_t segHitsTotal = 0;
-  for (int i = cacheSegCount - 1; i >= 0; i--) {
-    printf("Hits in segment %d %llu\n", i, segHits[i]);
+  for (int i = 0; i < cacheSegCount; i++) {
+    printf("{seg%d %llu} ", i, segHits[i]);
     segHitsTotal += segHits[i];
   }
-  printf("Total hits in segments %llu\n", segHitsTotal);
+  printf("{total %llu} }\n", segHitsTotal);
 
   ghost.statisticsShow();
+
+  printf("}\n");
+
   StoreCache::statisticsShow();
 }

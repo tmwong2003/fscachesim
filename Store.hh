@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Store.hh,v 1.1 2002/02/12 21:50:56 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Store.hh,v 1.2 2002/02/15 15:44:25 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -91,6 +91,11 @@ public:
    *Destroy a block store.
    */
   virtual ~Store() { ; };
+
+  /**
+   * Get the block size.
+   */
+  uint64_t blockSizeGet() const { return (blockSize); };
 
   // I/O request handlers
 

@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSimple.cc,v 1.2 2002/02/13 20:21:08 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSimple.cc,v 1.3 2002/02/15 15:44:25 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -112,4 +112,18 @@ StoreCacheSimple::BlockCache(const IORequest& inIOReq,
 
     abort();
   }
+}
+
+void
+StoreCacheSimple::statisticsShow() const
+{
+  printf("{StoreCacheSimple.%s\n", nameGet());
+
+  printf("\t{size {total %llu} }\n", cache.sizeGet() * blockSizeGet());
+  printf("\t{ejectPolicy %s}\n", (ejectPolicy == LRU ? "LRU" : "MRU"));
+  printf("\t{demotePolicy %s}\n", (demotePolicy == None ? "None" : "Demote"));
+
+  printf("}\n");
+
+  StoreCache::statisticsShow();
 }

@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Ghost.cc,v 1.1 2002/02/13 20:21:07 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Ghost.cc,v 1.2 2002/02/15 15:44:25 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -93,6 +93,9 @@ Ghost::statisticsReset()
 void
 Ghost::statisticsShow() const
 {
-  printf("Read hits (demote ghost) for %s %llu\n", nameGet(), demoteReadHits);
-  printf("Read hits (read ghost) for %s %llu\n", nameGet(), readReadHits);
+  printf("\t{Ghost.%s\n", nameGet());
+  printf("\t\t{readReadHits %llu}\n", readReadHits);
+  printf("\t\t{demoteReadHits %llu}\n", demoteReadHits);
+  printf("\t\t{normalizeFlag %s}\n", (normalizeFlag ? "true" : "false"));
+  printf("\t}\n");
 }

@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCache.cc,v 1.1 2002/02/12 21:50:56 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCache.cc,v 1.2 2002/02/15 15:44:25 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -72,33 +72,43 @@ StoreCache::statisticsReset()
 void
 StoreCache::statisticsShow() const
 {
-  printf("Statistics for StoreCache.%s\n", nameGet());
+  printf("{StoreCache.%s\n", nameGet());
 
-  for (Char::Counter::const_iterator i = demoteHitsPerOrig.begin();
-       i != demoteHitsPerOrig.end();
-       i++) {
-    printf("Demote hits for %s %llu\n", i->first, i->second);
-  }
-  for (Char::Counter::const_iterator i = demoteMissesPerOrig.begin();
-       i != demoteMissesPerOrig.end();
-       i++) {
-    printf("Demote misses for %s %llu\n", i->first, i->second);
-  }
+  printf("\t{blockSize %llu}\n", blockSizeGet());
 
-  printf("Demote hits %llu\n", demoteHits);
-  printf("Demote misses %llu\n", demoteMisses);
-
+  printf("\t{readHitsPerOrig ");
   for (Char::Counter::const_iterator i = readHitsPerOrig.begin();
        i != readHitsPerOrig.end();
        i++) {
-    printf("Read hits for %s %llu\n", i->first, i->second);
+    printf("{%s %llu} ", i->first, i->second);
   }
+  printf("}\n");
+  printf("\t{readMissesPerOrig ");
   for (Char::Counter::const_iterator i = readMissesPerOrig.begin();
        i != readMissesPerOrig.end();
        i++) {
-    printf("Read misses for %s %llu\n", i->first, i->second);
+    printf("{%s %llu} ", i->first, i->second);
   }
+  printf("}\n");
 
-  printf("Read hits %llu\n", readHits);
-  printf("Read misses %llu\n", readMisses);
+  printf("\t{read {hits %llu} {misses %llu} }\n", readHits, readMisses);
+
+  printf("\t{demoteHitsPerOrig ");
+  for (Char::Counter::const_iterator i = demoteHitsPerOrig.begin();
+       i != demoteHitsPerOrig.end();
+       i++) {
+    printf("{%s %llu} ", i->first, i->second);
+  }
+  printf("}\n");
+  printf("\t{demoteMissesPerOrig ");
+  for (Char::Counter::const_iterator i = demoteMissesPerOrig.begin();
+       i != demoteMissesPerOrig.end();
+       i++) {
+    printf("{%s %llu} ", i->first, i->second);
+  }
+  printf("}\n");
+
+  printf("\t{demote {hits %llu} {misses %llu} }\n", demoteHits, demoteMisses);
+
+  printf("}\n");
 }

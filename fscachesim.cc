@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/fscachesim.cc,v 1.3 2002/02/13 20:21:08 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/fscachesim.cc,v 1.4 2002/02/15 15:44:25 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -40,7 +40,10 @@ const char *globalProgUsage = \
 "[-d] " \
 "[-g] " \
 "[-m] " \
+"[-n] " \
+"[-u] " \
 "[-b block_size] " \
+"[-s prob_cache_size] " \
 "[-w warmup_time] " \
 "client_cache_size array_cache_size trace_files...";
 
@@ -167,6 +170,10 @@ main(int argc,
 			       blockSize,
 			       arraySize,
 			       arrayProbSize);
+    fprintf(stderr,
+	    "SLRU array, prob size %llu size %llu\n",
+	    arrayProbSize,
+	    arraySize);
   }
   else if (useArraySegFlag) {
     if (useArraySegUniformFlag) {
@@ -175,6 +182,11 @@ main(int argc,
 				arraySize,
 				globalStoreCacheSegSegCount,
 				useArraySegNormalizeGhostFlag);
+      fprintf(stderr,
+	      "Segmented %s adaptive array, size %llu uniform segs %d \n",
+	      (useArraySegNormalizeGhostFlag ? "normalized" : "raw"),
+	      arraySize,
+	      globalStoreCacheSegSegCount);
     }
     else {
       array = new StoreCacheSeg("array",
@@ -183,6 +195,11 @@ main(int argc,
 				globalStoreCacheSegSegCount,
 				globalStoreCacheSegSegMultiplier,
 				useArraySegNormalizeGhostFlag);
+      fprintf(stderr,
+	      "Segmented %s adaptive array, size %llu exp segs %d\n",
+	      (useArraySegNormalizeGhostFlag ? "normalized" : "raw"),
+	      arraySize,
+	      globalStoreCacheSegSegCount);
     }
   }
   else {
@@ -191,6 +208,10 @@ main(int argc,
 				 arraySize,
 				 arrayEjectPolicy,
 				 StoreCacheSimple::None);
+    fprintf(stderr,
+	    "Simple array, size %llu eject policy %s\n",
+	    arraySize,
+	    (arrayEjectPolicy == StoreCacheSimple::LRU ? "LRU" : "MRU"));
   }
   generators->StatisticsAdd(array);
 
@@ -224,15 +245,6 @@ main(int argc,
 
   while (generators->IORequestDown());
 
-  // Show stats.
-
-  printf("Client cache size %llu\n", clientSizeMB);
-  printf("Array cache size %llu\n", arraySizeMB);
-  printf("Array cache policy %s-",
-	 (arrayEjectPolicy == StoreCacheSimple::LRU ? "LRU" : "MRU"));
-  printf("%s\n",
-	 (clientDemotePolicy == StoreCacheSimple::Demand ? "LRU" : "NONE"));
-  printf("Block size %llu\n", blockSize);
   generators->statisticsShow();
 
   // Clean up after ourselves.

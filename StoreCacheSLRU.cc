@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSLRU.cc,v 1.2 2002/02/13 20:21:08 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSLRU.cc,v 1.3 2002/02/15 15:44:25 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -153,26 +153,61 @@ StoreCacheSLRU::statisticsReset()
 void
 StoreCacheSLRU::statisticsShow() const
 {
-  printf("Statistics for StoreCacheSLRU.%s\n", nameGet());
+  printf("{StoreCacheSLRU.%s\n", nameGet());
 
+  printf("\t{size {total %llu} {prob %llu} {prob %llu} }\n",
+	 (probCache.sizeGet() + protCache.sizeGet()) * blockSizeGet(),
+	 probCache.sizeGet() * blockSizeGet(),
+	 protCache.sizeGet() * blockSizeGet());
+
+  printf("\t{probReadHitsPerOrig ");
   for (Char::Counter::const_iterator i = probReadHitsPerOrig.begin();
        i != probReadHitsPerOrig.end();
        i++) {
-    printf("Block probationary read hits for %s %llu\n", i->first, i->second);
+    printf("{%s %llu} ", i->first, i->second);
   }
+  printf("}\n");
+
+  printf("\t{probDemoteHitsPerOrig ");
+  for (Char::Counter::const_iterator i = probDemoteHitsPerOrig.begin();
+       i != probDemoteHitsPerOrig.end();
+       i++) {
+    printf("{%s %llu} ", i->first, i->second);
+  }
+  printf("}\n");
+
+  printf("\t{protReadHitsPerOrig ");
   for (Char::Counter::const_iterator i = protReadHitsPerOrig.begin();
        i != protReadHitsPerOrig.end();
        i++) {
-    printf("Block protected read hits for %s %llu\n", i->first, i->second);
+    printf("{%s %llu} ", i->first, i->second);
   }
+  printf("}\n");
+
+  printf("\t{protDemoteHitsPerOrig ");
+  for (Char::Counter::const_iterator i = protDemoteHitsPerOrig.begin();
+       i != protDemoteHitsPerOrig.end();
+       i++) {
+    printf("{%s %llu} ", i->first, i->second);
+  }
+  printf("}\n");
+
+  printf("\t{probToProtXfersPerOrig ");
   for (Char::Counter::const_iterator i = probToProtXfersPerOrig.begin();
        i != probToProtXfersPerOrig.end();
        i++) {
-    printf("Block prob-to-prot transfers for %s %llu\n", i->first, i->second);
+    printf("{%s %llu} ", i->first, i->second);
   }
+  printf("}\n");
+  printf("\t{protToProbXfersPerOrig ");
   for (Char::Counter::const_iterator i = protToProbXfersPerOrig.begin();
        i != protToProbXfersPerOrig.end();
        i++) {
-    printf("Block prot-to-prob transfers for %s %llu\n", i->first, i->second);
+    printf("{%s %llu} ", i->first, i->second);
   }
+  printf("}\n");
+
+  printf("}\n");
+
+  StoreCache::statisticsShow();
 }
