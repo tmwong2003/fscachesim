@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/scripts/fscachesim-run.pl,v 1.2 2002/02/18 20:55:25 tmwong Exp $
+# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/scripts/run.pl,v 1.1 2002/02/18 21:16:44 tmwong Exp $
 # Description: Wrapper script for fscachesim
 # Author:      T.M. Wong <tmwong+@cs.cmu.edu>
 
@@ -34,7 +34,7 @@ use File::Basename;
 
 push(@INC, "./scripts");
 
-require "fscachesim-config.pl";
+require "config.pl";
 
 use vars qw($config_bin %config_trPathTable $config_resultPath);
 
