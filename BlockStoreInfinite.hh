@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreInfinite.hh,v 1.6 2000/10/30 01:12:44 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreInfinite.hh,v 1.7 2001/11/20 02:20:13 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -19,18 +19,19 @@ extern "C" {
 }
 
 #include "BlockStore.hh"
+#include "Cache.hh"
 
-struct uint32LessThan
+struct uint64LessThan
 {
-  bool operator()(const uint64_t i1, const uint32_t i2) const
+  bool operator()(const uint64_t i1, const uint64_t i2) const
     {
       return (i1 < i2);
     }
 };
 
-typedef map<uint64_t, uint32_t, uint32LessThan> uint32Map;
-typedef map<uint64_t, uint32_t, uint32LessThan>::iterator uint32MapIter;
-typedef map<uint64_t, uint32_t, uint32LessThan>::const_iterator uint32MapConstIter;
+typedef map<uint64_t, uint64_t, uint64LessThan> uint64Map;
+typedef map<uint64_t, uint64_t, uint64LessThan>::iterator uint64MapIter;
+typedef map<uint64_t, uint64_t, uint64LessThan>::const_iterator uint64MapConstIter;
 
 class BlockStoreInfinite : public BlockStore {
 private:
@@ -44,10 +45,18 @@ private:
   uint64_t blockTimestampClock;
   Tree *LRUTree;
 
+  // For finite caches.
+
+  Cache cache;
+
   // These keep stats on the cache.
 
-  uint32Map LRUMap; // LRU stack depth
+  uint64Map LRUMap; // LRU stack depth
   BlockMap freqMap; // Block access frequency
+
+  // Keep the frequency count or not?
+
+  bool freqFlag;
 
 private:
   // Copy constructors - declared private and never defined
@@ -58,13 +67,16 @@ private:
 public:
   BlockStoreInfinite(const char *inName,
 		     unsigned long inCacheSize,
-		     unsigned int inBlockSize) :
+		     unsigned int inBlockSize,
+		     bool inFreqFlag) :
     BlockStore(inName, inBlockSize),
     blockTimestampMap(),
     blockTimestampClock(0),
     LRUTree(NULL),
+    cache(inCacheSize),
     LRUMap(),
-    freqMap() { ; };
+    freqMap(),
+    freqFlag(inFreqFlag) { ; };
   ~BlockStoreInfinite() { ; };
 
   // Process incoming I/O requests

@@ -1,9 +1,16 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreInfinite.cc,v 1.6 2001/07/02 23:25:27 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreInfinite.cc,v 1.7 2001/11/20 02:20:13 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+#define NDEBUG
+
+#include <assert.h>
 #include <stdio.h>
 
 #include "IORequest.hh"
@@ -24,7 +31,7 @@ BlockStoreInfinite::IORequestDown(const IORequest& inIOReq,
     if (blockIter != blockTimestampMap.end()) {
       uint64_t blockTimestamp = blockIter->second;
       uint64_t blockLRUDepth;
-      uint32MapIter LRUIter;
+      uint64MapIter LRUIter;
 
       blockReadHits++;
 
@@ -45,9 +52,43 @@ BlockStoreInfinite::IORequestDown(const IORequest& inIOReq,
       LRUMap[blockLRUDepth] = (LRUIter != LRUMap.end() ?
 			       ++(LRUIter->second) :
 			       1);
+
+      // If we're using a finite cache, update the LRU queue.
+
+      if (cache.sizeGet() != 0) {
+	cache.blockGet(block);
+	cache.blockPutAtTail(block);
+      }
     }
     else {
       blockReadMisses++;
+
+      // If we're using a finite cache...
+
+      if (cache.sizeGet() != 0) {
+	if (cache.isFull()) {
+	  Block ejectBlock;
+
+	  // ... eject the head block if necessary...
+
+	  cache.blockGetAtHead(ejectBlock);
+	  
+	  // ... and remove it from the splay tree.
+
+	  BlockMapIter blockIter = blockTimestampMap.find(ejectBlock);
+	  assert(blockIter != blockTimestampMap.end());
+
+	  uint64_t ejectBlockTimestamp = blockIter->second;
+	  LRUTree = Splay_delete(ejectBlockTimestamp, LRUTree);
+
+	  blockTimestampMap.erase(ejectBlock);
+	  assert(blockTimestampMap.size() == (cache.sizeGet() - 1));
+	}
+
+	// Update the LRU queue.
+
+	cache.blockPutAtTail(block);
+      }
     }
 
     LRUTree = Splay_insert(blockTimestampClock, LRUTree);
@@ -55,10 +96,12 @@ BlockStoreInfinite::IORequestDown(const IORequest& inIOReq,
 
     // Increment the access count for this sector.
 
-    blockIter = freqMap.find(block);
-    freqMap[block] = (blockIter != freqMap.end() ?
-		      ++(blockIter->second) :
-		      1);
+    if (freqFlag) {
+      blockIter = freqMap.find(block);
+      freqMap[block] = (blockIter != freqMap.end() ?
+			++(blockIter->second) :
+			1);
+    }
 
     // Increment the sector access clock.
 
@@ -87,8 +130,10 @@ BlockStoreInfinite::statisticsReset()
 void
 BlockStoreInfinite::statisticsShow() const
 {
-  printf("Block access frequency:\n");
-  statisticsFreqShow();
+  if (freqFlag) {
+    printf("Block access frequency:\n");
+    statisticsFreqShow();
+  }
   printf("LRU stack depth hits:\n");
   statisticsLRUShow();
   statisticsSummaryShow();
@@ -106,11 +151,11 @@ BlockStoreInfinite::statisticsFreqShow() const
 void
 BlockStoreInfinite::statisticsLRUShow() const
 {
-  for (uint32MapConstIter i = LRUMap.begin(); i != LRUMap.end(); i++) {
-    // Convert the x-axis to kilobytes instead of block size - the
-    // latter is not an intuitive measure of size.
+  for (uint64MapConstIter i = LRUMap.begin(); i != LRUMap.end(); i++) {
+    // Convert the x-axis to MB instead of block size - the latter is not
+    // an intuitive measure of size.
 
-    printf("%llu %d\n", ((i->first * (blockSize / 1024)) / 1024), i->second);
+    printf("%llu %llu\n", ((i->first * (blockSize / 1024)) / 1024), i->second);
   }
   fflush(stdout);
 }
@@ -124,12 +169,12 @@ BlockStoreInfinite::statisticsLRUCumulShow() const
   // cumulTotal doesn't start at zero since we need to account for
   // compulsory misses.
 
-  for (uint32MapConstIter i = LRUMap.begin(); i != LRUMap.end(); i++) {
+  for (uint64MapConstIter i = LRUMap.begin(); i != LRUMap.end(); i++) {
     cumulTotal += i->second;
   }
-  for (uint32MapConstIter i = LRUMap.begin(); i != LRUMap.end(); i++) {
-    // Convert the x-axis to kilobytes instead of block size - the
-    // latter is not an intuitive measure of size.
+  for (uint64MapConstIter i = LRUMap.begin(); i != LRUMap.end(); i++) {
+    // Convert the x-axis to MB instead of block size - the latter is not
+    // an intuitive measure of size.
 
     cumul += i->second;
     printf("%llu %4.3f\n", ((i->first * (blockSize / 1024)) / 1024), ((double)cumul / cumulTotal));

@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Cache.hh,v 1.4 2001/11/16 23:32:46 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Cache.hh,v 1.5 2001/11/20 02:20:13 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -50,6 +50,8 @@ public:
   void blockPutAtHead(Block inBlock);
 
   void blockPutAtTail(Block inBlock);
+
+  uint64_t sizeGet() { return (blockCountMax);};
 
   bool isCached(Block inBlock);
   bool isFull();

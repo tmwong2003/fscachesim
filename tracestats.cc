@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/tracestats.cc,v 1.8 2001/07/21 00:07:06 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/tracestats.cc,v 1.9 2001/11/20 02:20:14 tmwong Exp $
   Description:  Generate LRU and frequency trace stats using fscachesim
                 objects.
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
@@ -23,10 +23,11 @@
 
 // Command usage.
 
-const char *globalProgArgs = "b:f:c:mt:";
+const char *globalProgArgs = "b:f:c:ms:t:";
 
 const char *globalProgUsage = "[-m] " \
 "[-b block_size] " \
+"[-s cache_size] " \
 "[-f file_prefix] " \
 "[-c warmup_count] "\
 "[-t warmup_time] " \
@@ -35,6 +36,9 @@ const char *globalProgUsage = "[-m] " \
 // Default command-line argument values.
 
 const int globalBlockSize = 4096;
+const uint64_t globalCacheSizeMB = 0;
+
+const int globalMBToB = 1048576;
 
 const char *globalFreqFileSuffix = "freq";
 const char *globalLRUFileSuffix = "lru-cumul";
@@ -78,6 +82,7 @@ main(int argc, char *argv[])
 {
   char *filePrefix = "results";
   uint64_t blockSize = globalBlockSize;
+  uint64_t cacheSizeMB = globalCacheSizeMB;
   uint64_t warmupCount = 0;
   double warmupTime = 0;
 
@@ -100,6 +105,9 @@ main(int argc, char *argv[])
       break;
     case 'm':
       useMamboFlag = true;
+      break;
+    case 's':
+      cacheSizeMB = strtoul(optarg, NULL, 0);
       break;
     case 't':
       warmupTime = strtod(optarg, NULL);
@@ -126,9 +134,11 @@ main(int argc, char *argv[])
     generators = new IORequestGeneratorBatch();
   }
 
-  // Create a single infinite cache for all I/Os to feed into.
+  // Create a single (possibly infinite) cache for all I/Os to feed into.
 
-  BlockStoreInfinite cache("cache-infinite", 0, blockSize);
+  uint64_t cacheSize = cacheSizeMB * (globalMBToB / blockSize);
+  BlockStoreInfinite cache("cache", cacheSize, blockSize, false);
+
   generators->StatisticsAdd(&cache);
   Node host(&cache, NULL);
 
