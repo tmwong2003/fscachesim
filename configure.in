@@ -1,0 +1,57 @@
+dnl RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/15-412/p1/configure.in,v 1.1.1.1 2000/09/13 00:22:06 tmwong Exp $
+dnl Description: fscachesim configure.in
+dnl Created by:  T.M. Wong <tmwong+@cs.cmu.edu>
+
+dnl
+dnl Process this file with autoconf to produce a configure script.
+dnl
+
+AC_INIT(configure.in)
+AC_CONFIG_AUX_DIR(config)
+AC_CANONICAL_SYSTEM
+
+dnl
+dnl Initializes automake
+dnl
+
+AM_INIT_AUTOMAKE(fscachesim,0.1)
+AM_CONFIG_HEADER(config.h)
+
+dnl
+dnl Checks for programs.
+dnl
+
+AC_PROG_CC
+AC_PROG_CXX
+
+dnl
+dnl Checks for libraries.
+dnl
+
+dnl
+dnl Checks for header files.
+dnl
+
+AC_HEADER_STDC
+AC_CHECK_HEADERS(unistd.h)
+
+dnl
+dnl Checks for typedefs, structures, and compiler characteristics.
+dnl
+
+AC_C_CONST
+AC_TYPE_SIZE_T
+
+dnl
+dnl Checks for library functions.
+dnl
+
+AC_CHECK_FUNCS(strerror)
+
+dnl
+dnl Output Makefiles
+dnl
+
+AC_OUTPUT( \
+	Makefile	\
+	)
