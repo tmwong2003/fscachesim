@@ -192,8 +192,8 @@ resultsParse $baseFilename baseStats
 set baseLatencies [latencyGet baseStats]
 
 puts [basename $baseFilename]
-puts -nonewline "Mean lat\t"
-puts [join $baseLatencies "\t"]
+puts -nonewline "Mean lat. & "
+puts [join $baseLatencies " & "]
 
 foreach i [lrange $argv 1 end] {
     resultsParse $i expStats
@@ -201,11 +201,8 @@ foreach i [lrange $argv 1 end] {
     set expSpeedups [speedupGet baseStats expStats]
 
     puts [basename $i]
-    puts -nonewline "Mean lat.\t"
-    puts [join $expLatencies "\t"]
-    puts -nonewline "Speedup\t\t"
-    puts [join $expSpeedups "\t"]
+    puts -nonewline "Mean lat. & "
+    puts [join $expLatencies " & "]
+    puts -nonewline "Speedup   & "
+    puts [join $expSpeedups " & "]
 }
-
-# puts [join $expLatZero "\t"]
-# puts [join $expSpeedupZero "\t"]
