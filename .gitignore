@@ -26,10 +26,13 @@ _$*
 *.ln
 core
 # CVS default ignores end
-.deps
 Makefile
 Makefile.in
+HPL
+.deps
 aclocal.m4
+backup
+cello
 config.cache
 config.h
 config.h.in
@@ -40,6 +43,7 @@ db2
 experimentParams.hh
 fscachesim
 httpd
+httpd-single
 mambo
 nfs
 openmail
