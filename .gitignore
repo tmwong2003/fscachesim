@@ -36,8 +36,8 @@ config.log
 config.status
 configure
 fscachesim
-snake-1week
-snake-2week
+mambo
 stamp-h
 stamp-h.in
+synth
 tracestats
