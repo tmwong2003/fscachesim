@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequestGeneratorFile.cc,v 1.5 2000/10/26 16:14:24 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/project/pdl-62/Cvs/fscachesim/IORequestGeneratorFile.cc,v 1.1 2000/10/30 01:12:44 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -16,7 +16,13 @@ IORequestGeneratorFile::IORequestGeneratorFile(Node *inNode,
   IORequestGenerator(inNode)
 {
   filename = strdup(inFilename);
-  if ((file = fopen(filename, "r")) == NULL) {
+
+  // tmwong 19 JUL 2001: Special case "-" means read records from stdin.
+
+  if (strcmp(filename, "-") == 0) {
+    file = stdin;
+  }
+  else if ((file = fopen(filename, "r")) == NULL) {
     perror(filename);
     abort();
   }
