@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/scripts/SLRU.pl,v 1.1 2001/07/06 01:35:23 tmwong Exp $
+# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/scripts/SLRU.pl,v 1.2 2001/07/06 01:41:47 tmwong Exp $
 # Description: 
 # Author:      T.M. Wong <tmwong+@cs.cmu.edu>
 
@@ -14,7 +14,9 @@ sub runSim {
 	$probSizeMB = $probSize * 4 / 1024;
 	$protSizeMB = $arraySizeMB - $probSizeMB;
 
-	$filename = "$traceFamily-LRU-LRU-SLRU-16-$probSizeMB-$protSizeMB";
+	$clientSizeMB = $arraySizeMB / 8;
+
+	$filename = "$traceFamily-LRU-SLRU-NONE-$clientSizeMB-$probSizeMB-$protSizeMB";
 
 	$cmdline = "./fscachesim -m -s $probSize mambo/$traceFamily/$traceFamily.server.* | tee $filename";
 
