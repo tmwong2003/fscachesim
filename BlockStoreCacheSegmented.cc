@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCacheSegmented.cc,v 1.1 2001/07/04 17:49:30 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCacheSegmented.cc,v 1.2 2001/07/06 01:46:10 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -14,8 +14,11 @@
 
 // Segemented cache operation.
 //
-// 1. Demoted blocks go to the tail of the protected LRU queue.
-// 2. Read blocks go to the tail of the probationary LRU queue.
+// 1. When blocks first arrive in the cache (regardless of whether they
+// were read in or demoted down), they go into the probationary queue.
+//
+// 2. If some request hits the block, the cache moves it into the protected
+// queue.
 
 bool
 BlockStoreCacheSegmented::IORequestDown(const IORequest& inIOReq,
@@ -27,8 +30,9 @@ BlockStoreCacheSegmented::IORequestDown(const IORequest& inIOReq,
   for (uint32_t i = 0; i < reqBlockLength; i++) {
     if (protCache.isCached(block)) {
 
-      // Block is in the protected cache. Eject the block (we will
-      // re-cache it later).
+      // Block is in the protected cache.
+
+      // Eject the block (we will re-cache it later).
 
       protCache.blockGet(block);
 
@@ -36,52 +40,29 @@ BlockStoreCacheSegmented::IORequestDown(const IORequest& inIOReq,
       case Demote:
 	protDemoteHitsMap[inIOReq.originatorGet()]++;
 	blockDemoteHits++;
-
-	// Re-cache the block at the end of the protected cache.
-
-	protCache.blockPutAtTail(block);
 	break;
       case Read:
 	protReadHitsMap[inIOReq.originatorGet()]++;
 	blockReadHits++;
-
-	// If the probationary cache is full, eject the front
-	// block. Then, re-cache the block at the end of the
-	// probationary cache.
-
-	if (probCache.isFull()) {
-	  Block ejectBlock;
-
-	  probCache.blockGetAtHead(ejectBlock);
-	}
-	probCache.blockPutAtTail(block);
 	break;
       default:
 	abort();
       }
+
+      // Re-cache the block at the end of the protected cache.
+
+      protCache.blockPutAtTail(block);
     }
     else if (probCache.isCached(block)) {
 
-      // Block is in the probationary cache. Eject the block (we will
-      // re-cache it later).
+      // Block is in the probationary cache.
+
+      // Eject the block (we will re-cache it later).
 
       probCache.blockGet(block);
 
-      switch (inIOReq.opGet()) {
-      case Demote:
-	probDemoteHitsMap[inIOReq.originatorGet()]++;
-	blockDemoteHits++;
-	break;
-      case Read:
-	probReadHitsMap[inIOReq.originatorGet()]++;
-	blockReadHits++;
-	break;
-      default:
-	abort();
-      }
-
-      // If the protected cache is full, move a block to the
-      // probationary cache.
+      // Move a block to the probationary cache if the protected cache is
+      // full.
 
       if (protCache.isFull()) {
 	Block protToProbBlock;
@@ -91,85 +72,42 @@ BlockStoreCacheSegmented::IORequestDown(const IORequest& inIOReq,
 	protToProbXfersMap[inIOReq.originatorGet()]++;
       }
 
-      protCache.blockPutAtTail(block);
-      probToProtXfersMap[inIOReq.originatorGet()]++;
-#if 0
-      // Old behavior keeps only demoted blocks in the protected queue.
-
       switch (inIOReq.opGet()) {
       case Demote:
 	probDemoteHitsMap[inIOReq.originatorGet()]++;
 	blockDemoteHits++;
-
-	// If the protected cache is full, move a block to the
-	// probationary cache.
-
-	if (protCache.isFull()) {
-	  Block protToProbBlock;
-
-	  protCache.blockGetAtHead(protToProbBlock);
-	  probCache.blockPutAtTail(protToProbBlock);
-	  protToProbXfersMap[inIOReq.originatorGet()]++;
-	}
-
-	// Re-cache the block at the end of the protected cache.
-
-	protCache.blockPutAtTail(block);
-	probToProtXfersMap[inIOReq.originatorGet()]++;
 	break;
       case Read:
 	probReadHitsMap[inIOReq.originatorGet()]++;
 	blockReadHits++;
-
-	// Re-cache the block at the end of the probationary cache.
-
-	probCache.blockPutAtTail(block);
 	break;
       default:
 	abort();
       }
-#endif /* 0 */
+
+      protCache.blockPutAtTail(block);
+      probToProtXfersMap[inIOReq.originatorGet()]++;
     }
     else {
 
       // Block isn't cached.
 
+      // Eject the front block of the probationary cache if it is full.
+
+      if (probCache.isFull()) {
+	Block ejectBlock;
+
+	probCache.blockGetAtHead(ejectBlock);
+      }
+
       switch (inIOReq.opGet()) {
       case Demote:
 	blockDemoteMissesMap[inIOReq.originatorGet()]++;
 	blockDemoteMisses++;
-
-	// If this is a demoted block, and the protected cache is
-	// full, move a block to the probationary cache. Eject the
-	// head of the probationary cache if necessary.
-
-	if (protCache.isFull()) {
-	  Block protToProbBlock;
-
-	  protCache.blockGetAtHead(protToProbBlock);
-	  if (probCache.isFull()) {
-	    Block ejectBlock;
-
-	    probCache.blockGetAtHead(ejectBlock);
-	  }
-	  probCache.blockPutAtTail(protToProbBlock);
-	  protToProbXfersMap[inIOReq.originatorGet()]++;
-	}
-	protCache.blockPutAtTail(block);
 	break;
-
       case Read:
 	blockReadMissesMap[inIOReq.originatorGet()]++;
 	blockReadMisses++;
-
-	// If the probationary cache is full, eject the front block.
-
-	if (probCache.isFull()) {
-	  Block ejectBlock;
-
-	  probCache.blockGetAtHead(ejectBlock);
-	}
-	probCache.blockPutAtTail(block);
 
 	// Create a new IORequest to pass on to the next-level node.
 
@@ -183,6 +121,10 @@ BlockStoreCacheSegmented::IORequestDown(const IORequest& inIOReq,
       default:
 	abort();
       }
+
+      // Cache the block at the end of the probationary cache.
+
+      probCache.blockPutAtTail(block);
     }
 
     block.blockID++;

@@ -38,6 +38,7 @@ configure
 experimentParams.hh
 fscachesim
 mambo
+nfs
 sharestats
 stamp-h
 stamp-h.in
