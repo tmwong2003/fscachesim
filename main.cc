@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/main.cc,v 1.9 2001/06/30 21:56:02 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/main.cc,v 1.10 2001/07/04 17:49:30 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -110,11 +110,12 @@ main(int argc,
 					      probArrayCacheSize);
   }
   else {
-    arrayCache = new BlockStoreCache("array",
-				     blockSize,
-				     globalArrayCacheSize,
-				     globalArrayReplPolicy,
-				     None);
+    BlockStoreCache *ac =  new BlockStoreCache("array",
+					       blockSize,
+					       globalArrayCacheSize,
+					       globalArrayReplPolicy,
+					       None);
+    arrayCache = ac;
   }
   generators->StatisticsAdd(arrayCache);
   Node array(arrayCache, NULL);

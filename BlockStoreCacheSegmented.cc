@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCache.cc,v 1.7 2001/07/02 23:29:57 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCacheSegmented.cc,v 1.1 2001/07/04 17:49:30 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -71,6 +71,35 @@ BlockStoreCacheSegmented::IORequestDown(const IORequest& inIOReq,
       case Demote:
 	probDemoteHitsMap[inIOReq.originatorGet()]++;
 	blockDemoteHits++;
+	break;
+      case Read:
+	probReadHitsMap[inIOReq.originatorGet()]++;
+	blockReadHits++;
+	break;
+      default:
+	abort();
+      }
+
+      // If the protected cache is full, move a block to the
+      // probationary cache.
+
+      if (protCache.isFull()) {
+	Block protToProbBlock;
+
+	protCache.blockGetAtHead(protToProbBlock);
+	probCache.blockPutAtTail(protToProbBlock);
+	protToProbXfersMap[inIOReq.originatorGet()]++;
+      }
+
+      protCache.blockPutAtTail(block);
+      probToProtXfersMap[inIOReq.originatorGet()]++;
+#if 0
+      // Old behavior keeps only demoted blocks in the protected queue.
+
+      switch (inIOReq.opGet()) {
+      case Demote:
+	probDemoteHitsMap[inIOReq.originatorGet()]++;
+	blockDemoteHits++;
 
 	// If the protected cache is full, move a block to the
 	// probationary cache.
@@ -99,6 +128,7 @@ BlockStoreCacheSegmented::IORequestDown(const IORequest& inIOReq,
       default:
 	abort();
       }
+#endif /* 0 */
     }
     else {
 
