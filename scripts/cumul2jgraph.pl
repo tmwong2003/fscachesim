@@ -1,39 +1,43 @@
 #!/usr/bin/perl -w
 #
-# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/scripts/cumul2jgraph.pl,v 1.1 2000/10/26 16:12:28 tmwong Exp $
+# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/scripts/cumul2jgraph.pl,v 1.2 2000/10/28 22:22:17 tmwong Exp $
 # Description: Convert a raw LRU cumulative file to a .jgraph file.
 # Author:      T.M. Wong <tmwong+@cs.cmu.edu>
 
 use strict;
 use vars qw($glblProgname);
+
+use File::Basename;
 use Getopt::Std;
 
-$glblProgname = $0;
+$glblProgname = basename($0);
 
 sub usage {
-  print "$glblProgname: $glblProgname workload sectors LRU-cumul_filename\n";
+  print "Usage: $glblProgname workload LRU-cumul_filename\n";
   exit(0);
 }
 
-if ($#ARGV < 2) {
+if ($#ARGV < 1) {
   usage();
 }
 
-open(CUMULFILE, "<$ARGV[2]")
+open(CUMULFILE, "<$ARGV[1]")
   or die("%glblProgname: $1");
 
 print <<EOF;
 newgraph
   legend defaults font Helvetica
-  title y 1.1 font Helvetica : Cumulative hit fraction vs. LRU stack depth - $ARGV[0]
+  title y 1.1 font Helvetica : Cumulative hit fraction vs. cache size - $ARGV[0]
 
 xaxis
   hash_labels font Helvetica
-  label font Helvetica : Stack depth ($ARGV[1])
+  label font Helvetica : Cache size (MB)
+  min 0
 
 yaxis
   hash_labels font Helvetica
-  label font Helvetica : Cumulative fraction of accesses
+  label font Helvetica : Cumulative hit fraction
+  min 0
   max 1.0
 
 (* the cumulative curve *)
@@ -42,6 +46,7 @@ newcurve
   linetype solid
   marktype none
   pts
+0 0
 EOF
 
 while (<CUMULFILE>) {
