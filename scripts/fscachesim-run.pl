@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# RCS:         $Header: $
+# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/scripts/fscachesim-run.pl,v 1.1 2002/02/18 00:23:49 tmwong Exp $
 # Description: Wrapper script for fscachesim
 # Author:      T.M. Wong <tmwong+@cs.cmu.edu>
 
@@ -27,7 +27,18 @@
 
 use strict;
 
-use "fscachesim-config.pl";
+use File::Basename;
+
+# Assume that we will run the wrapper script from the fscachesim source
+# directory 90% of the time.
+
+push(@INC, "./scripts");
+
+require "fscachesim-config.pl";
+
+use vars qw($config_bin %config_trPathTable $config_resultPath);
+
+my ($progName) = basename($0);
 
 my (%demoteTable) =
   (
@@ -42,34 +53,54 @@ my (%demoteTable) =
 my (%trTypeTable) =
   (
    "db2", "-m",
+   "db2single", "",
    "httpd", "-m",
-   "httpd-test", "-m",
+   "httpdsingle", "",
+   "httpdtest", "-m",
    "openmail", ""
   );
 
 my (%trFilesTable) =
   (
    "db2", "db2.server.0.trace db2.server.1.trace db2.server.2.trace db2.server.3.trace db2.server.4.trace db2.server.5.trace db2.server.6.trace db2.server.7.trace",
+   "db2single", "db2.server.single",
    "httpd", "httpd.server.1.trace httpd.server.2.trace httpd.server.3.trace httpd.server.4.trace httpd.server.5.trace httpd.server.6.trace httpd.server.7.trace",
-   "httpd-test", "httpd.server.1.trace",
+   "httpdsingle", "httpd.server.single",
+   "httpdtest", "httpd.server.1.trace",
    "openmail", "i3125om1.fscachesim i3125om2.fscachesim i3125om3.fscachesim i3125om4.fscachesim i3125om5.fscachesim i3125om6.fscachesim"
   );
 
-sub runSim {
-  my ($sim, $clientSize, $arraySize, @arrayTypes) = @_;
+sub usage {
+  print "Usage: $progName TRACESET CLIENTSIZE ARRAYSIZE ARRAYTYPES...\n";
+}
 
-  my ($trFiles) = trFilesGet($sim, $configTracePathTable{$sim});
-  my ($trType) = $trTypeTable{$sim};
+sub trFilesGet{
+  my ($trSet, $trPath) = @_;
+  my ($trFiles) = "";
+  my ($i);
+
+  foreach $i (split(/\s/,$trFilesTable{$trSet})) {
+    $trFiles .= "$trPath/$i ";
+  }
+
+  return ($trFiles);
+}
+
+sub runSim {
+  my ($trSet, $clientSize, $arraySize, @arrayTypes) = @_;
+
+  my ($trFiles) = trFilesGet($trSet, $config_trPathTable{$trSet});
+  my ($trType) = $trTypeTable{$trSet};
 
   my ($arrayType);
   foreach $arrayType (@arrayTypes) {
     my ($demoteFlag) = $demoteTable{$arrayType};
 
     my ($cmdline) =
-      "$configBin " .
+      "$config_bin " .
       "$demoteFlag " .
       "$trType " .
-      "-o $configResultPath/$sim " .
+      "-o $config_resultPath/$trSet " .
       "$arrayType " .
       "$clientSize $arraySize " .
       "$trFiles";
@@ -79,16 +110,11 @@ sub runSim {
   }
 }
 
-sub trFilesGet{
-  my ($sim, $trPath) = @_;
-  my ($trFiles) = "";
-  my ($i);
+# Validate some of the command line args.
 
-  foreach $i (split(/\s/,$trFilesTable{$sim})) {
-    $trFiles .= "$trPath/$i ";
-  }
-
-  return ($trFiles);
+if ($#ARGV < 3) {
+  usage();
+  exit;
 }
 
 runSim(@ARGV);

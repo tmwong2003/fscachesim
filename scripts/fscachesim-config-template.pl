@@ -1,14 +1,14 @@
-# RCS:         $Header: $
+# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/scripts/fscachesim-config-template.pl,v 1.1 2002/02/18 00:23:49 tmwong Exp $
 # Description: Template file for fscachesim-run.pl configuration file.
 # Author:      T.M. Wong <tmwong+@cs.cmu.edu>
 
 # Fully-qualified fscachesim binary name.
 
-my ($configBin) = "/path/fscachesim";
+$config_bin = "/path/fscachesim";
 
 # Path to trace files, for each trace set.
 
-my (%configTracePathTable) =
+%config_trPathTable) =
   (
    "db2", "/path/db2",
    "httpd", "/path/httpd",
@@ -17,7 +17,7 @@ my (%configTracePathTable) =
 
 # Path into which to dump result files. Results file names have the form:
 #
-# $configResultsPath/traceSet-DEMOTETYPE}-{ARRAYTYPE}-{CLIENTSIZE}-{ARRAYSIZE}
+# $config_resultsPath/traceSet-DEMOTETYPE}-{ARRAYTYPE}-{CLIENTSIZE}-{ARRAYSIZE}
 #
 # where
 #
@@ -26,4 +26,4 @@ my (%configTracePathTable) =
 # CLIENTSIZE : (in MB)
 # ARRAYSIZE : (in MB)
 
-my ($configResultPath) = "/path/results";
+my ($config_resultPath) = "/path/results";
