@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/fscachesim.cc,v 1.5 2002/02/15 18:17:30 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/fscachesim.cc,v 1.6 2002/02/18 00:23:45 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -121,6 +121,7 @@ main(int argc,
       break;
     case 'o':
       outFilePrefix = optarg;
+      break;
     case 'm':
       useMamboFlag = true;
       break;
