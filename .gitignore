@@ -38,3 +38,4 @@ configure
 fscachesim
 stamp-h
 stamp-h.in
+tracestats

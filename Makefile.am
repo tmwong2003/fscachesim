@@ -1,4 +1,4 @@
-# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/Makefile.am,v 1.2 2000/09/22 16:15:39 tmwong Exp $
+# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/Makefile.am,v 1.3 2000/09/28 02:54:50 tmwong Exp $
 # Description: fscachesim Makefile.am
 # Created by:  T.M. Wong <tmwong+@cs.cmu.edu>
 
@@ -9,7 +9,7 @@ AUTOMAKE_OPTIONS = foreign
 
 # Rules for building fscachesim
 
-bin_PROGRAMS = fscachesim
+bin_PROGRAMS = fscachesim tracestats
 
 fscachesim_SOURCES = \
 	BlockStoreCache.cc \
@@ -18,3 +18,10 @@ fscachesim_SOURCES = \
 	Node.cc \
 	main.cc \
 	top-down-size-splay.c
+
+tracestats_SOURCES = \
+	BlockStoreInfinite.cc \
+	IORequestGenerator.cc \
+	Node.cc \
+	top-down-size-splay.c \
+	tracestats.cc

@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/main.cc,v 1.2 2000/09/22 16:15:39 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/main.cc,v 1.3 2000/09/28 02:54:50 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong@cs.cmu.edu>
 */
@@ -16,8 +16,12 @@
 #include "Node.hh"
 
 const int globalBlockSize = 4096;
+
 const int globalHostCacheSize = 16384;
+const CacheDemotePolicy_t globalHostDemotePolicy = DemoteDemand;
+
 const int globalArrayCacheSize = 16384;
+const CacheReplPolicy_t globalArrayReplPolicy = MRU;
 
 const int globalRecordsPerDot = 1000;
 
@@ -25,17 +29,19 @@ class IORequestGeneratorLess:
   public binary_function<IORequestGenerator *, IORequestGenerator *, bool> {
 public:
   bool operator()(const IORequestGenerator *inGenL,
-		  const IORequestGenerator *inGenR)
-    {
-      return (*inGenL < *inGenR);
-    };
+		  const IORequestGenerator *inGenR) {
+    return (*inGenL < *inGenR);
+  };
 };
 
 int
 main(int argc, char *argv[])
 {
   list<IORequestGenerator *> generators;
-  BlockStoreCache arrayCache(globalBlockSize, globalArrayCacheSize, MRU, None);
+  BlockStoreCache arrayCache(globalBlockSize,
+			     globalArrayCacheSize,
+			     globalArrayReplPolicy,
+			     None);
   Node array(&arrayCache, NULL);
   int records = 0;
 
@@ -43,7 +49,7 @@ main(int argc, char *argv[])
     BlockStoreCache *cache = new BlockStoreCache(globalBlockSize,
 						 globalHostCacheSize,
 						 LRU,
-						 DemoteDemand);
+						 globalHostDemotePolicy);
     Node *host = new Node(cache, &array);
     IORequestGenerator *generator = new IORequestGenerator(host, argv[i]);
 

@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreInfinite.hh,v 1.1 2000/09/22 16:15:39 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreInfinite.hh,v 1.2 2000/09/28 02:54:50 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong@cs.cmu.edu>
 */
@@ -58,9 +58,9 @@ public:
     BlockStore(inBlockSize),
     blockTimestampMap(),
     blockTimestampClock(0),
-    freqMap(),
     LRUMap(),
-    LRUTree(NULL) { ; };
+    LRUTree(NULL),
+    freqMap() { ; };
   ~BlockStoreInfinite() { ; };
 
   // Process incoming I/O requests

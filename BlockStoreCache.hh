@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreCache.hh,v 1.1 2000/09/22 16:15:38 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreCache.hh,v 1.2 2000/09/28 02:54:49 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong@cs.cmu.edu>
 */
@@ -22,10 +22,21 @@ enum CacheReplPolicy_t {LRU, MRU};
 
 class BlockStoreCache : public BlockStore {
 private:
+  struct CharStarLessThan {
+    bool operator()(const char *str1, const char *str2) const {
+      return (strcmp(str1, str2) < 0);
+    };
+  };
+
   typedef list<Block> Cache;
   typedef Cache::iterator CacheIter;
+
   typedef map<Block, CacheIter, BlockLessThan> CacheIndex;
   typedef CacheIndex::iterator CacheIndexIter;
+
+  typedef map<const char *, uint32_t, CharStarLessThan> StatMap;
+  typedef StatMap::iterator StatMapIter;
+  typedef StatMap::const_iterator StatMapConstIter;
 
   Cache cache;
   uint32_t cacheSize;
@@ -33,6 +44,12 @@ private:
   CacheIndex cacheIndex;
   CacheReplPolicy_t cacheReplPolicy;
   CacheDemotePolicy_t cacheDemotePolicy;
+
+  StatMap blockDemoteHitsMap;
+  StatMap blockDemoteMissesMap;
+
+  StatMap blockReadHitsMap;
+  StatMap blockReadMissesMap;
 
 private:
   // Copy constructors - declared private and never defined

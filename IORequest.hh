@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequest.hh,v 1.2 2000/09/22 16:15:39 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequest.hh,v 1.3 2000/09/28 02:54:50 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong@cs.cmu.edu>
 */
@@ -17,6 +17,8 @@ enum IORequestOp_t {Demote, Read};
 
 class IORequest {
 protected:
+  const char *originator;
+
   IORequestOp_t op;
 
   double timeIssued;
@@ -34,11 +36,13 @@ private:
 public:
   // Constructors and destructors
 
-  IORequest(IORequestOp_t inOp,
+  IORequest(const char *inOriginator,
+	    IORequestOp_t inOp,
 	    double inTimeIssued,
 	    uint32_t inObjectID,
 	    uint32_t inOffset,
 	    uint32_t inLength) :
+    originator(inOriginator),
     op(inOp),
     timeIssued(inTimeIssued),
     objectID(inObjectID),
@@ -46,6 +50,7 @@ public:
     length(inLength) { ; };
 
   IORequest(const IORequest& inIOReq) {
+    originator = inIOReq.originator;
     op = inIOReq.op;
     timeIssued = inIOReq.timeIssued;
     devID = inIOReq.devID;
@@ -57,6 +62,10 @@ public:
   ~IORequest() { ; };
 
   // Accessors
+
+  const char *originatorGet() const {
+    return (originator);
+  };
 
   IORequestOp_t opGet() const {
     return (op);

@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreCache.cc,v 1.1 2000/09/22 16:15:38 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreCache.cc,v 1.2 2000/09/28 02:54:49 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong@cs.cmu.edu>
 */
@@ -29,9 +29,11 @@ BlockStoreCache::IORequestDown(const IORequest& inIOReq,
     if (blockIter != cacheIndex.end()) {
       switch (inIOReq.opGet()) {
       case Demote:
+	blockDemoteHitsMap[inIOReq.originatorGet()]++;
 	blockDemoteHits++;
 	break;
       case Read:
+	blockReadHitsMap[inIOReq.originatorGet()]++;
 	blockReadHits++;
 	break;
       default:
@@ -45,9 +47,11 @@ BlockStoreCache::IORequestDown(const IORequest& inIOReq,
     else {
       switch (inIOReq.opGet()) {
       case Demote:
+	blockDemoteMissesMap[inIOReq.originatorGet()]++;
 	blockDemoteMisses++;
 	break;
       case Read:
+	blockReadMissesMap[inIOReq.originatorGet()]++;
 	blockReadMisses++;
 	break;
       default:
@@ -62,7 +66,8 @@ BlockStoreCache::IORequestDown(const IORequest& inIOReq,
 	if (cacheDemotePolicy == DemoteDemand) {
 	  Block demoteBlock = *cache.begin();
 
-	  outIOReqList.push_back(IORequest(Demote,
+	  outIOReqList.push_back(IORequest(inIOReq.originatorGet(),
+					   Demote,
 					   demoteBlock.devID,
 					   demoteBlock.objectID,
 					   demoteBlock.blockID * blockSize,
@@ -78,7 +83,8 @@ BlockStoreCache::IORequestDown(const IORequest& inIOReq,
 
       // Create a new IORequest to pass on to the next-level node.
 
-      outIOReqList.push_back(IORequest(Read,
+      outIOReqList.push_back(IORequest(inIOReq.originatorGet(),
+				       Read,
 				       0,
 				       inIOReq.objectIDGet(),
 				       block.blockID * blockSize,
@@ -117,6 +123,16 @@ BlockStoreCache::IORequestDown(const IORequest& inIOReq,
 void
 BlockStoreCache::statisticsShow() const
 {
+  for (StatMapConstIter i = blockReadHitsMap.begin();
+       i != blockReadHitsMap.end();
+       i++) {
+    printf("Block read hits for %s %u\n", i->first, i->second);
+  }
+  for (StatMapConstIter i = blockReadMissesMap.begin();
+       i != blockReadMissesMap.end();
+       i++) {
+    printf("Block read misses for %s %u\n", i->first, i->second);
+  }
   printf("Block demote hits %u\n", blockDemoteHits);
   printf("Block demote misses %u\n", blockDemoteMisses);
   printf("Block read hits %u\n", blockReadHits);

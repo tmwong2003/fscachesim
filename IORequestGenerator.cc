@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/main.cc,v 1.2 2000/09/22 16:15:39 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequestGenerator.cc,v 1.1 2000/09/28 02:54:50 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong@cs.cmu.edu>
 */
@@ -43,7 +43,12 @@ IORequestGenerator::IORequestQueue()
       nextRequest = NULL;
     }
     else {
-      nextRequest = new IORequest(Read, timeIssued, objectID, offset, length);
+      nextRequest = new IORequest(basename(filename),
+				  Read,
+				  timeIssued,
+				  objectID,
+				  offset,
+				  length);
     }
   }
 }
