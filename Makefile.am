@@ -1,10 +1,10 @@
-# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Makefile.am,v 1.17 2002/02/13 20:21:08 tmwong Exp $
+# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Makefile.am,v 1.18 2002/02/18 22:20:07 tmwong Exp $
 # Description: fscachesim Makefile.am
 # Created by:  T.M. Wong <tmwong+@cs.cmu.edu>
 
 EXTRA_DIST = reconf
 
-SUBDIRS = mambolib scripts
+SUBDIRS = doc mambolib scripts
 
 # We do not have _all_ GNU files so add this to avoid warnings
 AUTOMAKE_OPTIONS = foreign

@@ -1,6 +1,9 @@
+Makefile
+Makefile.in
 manual.aux
 manual.bbl
 manual.blg
 manual.dvi
 manual.log
+manual.pdf
 manual.ps

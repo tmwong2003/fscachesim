@@ -1,4 +1,4 @@
-dnl RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/configure.in,v 1.4 2002/02/11 20:08:22 tmwong Exp $
+dnl RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/configure.in,v 1.5 2002/02/18 22:20:07 tmwong Exp $
 dnl Description: fscachesim configure.in
 dnl Created by:  T.M. Wong <tmwong+@cs.cmu.edu>
 
@@ -57,6 +57,7 @@ dnl
 
 AC_OUTPUT( \
 	Makefile	\
+	doc/Makefile	\
 	mambolib/Makefile \
 	scripts/Makefile
 	)
