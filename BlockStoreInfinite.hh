@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreInfinite.hh,v 1.3 2000/10/02 18:18:17 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreInfinite.hh,v 1.4 2000/10/24 19:54:41 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -38,13 +38,16 @@ private:
   typedef BlockMap::iterator BlockMapIter;
   typedef BlockMap::const_iterator BlockMapConstIter;
 
+  // These data structures together form the 'cache'.
+
   BlockMap blockTimestampMap;
   uint32_t blockTimestampClock;
-
-  uint32Map LRUMap;
   Tree *LRUTree;
 
-  BlockMap freqMap;
+  // These keep stats on the cache.
+
+  uint32Map LRUMap; // LRU stack depth
+  BlockMap freqMap; // Block access frequency
 
 private:
   // Copy constructors - declared private and never defined
@@ -58,8 +61,8 @@ public:
     BlockStore(inBlockSize),
     blockTimestampMap(),
     blockTimestampClock(0),
-    LRUMap(),
     LRUTree(NULL),
+    LRUMap(),
     freqMap() { ; };
   ~BlockStoreInfinite() { ; };
 
@@ -68,9 +71,16 @@ public:
   virtual bool IORequestDown(const IORequest& inIOReq,
 			     list<IORequest>& outIOReqList);
 
-  // Output statistics
+  // Statistics management
+
+  virtual void statisticsReset();
 
   virtual void statisticsShow() const;
+
+  void statisticsFreqShow() const;
+  void statisticsLRUShow() const;
+  void statisticsLRUCumulShow() const;
+  void statisticsSummaryShow() const;
 };
 
 #endif /* _BLOCKSTOREINFINITE_HH_ */

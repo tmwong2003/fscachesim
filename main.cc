@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/main.cc,v 1.4 2000/10/02 18:18:17 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/main.cc,v 1.5 2000/10/24 19:54:42 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -12,7 +12,7 @@
 #include "BlockStoreDisk.hh"
 #include "BlockStoreInfinite.hh"
 #include "IORequest.hh"
-#include "IORequestGenerator.hh"
+#include "IORequestGeneratorGeneric.hh"
 #include "Node.hh"
 
 const int globalBlockSize = 4096;
@@ -51,7 +51,8 @@ main(int argc, char *argv[])
 						 LRU,
 						 globalHostDemotePolicy);
     Node *host = new Node(cache, &array);
-    IORequestGenerator *generator = new IORequestGenerator(host, argv[i]);
+    IORequestGeneratorGeneric *generator =
+      new IORequestGeneratorGeneric(host, argv[i]);
 
     generators.push_back(generator);
   }

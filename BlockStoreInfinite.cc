@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreInfinite.cc,v 1.2 2000/09/28 02:54:50 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreInfinite.cc,v 1.3 2000/10/24 19:54:41 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -71,15 +71,70 @@ BlockStoreInfinite::IORequestDown(const IORequest& inIOReq,
 }
 
 void
+BlockStoreInfinite::statisticsReset()
+{
+  // A reset for a cache doesn't wipe the infinite cache clean - it just
+  // clears the LRU stack depth and freq. statistics.
+
+  LRUMap.clear();
+  freqMap.clear();
+
+  // And of course, reset the parent.
+
+  BlockStore::statisticsReset();
+}
+
+void
 BlockStoreInfinite::statisticsShow() const
+{
+  printf("Block access frequency:\n");
+  statisticsFreqShow();
+  printf("LRU stack depth hits:\n");
+  statisticsLRUShow();
+  statisticsSummaryShow();
+}
+
+void
+BlockStoreInfinite::statisticsFreqShow() const
+{
+  for (BlockMapConstIter i = freqMap.begin(); i != freqMap.end(); i++) {
+    printf("%u,%u %d\n", i->first.objectID, i->first.blockID, i->second);
+  }
+  fflush(stdout);
+}
+
+void
+BlockStoreInfinite::statisticsLRUShow() const
 {
   for (uint32MapConstIter i = LRUMap.begin(); i != LRUMap.end(); i++) {
     printf("%d %d\n", i->first, i->second);
   }
-  printf("Frequency:\n");
-  for (BlockMapConstIter i = freqMap.begin(); i != freqMap.end(); i++) {
-    printf("%u,%u %d\n", i->first.objectID, i->first.blockID, i->second);
+  fflush(stdout);
+}
+
+void
+BlockStoreInfinite::statisticsLRUCumulShow() const
+{
+  uint32_t cumul = 0;
+  uint32_t cumulTotal = blockReadMisses;
+
+  // cumulTotal doesn't start at zero since we need to account for
+  // compulsory misses.
+
+  for (uint32MapConstIter i = LRUMap.begin(); i != LRUMap.end(); i++) {
+    cumulTotal += i->second;
   }
+  for (uint32MapConstIter i = LRUMap.begin(); i != LRUMap.end(); i++) {
+    cumul += i->second;
+    printf("%d %4.3f\n", i->first, ((double)cumul / cumulTotal));
+  }
+  fflush(stdout);
+}
+
+void
+BlockStoreInfinite::statisticsSummaryShow() const
+{
   printf("Block hits %u\n", blockReadHits);
   printf("Block misses %u\n", blockReadMisses);
+  fflush(stdout);
 }

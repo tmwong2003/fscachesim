@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStore.hh,v 1.2 2000/09/28 02:54:49 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStore.hh,v 1.3 2000/10/24 19:54:40 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -51,12 +51,8 @@ private:
 public:
   // Constructors
 
-  BlockStore(uint32_t inBlockSize) :
-    blockSize(inBlockSize),
-    blockDemoteHits(0),
-    blockDemoteMisses(0),
-    blockReadHits(0),
-    blockReadMisses(0) { ; };
+  BlockStore(uint32_t inBlockSize);
+
   virtual ~BlockStore() { ; };
 
   // Process incoming I/O requests
@@ -64,9 +60,23 @@ public:
   virtual bool IORequestDown(const IORequest &inIOReq,
 			     list<IORequest> &outIOReqList) = 0;
 
-  // Output statistics
+  // Statistics management
+
+  virtual void statisticsReset() {
+    blockDemoteHits = 0;
+    blockDemoteMisses = 0;
+    blockReadHits = 0;
+    blockReadMisses = 0;
+  };
 
   virtual void statisticsShow() const = 0;
+};
+
+inline
+BlockStore::BlockStore(uint32_t inBlockSize) :
+  blockSize(inBlockSize)
+{
+  statisticsReset();
 };
 
 #endif /* _BLOCKSTORE_HH_ */

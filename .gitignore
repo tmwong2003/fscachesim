@@ -35,10 +35,9 @@ config.h.in
 config.log
 config.status
 configure
-db2
 fscachesim
-httpd
-snake
+snake-1week
+snake-2week
 stamp-h
 stamp-h.in
 tracestats

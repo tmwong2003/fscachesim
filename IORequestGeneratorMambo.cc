@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequestGeneratorMambo.cc,v 1.1 2000/10/25 03:32:30 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequestGeneratorMambo.cc,v 1.2 2000/10/25 17:39:21 tmwong Exp $
   Description:  Generate I/O requests from a Mambo trace file.
   Author:       A. Acharya <acha@cs.umd.edu>, T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -112,12 +112,7 @@ IORequestGeneratorMambo::IORequestQueue()
 
 	abort();
       }
-      else if (record.op == READ &&
-	       record.length != 0 &&
-	       record.fileId != (traceHeader.numOfFiles - 1)) {
-	// Got a read record of non-zero length, that wasn't an access to a
-	// Mambo miscellaneous "others" file.
-
+      else if (record.op == READ && record.length != 0) {
 	// Validate the record.
 
 	if (record.op == LISTIO_HEADER) {
@@ -128,23 +123,26 @@ IORequestGeneratorMambo::IORequestQueue()
 	}
 	assert(record.pid >= 0);
 	assert(record.fileId >= 0);
-	assert(strcmp(traceHeader.fileNames[record.fileId].name, "others")
-	       != 0);
 	assert(record.wallClock >= 0.0L);
 	assert(record.processClock >= 0.0L);
 	assert(record.offset >= 0L);
 	assert(record.length >= 0);
 
-	// Convert the fileID to a unique ID.
+	// Ignore files called 'others', since Mambo uses the name as a 
+	// throwaway file for miscellaneous accesses.
 
-	uint32_t uniqueFileID =
-	  staticDir[traceHeader.fileNames[record.fileId].name];
-	nextRequest = new IORequest(basename(filename),
-				    Read,
-				    record.wallClock,
-				    uniqueFileID,
-				    record.offset,
-				    record.length);
+	if (strcmp(traceHeader.fileNames[record.fileId].name, "others") != 0) {
+	  // Convert the fileID to a unique ID.
+
+	  uint32_t uniqueFileID =
+	    staticDir[traceHeader.fileNames[record.fileId].name];
+	  nextRequest = new IORequest(basename(filename),
+				      Read,
+				      record.wallClock,
+				      uniqueFileID,
+				      record.offset,
+				      record.length);
+	}
       }
     } while (!gotEOF && !nextRequest);
   }

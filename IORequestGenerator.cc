@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequestGenerator.cc,v 1.3 2000/10/24 19:54:41 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequestGenerator.cc,v 1.4 2000/10/25 03:32:30 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -18,6 +18,7 @@ IORequestGenerator::IORequestGenerator(Node *inNode,
 {
   filename = strdup(inFilename);
   if ((file = fopen(filename, "r")) == NULL) {
+    perror(filename);
     abort();
   }
 }
@@ -25,6 +26,7 @@ IORequestGenerator::IORequestGenerator(Node *inNode,
 IORequestGenerator::~IORequestGenerator()
 {
   if (file != NULL && fclose(file) != 0) {
+    perror(NULL);
     abort();
   }
   delete filename;

@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequestGeneratorGeneric.hh,v 1.2 2000/10/24 19:54:41 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequestGeneratorGeneric.hh,v 1.1 2000/10/25 03:32:30 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -29,7 +29,7 @@ public:
     IORequestQueue();
   };
 
-  ~IORequestGeneratorGeneric() { ; };
+ virtual ~IORequestGeneratorGeneric() { ; };
 };
 
 #endif /* _IOREQUESTGENERATORGENERIC_HH_ */
