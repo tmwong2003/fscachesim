@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Block.hh,v 1.2 2002/02/12 00:38:54 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Block.hh,v 1.3 2002/02/12 21:50:55 tmwong Exp $
   Description:  Disk block type abstraction
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -37,8 +37,16 @@ namespace Block {
     uint64_t blockID;
   } block_t;
 
+  /**
+   * "Less than" ordering function class for disk blocks
+   */
   class LessThan {
   public:
+    /**
+     * "Less than" operator. Lower object IDs are less than higher IDs. If
+     * two blocks have equal object IDs, one one with a lower block ID is
+     * less than the one with a higher ID.
+     */
     bool operator()(const block_t &block1, const block_t &block2) const {
       return (block1.objID < block2.objID ||
 	      (block1.objID == block2.objID &&

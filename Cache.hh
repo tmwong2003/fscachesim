@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Cache.hh,v 1.8 2002/02/12 00:38:54 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Cache.hh,v 1.9 2002/02/12 21:50:55 tmwong Exp $
   Description:  Simple cache object. Supports insertions at the head and tail.
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -84,7 +84,7 @@ public:
    *
    * @param inBlock The block to get.
    */
-  void blockGet(Block::block_t inBlock);
+  void blockGet(const Block::block_t& inBlock);
 
   /**
    * Get the block at the head of the cache. Copy the block into outBlock
@@ -93,7 +93,7 @@ public:
    *
    * @param outBlock An output block.
    */
-  void blockGetAtHead(Block::block_t &outBlock);
+  void blockGetAtHead(Block::block_t& outBlock);
 
   /**
    * Put a block at the head of the cache.
@@ -102,7 +102,7 @@ public:
    *
    * @param outBlock The block to put.
    */
-  void blockPutAtHead(Block::block_t inBlock);
+  void blockPutAtHead(const Block::block_t& inBlock);
 
   /**
    * Put a block at the tail of the cache.
@@ -111,12 +111,12 @@ public:
    *
    * @param outBlock The block to put.
    */
-  void blockPutAtTail(Block::block_t inBlock);
+  void blockPutAtTail(const Block::block_t& inBlock);
 
   /**
    * Get the count of blocks in the cache.
    */
-  uint64_t sizeGet() { return (blockCountMax);};
+  uint64_t sizeGet() const { return (blockCountMax);};
 
   /**
    * Find out if inBlock is cached. If it is, return true. Otherwise,
@@ -124,17 +124,17 @@ public:
    *
    * @param inBlock The block to find.
    */
-  bool isCached(Block::block_t inBlock);
+  bool isCached(const Block::block_t& inBlock) const;
 
   /**
    * Find out if the cache is full. If it is, return true. Otherwise,
    * return false.
    */
-  bool isFull();
+  bool isFull() const;
 };
 
 inline void
-Cache::blockGet(Block::block_t inBlock)
+Cache::blockGet(const Block::block_t& inBlock)
 {
   CacheIndex::iterator blockIter = cacheIndex.find(inBlock);
   if (blockIter != cacheIndex.end()) {
@@ -146,7 +146,7 @@ Cache::blockGet(Block::block_t inBlock)
 };
 
 inline void
-Cache::blockGetAtHead(Block::block_t &outBlock)
+Cache::blockGetAtHead(Block::block_t& outBlock)
 {
   if (!cache.empty()) {
     outBlock = *cache.begin();
@@ -158,7 +158,7 @@ Cache::blockGetAtHead(Block::block_t &outBlock)
 };
 
 inline void
-Cache::blockPutAtHead(Block::block_t inBlock)
+Cache::blockPutAtHead(const Block::block_t& inBlock)
 {
   blockCount++;
   cache.push_front(inBlock);
@@ -167,7 +167,7 @@ Cache::blockPutAtHead(Block::block_t inBlock)
 };
 
 inline void
-Cache::blockPutAtTail(Block::block_t inBlock)
+Cache::blockPutAtTail(const Block::block_t& inBlock)
 {
   blockCount++;
   cache.push_back(inBlock);
@@ -176,13 +176,13 @@ Cache::blockPutAtTail(Block::block_t inBlock)
 };
 
 inline bool
-Cache::isCached(Block::block_t inBlock)
+Cache::isCached(const Block::block_t& inBlock) const
 {
   return (cacheIndex.find(inBlock) != cacheIndex.end());
 };
 
 inline bool
-Cache::isFull()
+Cache::isFull() const
 {
   return (blockCount == blockCountMax);
 };

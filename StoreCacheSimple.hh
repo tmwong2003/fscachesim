@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSimple.hh,v 1.1 2002/02/12 00:38:54 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSimple.hh,v 1.1 2002/02/12 21:50:56 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -33,7 +33,7 @@ public:
    */
   enum DemotePolicy_t {
     None, /**< No demotes. */
-    DemoteDemand /**< Demote a block when the cache ejects the block. */
+    Demand /**< Demote a block when the cache ejects the block. */
   };
 
   /**
@@ -59,7 +59,7 @@ private:
 
 protected:
   virtual void BlockCache(const IORequest& inIOReq,
-			  const Block::block_t inBlock,
+			  const Block::block_t& inBlock,
 			  list<IORequest>& outIOReqs);
 
 public:

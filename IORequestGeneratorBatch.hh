@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/IORequestGeneratorBatch.hh,v 1.2 2001/11/20 02:20:13 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/IORequestGeneratorBatch.hh,v 1.3 2002/02/12 21:50:55 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -19,8 +19,8 @@
 class IORequestGeneratorBatch :
   public IORequestGenerator,
   public Statistics {
-protected:
-  class IORequestGeneratorLess:
+private:
+  class IORequestGeneratorLessThan:
     public binary_function<IORequestGenerator *, IORequestGenerator *, bool> {
   public:
     bool operator()(const IORequestGenerator *inGenL,

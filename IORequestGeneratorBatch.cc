@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/IORequestGeneratorBatch.cc,v 1.2 2001/11/20 02:20:13 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/IORequestGeneratorBatch.cc,v 1.3 2002/02/12 00:38:54 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -21,7 +21,7 @@ IORequestGeneratorBatch::IORequestDown()
   // Sort the IORequestGenerators by next-I/O issue time, and issue the
   // earliest request.
 
-  generators.sort(IORequestGeneratorLess());
+  generators.sort(IORequestGeneratorLessThan());
   const IORequest *req = generators.front()->IORequestGet();
 
   // If the next request passes the threshold for warmups, reset any
@@ -83,7 +83,6 @@ IORequestGeneratorBatch::statisticsShow() const
   for (list<Statistics *>::const_iterator i =  statistics.begin();
        i != statistics.end();
        i++) {
-    //    printf("Stats for IORequestGenerator %s\n", generator->filenameGet());
     (*i)->statisticsShow();
   }
 }

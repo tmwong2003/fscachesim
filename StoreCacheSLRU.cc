@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSLRU.cc,v 1.1 2002/02/12 01:16:32 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSLRU.cc,v 1.1 2002/02/12 21:50:56 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -26,7 +26,7 @@ using Block::block_t;
  */
 void
 StoreCacheSLRU::BlockCache(const IORequest& inIOReq,
-			   const block_t inBlock,
+			   const block_t& inBlock,
 			   list<IORequest>& outIOReqs)
 {
   if (protCache.isCached(inBlock)) {

@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSLRU.hh,v 1.1 2002/02/12 01:16:32 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSLRU.hh,v 1.1 2002/02/12 21:50:56 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -18,8 +18,8 @@
 #include "StoreCache.hh"
 
 /**
- * SLRU block cache with support incoming demotions sent down from a
- * higher-level block store or request generator.
+ * SLRU block cache [Karedla1994] with support incoming demotions sent down
+ * from a higher-level block store or request generator.
  *
  * @warning Will not demotions to send to a lower-level store.
  */
@@ -64,12 +64,12 @@ protected:
 protected:
   // Documented at the definition.
   virtual void BlockCache(const IORequest& inIOReq,
-			  const Block::block_t inBlock,
+			  const Block::block_t& inBlock,
 			  list<IORequest>& outIOReqs);
 
 public:
   /**
-   * Create an SLRU [Karedla1994] cache.
+   * Create an SLRU cache.
    *
    * @param inName A string name for the cache.
    * @param inNextStore A lower-level storage device (can be NULL).

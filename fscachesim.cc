@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/fscachesim.cc,v 1.1 2002/02/12 00:38:54 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/fscachesim.cc,v 1.2 2002/02/12 21:50:57 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -18,6 +18,7 @@
 #include "Store.hh"
 #include "StoreCache.hh"
 #include "StoreCacheSLRU.hh"
+#include "StoreCacheSeg.hh"
 #include "StoreCacheSimple.hh"
 
 // Command usage.
@@ -27,6 +28,7 @@ const char *globalProgArgs = "b:DdGgmns:uw:";
 const char *globalProgUsage = \
 "[-D] " \
 "[-d] " \
+"[-g] " \
 "[-m] " \
 "[-b block_size] " \
 "[-w warmup_time] " \
@@ -34,9 +36,9 @@ const char *globalProgUsage = \
 
 const int globalMBToB = 1048576;
 
-const int globalCacheSegVariableSegCount = 10;
+const int globalStoreCacheSegSegCount = 10;
 
-const int globalCacheSegVariableSegMultiplier = 2;
+const int globalStoreCacheSegSegMultiplier = 2;
 
 void
 usage(char *inProgName,
@@ -57,8 +59,8 @@ main(int argc,
 
   // Default array parameters.
 
-  uint64_t arrayProbCacheSize = 0;
-  uint64_t arrayProbCacheSizeMB = 0;
+  uint64_t arrayProbSize = 0;
+  uint64_t arrayProbSizeMB = 0;
   StoreCacheSimple::EjectPolicy_t arrayEjectPolicy =
     StoreCacheSimple::LRU;
 
@@ -75,7 +77,12 @@ main(int argc,
   // Default flags.
 
   bool useMamboFlag = false;
-  bool useSLRUarrayFlag = false;
+
+  bool useArraySegFlag = false;
+  bool useArraySLRUFlag = false;
+
+  bool useArraySegUniformFlag = false;
+  bool useArraySegNormalizeGhostFlag = false;
 
   // Process command-line args.
 
@@ -87,19 +94,28 @@ main(int argc,
       blockSize = atol(optarg);
       break;
     case 'D':
-      clientDemotePolicy = StoreCacheSimple::DemoteDemand;
+      clientDemotePolicy = StoreCacheSimple::Demand;
       break;
     case 'd':
-      clientDemotePolicy = StoreCacheSimple::DemoteDemand;
+      clientDemotePolicy = StoreCacheSimple::Demand;
       arrayEjectPolicy = StoreCacheSimple::MRU;
+      break;
+    case 'g':
+      useArraySegFlag = true;
       break;
     case 'm':
       useMamboFlag = true;
       break;
+    case 'n':
+      useArraySegNormalizeGhostFlag = true;
+      break;
     case 's':
-      useSLRUarrayFlag = true;
-      arrayProbCacheSizeMB = atol(optarg);
-      arrayProbCacheSize = arrayProbCacheSizeMB * (globalMBToB / blockSize);
+      useArraySLRUFlag = true;
+      arrayProbSizeMB = atol(optarg);
+      arrayProbSize = arrayProbSizeMB * (globalMBToB / blockSize);
+      break;
+    case 'u':
+      useArraySegUniformFlag = true;
       break;
     case 'w':
       warmupTime = strtod(optarg, NULL);
@@ -128,26 +144,45 @@ main(int argc,
 
   // Get the cache sizes.
 
-  uint64_t clientCacheSizeMB = atol(argv[optind]);
-  uint64_t clientCacheSize = clientCacheSizeMB * (globalMBToB / blockSize);
-  uint64_t arrayCacheSizeMB = atol(argv[optind + 1]);
-  uint64_t arrayCacheSize = arrayCacheSizeMB * (globalMBToB / blockSize);
+  uint64_t clientSizeMB = atol(argv[optind]);
+  uint64_t clientSize = clientSizeMB * (globalMBToB / blockSize);
+  uint64_t arraySizeMB = atol(argv[optind + 1]);
+  uint64_t arraySize = arraySizeMB * (globalMBToB / blockSize);
 
   // Create a single array cache for all client-missed I/Os to feed into.
 
   Store *array;
-  if (useSLRUarrayFlag) {
+  if (useArraySLRUFlag) {
     array = new StoreCacheSLRU("array",
 			       NULL,
 			       blockSize,
-			       arrayCacheSize,
-			       arrayProbCacheSize);
+			       arraySize,
+			       arrayProbSize);
+  }
+  else if (useArraySegFlag) {
+    if (useArraySegUniformFlag) {
+      array = new StoreCacheSeg("array",
+				NULL,
+				blockSize,
+				arraySize,
+				globalStoreCacheSegSegCount,
+				useArraySegNormalizeGhostFlag);
+    }
+    else {
+      array = new StoreCacheSeg("array",
+				NULL,
+				blockSize,
+				arraySize,
+				globalStoreCacheSegSegCount,
+				globalStoreCacheSegSegMultiplier,
+				useArraySegNormalizeGhostFlag);
+    }
   }
   else {
     array = new StoreCacheSimple("array",
 				 NULL,
 				 blockSize,
-				 arrayCacheSize,
+				 arraySize,
 				 arrayEjectPolicy,
 				 StoreCacheSimple::None);
   }
@@ -162,7 +197,7 @@ main(int argc,
     StoreCacheSimple *client = new StoreCacheSimple(buffer,
 						    array,
 						    blockSize,
-						    clientCacheSize,
+						    clientSize,
 						    StoreCacheSimple::LRU,
 						    clientDemotePolicy);
     generators->StatisticsAdd(client);
@@ -185,12 +220,12 @@ main(int argc,
 
   // Show stats.
 
-  printf("Client cache size %llu\n", clientCacheSizeMB);
-  printf("Array cache size %llu\n", arrayCacheSizeMB);
+  printf("Client cache size %llu\n", clientSizeMB);
+  printf("Array cache size %llu\n", arraySizeMB);
   printf("Array cache policy %s-",
 	 (arrayEjectPolicy == StoreCacheSimple::LRU ? "LRU" : "MRU"));
   printf("%s\n",
-	 (clientDemotePolicy == StoreCacheSimple::DemoteDemand ? "LRU" : "NONE"));
+	 (clientDemotePolicy == StoreCacheSimple::Demand ? "LRU" : "NONE"));
   printf("Block size %llu\n", blockSize);
   generators->statisticsShow();
 

@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCache.cc,v 1.13 2001/11/20 02:20:13 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSimple.cc,v 1.1 2002/02/12 21:50:56 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -24,7 +24,7 @@ using Block::block_t;
  */
 void
 StoreCacheSimple::BlockCache(const IORequest& inIOReq,
-			     const block_t inBlock,
+			     const block_t& inBlock,
 			     list<IORequest>& outIOReqs)
 {
   // See if the block is cached.
@@ -59,7 +59,7 @@ StoreCacheSimple::BlockCache(const IORequest& inIOReq,
 
       // If necessary, create a Demote I/O.
 
-      if (demotePolicy == DemoteDemand) {
+      if (demotePolicy == Demand) {
 	outIOReqs.push_back(IORequest(inIOReq.origGet(),
 				      Demote,
 				      inIOReq.timeIssuedGet(),

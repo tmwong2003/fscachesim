@@ -1,4 +1,4 @@
-# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Makefile.am,v 1.15 2002/02/12 00:38:54 tmwong Exp $
+# RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Makefile.am,v 1.16 2002/02/12 21:50:56 tmwong Exp $
 # Description: fscachesim Makefile.am
 # Created by:  T.M. Wong <tmwong+@cs.cmu.edu>
 
@@ -12,12 +12,14 @@ AUTOMAKE_OPTIONS = foreign
 bin_PROGRAMS = fscachesim sharestats tracestats
 
 fscachesim_SOURCES = \
+	Ghost.cc \
 	IORequestGeneratorBatch.cc \
 	IORequestGeneratorFile.cc \
 	IORequestGeneratorFileGeneric.cc \
 	IORequestGeneratorFileMambo.cc \
 	StoreCache.cc \
 	StoreCacheSLRU.cc \
+	StoreCacheSeg.cc \
 	StoreCacheSimple.cc \
 	fscachesim.cc \
 	top-down-size-splay.c
