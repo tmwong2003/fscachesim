@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/Node.hh,v 1.1.1.1 2000/09/21 16:25:41 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong@cs.cmu.edu>
 */
@@ -7,13 +7,14 @@
 #ifndef _NODE_HH_
 #define _NODE_HH_
 
-#include "BlockCache.hh"
+#include "BlockStore.hh"
 #include "IORequest.hh"
 
 class Node
 {
 private:
-  BlockCache *blockStore;
+  BlockStore *blockStore;
+  Node *nextNode;
 
 private:
   // Copy constructors - declared private and never defined
@@ -24,16 +25,18 @@ private:
 public:
   // Constructors and destructors
 
-  Node(BlockCache *inBlockStore) :
-    blockStore(inBlockStore)
+  Node(BlockStore *inBlockStore,
+       Node *inNextNode) :
+    blockStore(inBlockStore),
+    nextNode(inNextNode)
     { ; };
   ~Node()
     { ; };
 
   // Process incoming I/O requests
 
-  bool IORequestStart(IORequest &inIOReq);
-  int IORequestFinish(IORequest &inIOReq);
+  bool IORequestDown(IORequest& inIOReq);
+  int IORequestUp(IORequest& inIOReq);
 
   // Output statistics
 

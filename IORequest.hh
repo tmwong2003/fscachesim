@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequest.hh,v 1.1.1.1 2000/09/21 16:25:41 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong@cs.cmu.edu>
 */
@@ -7,8 +7,9 @@
 #ifndef _IOREQUEST_HH_
 #define _IOREQUEST_HH_
 
-typedef unsigned short int uint16_t;
-typedef unsigned int uint32_t;
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
 
 enum IORequestOp_t {Read};
 
@@ -26,7 +27,6 @@ protected:
 private:
   // Copy constructors - declared private and never defined
 
-  IORequest(const IORequest&);
   IORequest& operator=(const IORequest&);
 
 public:
@@ -43,17 +43,47 @@ public:
     offset(inOffset),
     length(inLength)
     { ; };
+
+  IORequest(const IORequest& inIOReq)
+    {
+      op = inIOReq.op;
+      timeIssued = inIOReq.timeIssued;
+      devID = inIOReq.devID;
+      objectID = inIOReq.objectID;
+      offset = inIOReq.offset;
+      length = inIOReq.length;
+    };
+
   ~IORequest()
     { ; };
 
   // Accessors
 
-  uint32_t objectIDGet()
-    { return (objectID); };
-  uint32_t offsetGet()
-    { return (offset); };
-  uint32_t lengthGet()
-    { return (length); };
+  uint32_t objectIDGet() const
+    {
+      return (objectID);
+    };
+  uint32_t offsetGet() const
+    {
+      return (offset);
+    };
+  uint32_t lengthGet() const
+    {
+      return (length);
+    };
+
+  uint32_t blockOffsetGet(const uint32_t inBlockSize) const
+    {
+      return (offset / inBlockSize);
+    };
+  uint32_t blockLengthGet(const uint32_t inBlockSize) const
+    {
+      //  The following expression is length + starting fill + ending fill.
+
+      return ((length + (offset % inBlockSize) +
+	      ((length + offset) % inBlockSize ?
+	       inBlockSize - ((length + offset) % inBlockSize) : 0)) / inBlockSize);
+    };
 };
 
 #endif /* _IOREQUEST_HH_ */

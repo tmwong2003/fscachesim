@@ -1,4 +1,4 @@
-dnl RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/15-412/p1/configure.in,v 1.1.1.1 2000/09/13 00:22:06 tmwong Exp $
+dnl RCS:         $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/configure.in,v 1.1.1.1 2000/09/21 16:25:41 tmwong Exp $
 dnl Description: fscachesim configure.in
 dnl Created by:  T.M. Wong <tmwong+@cs.cmu.edu>
 
@@ -41,6 +41,9 @@ dnl
 
 AC_C_CONST
 AC_TYPE_SIZE_T
+
+AC_CHECK_TYPE(uint16_t, unsigned short int)
+AC_CHECK_TYPE(uint32_t, unsigned int)
 
 dnl
 dnl Checks for library functions.
