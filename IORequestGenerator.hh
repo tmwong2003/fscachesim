@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequestGenerator.hh,v 1.1 2000/09/28 02:54:50 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequestGenerator.hh,v 1.2 2000/10/24 19:54:41 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -18,7 +18,7 @@
 #include "Node.hh"
 
 class IORequestGenerator {
-private:
+protected:
   const char *filename;
   FILE *file;
 
@@ -32,7 +32,7 @@ private:
 
 protected:
 
-  void IORequestQueue();
+  virtual void IORequestQueue() = 0;
 
 public:
   IORequestGenerator(Node *inNode,

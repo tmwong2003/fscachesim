@@ -35,7 +35,10 @@ config.h.in
 config.log
 config.status
 configure
+db2
 fscachesim
+httpd
+snake
 stamp-h
 stamp-h.in
 tracestats
