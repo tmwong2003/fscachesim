@@ -42,6 +42,7 @@ configure
 db2
 experimentParams.hh
 fscachesim
+fscachesim-1.0.tar.gz
 httpd
 httpd-single
 mambo
