@@ -45,4 +45,4 @@ typedef struct TRACEREC
 /* alignment for char strings */
 #define SALIGN 4
 
-#endif _IOTRACE_H_
+#endif /* _IOTRACE_H_ */
