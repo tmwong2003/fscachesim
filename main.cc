@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/main.cc,v 1.15 2001/07/19 02:53:35 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/main.cc,v 1.16 2001/07/19 20:24:54 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -132,7 +132,6 @@ main(int argc,
     arrayCache = new BlockStoreCacheSegVariable("array",
 						blockSize,
 						arrayCacheSize,
-						10,
 						10);
   }
   else {

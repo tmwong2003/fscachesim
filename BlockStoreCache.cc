@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCache.cc,v 1.9 2001/07/06 01:45:41 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCache.cc,v 1.10 2001/07/17 01:55:54 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -142,18 +142,32 @@ void
 BlockStoreCache::statisticsShow() const
 {
   printf("Statistics for BlockStoreCache.%s\n", nameGet());
+
+  for (StatMapConstIter i = blockDemoteHitsMap.begin();
+       i != blockDemoteHitsMap.end();
+       i++) {
+    printf("Demote hits for %s %u\n", i->first, i->second);
+  }
+  for (StatMapConstIter i = blockDemoteMissesMap.begin();
+       i != blockDemoteMissesMap.end();
+       i++) {
+    printf("Demote misses for %s %u\n", i->first, i->second);
+  }
+
+  printf("Demote hits %u\n", blockDemoteHits);
+  printf("Demote misses %u\n", blockDemoteMisses);
+
   for (StatMapConstIter i = blockReadHitsMap.begin();
        i != blockReadHitsMap.end();
        i++) {
-    printf("Block read hits for %s %u\n", i->first, i->second);
+    printf("Read hits for %s %u\n", i->first, i->second);
   }
   for (StatMapConstIter i = blockReadMissesMap.begin();
        i != blockReadMissesMap.end();
        i++) {
-    printf("Block read misses for %s %u\n", i->first, i->second);
+    printf("Read misses for %s %u\n", i->first, i->second);
   }
-  printf("Block demote hits %u\n", blockDemoteHits);
-  printf("Block demote misses %u\n", blockDemoteMisses);
-  printf("Block read hits %u\n", blockReadHits);
-  printf("Block read misses %u\n", blockReadMisses);
+
+  printf("Read hits %u\n", blockReadHits);
+  printf("Read misses %u\n", blockReadMisses);
 }
