@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/main.cc,v 1.10 2001/07/04 17:49:30 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/main.cc,v 1.12 2001/07/06 16:18:38 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -12,6 +12,7 @@
 #include <unistd.h>
 
 #include "BlockStoreCache.hh"
+#include "BlockStoreCacheGhost.hh"
 #include "BlockStoreCacheSegmented.hh"
 #include "IORequest.hh"
 #include "IORequestGeneratorBatch.hh"
@@ -21,10 +22,12 @@
 
 // Command usage.
 
-const char *globalProgArgs = "b:dms:w:";
+const char *globalProgArgs = "b:Ddgms:w:";
 
 const char *globalProgUsage = \
+"[-D] " \
 "[-d] " \
+"[-g] " \
 "[-m] " \
 "[-b block_size] " \
 "[-s prob_cache_size] " \
@@ -56,6 +59,7 @@ main(int argc,
   uint32_t warmupCount = 0;
   double warmupTime = 0;
 
+  bool useGhostFlag = false;
   bool useMamboFlag = false;
   bool useSLRUcacheFlag = false;
 
@@ -68,9 +72,15 @@ main(int argc,
     case 'b':
       blockSize = atol(optarg);
       break;
+    case 'D':
+      hostDemotePolicy = DemoteDemand;
+      break;
     case 'd':
       hostDemotePolicy = DemoteDemand;
       arrayReplPolicy = MRU;
+      break;
+    case 'g':
+      useGhostFlag = true;
       break;
     case 'm':
       useMamboFlag = true;
@@ -118,13 +128,17 @@ main(int argc,
 					      arrayCacheSize,
 					      arrayProbCacheSize);
   }
+  else if (useGhostFlag) {
+    arrayCache = new BlockStoreCacheGhost("array",
+					  blockSize,
+					  arrayCacheSize);
+  }
   else {
-    BlockStoreCache *ac =  new BlockStoreCache("array",
-					       blockSize,
-					       arrayCacheSize,
-					       arrayReplPolicy,
-					       None);
-    arrayCache = ac;
+    arrayCache = new BlockStoreCache("array",
+				     blockSize,
+				     arrayCacheSize,
+				     arrayReplPolicy,
+				     None);
   }
   generators->StatisticsAdd(arrayCache);
   Node array(arrayCache, NULL);
@@ -164,12 +178,18 @@ main(int argc,
   if (useSLRUcacheFlag) {
     printf("Array prob cache size %ld\n",
 	   arrayProbCacheSize * blockSize / globalMBToB);
-    printf("Array cache policy %s\n",
-	   (hostDemotePolicy == DemoteDemand ? "SLRU-SLRU" : "SLRU-NONE"));
+    printf("Array cache policy SLRU-%s\n",
+	   (hostDemotePolicy == DemoteDemand ? "SLRU" : "NONE"));
+  }
+  else if (useGhostFlag) {
+    printf("Array cache policy GHOST-%s\n",
+	   (hostDemotePolicy == DemoteDemand ? "GHOST" : "NONE"));
   }
   else {
-    printf("Array cache policy %s\n",
-	   (hostDemotePolicy == DemoteDemand ? "MRU-LRU" : "LRU-NONE"));
+    printf("Array cache policy %s-",
+	   (arrayReplPolicy == LRU ? "LRU" : "MRU"));
+    printf("%s\n",
+	   (hostDemotePolicy == DemoteDemand ? "LRU" : "NONE"));
   }
   generators->statisticsShow();
 
