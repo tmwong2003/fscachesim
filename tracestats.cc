@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/tracestats.cc,v 1.6 2000/10/30 01:12:45 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/tracestats.cc,v 1.7 2001/06/30 21:56:02 tmwong Exp $
   Description:  Generate LRU and frequency trace stats using fscachesim
                 objects.
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
@@ -23,7 +23,7 @@
 
 // Command usage.
 
-const char *globalProgArgs = "bf:c:mt:";
+const char *globalProgArgs = "b:f:c:mt:";
 
 const char *globalProgUsage = "[-m] " \
 "[-b block_size] " \
