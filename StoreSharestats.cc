@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreSharestats.cc,v 1.1 2002/02/12 21:50:57 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreSharestats.cc,v 1.2 2002/02/15 15:44:25 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -16,7 +16,6 @@
 #endif /* HAVE_STDLIB_H */
 
 #include "Block.hh"
-#include "Cache.hh"
 #include "IORequest.hh"
 
 #include "StoreSharestats.hh"
