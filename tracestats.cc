@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/tracestats.cc,v 1.2 2000/10/24 19:54:42 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/tracestats.cc,v 1.3 2000/10/26 01:51:00 tmwong Exp $
   Description:  Generate LRU and frequency trace stats using fscachesim
                 objects.
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
@@ -31,30 +31,6 @@ public:
   };
 };
 
-bool
-stdoutRedirect(const char *inFile)
-{
-  int newStdoutFD;
-
-  if ((newStdoutFD = open(inFile, O_CREAT|O_TRUNC|O_WRONLY, 0666)) < 0) {
-    perror(inFile);
-
-    return (false);
-  }
-  if (dup2(newStdoutFD, fileno(stdout)) < 0) {
-    perror(inFile);
-
-    return (false);
-  }
-  if (close(newStdoutFD) < 0) {
-    perror(inFile);
-
-    return (false);
-  }
-
-  return (true);
-}
-
 int
 main(int argc, char *argv[])
 {
@@ -83,17 +59,7 @@ main(int argc, char *argv[])
   } while (requestProcessed);
   fprintf(stderr, "\n");
 
-  // Output the stats to separate files.
-
-  if (!stdoutRedirect(globalFileFreq)) {
-    exit(EXIT_FAILURE);
-  }
-  cache.statisticsFreqShow();
-
-  if (!stdoutRedirect(globalFileLRU)) {
-    exit(EXIT_FAILURE);
-  }
-  cache.statisticsLRUCumulShow();
+  cache.statisticsShow();
 
   return (EXIT_SUCCESS);
 }
