@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/IORequestGeneratorBatch.hh,v 1.1 2000/10/30 01:12:44 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/IORequestGeneratorBatch.hh,v 1.2 2001/11/20 02:20:13 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -10,6 +10,8 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
+
+#include <list>
 
 #include "IORequestGenerator.hh"
 #include "Statistics.hh"

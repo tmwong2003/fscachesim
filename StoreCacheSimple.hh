@@ -1,11 +1,11 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreCache.hh,v 1.10 2001/11/20 02:20:13 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSimple.hh,v 1.1 2002/02/12 00:38:54 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
-#ifndef _BLOCKSTORECACHESIMPLE_HH_
-#define _BLOCKSTORECACHESIMPLE_HH_
+#ifndef _STORECACHESIMPLE_HH_
+#define _STORECACHESIMPLE_HH_
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -16,13 +16,15 @@
 #endif /* HAVE_STDINT_H */
 #include <stdio.h>
 
-#include "BlockStoreCache.hh"
+#include "Block.hh"
 #include "Cache.hh"
+#include "IORequest.hh"
+#include "StoreCache.hh"
 
 /**
  * Simple LRU/MRU block cache with support for demote operations.
  */
-class BlockStoreCacheSimple : public BlockStoreCache {
+class StoreCacheSimple : public StoreCache {
 public:
   // Policies
 
@@ -52,8 +54,13 @@ private:
 private:
   // Copy constructors - declared private and never defined
 
-  BlockStoreCacheSimple(const BlockStoreCacheSimple&);
-  BlockStoreCacheSimple& operator=(const BlockStoreCacheSimple&);
+  StoreCacheSimple(const StoreCacheSimple&);
+  StoreCacheSimple& operator=(const StoreCacheSimple&);
+
+protected:
+  virtual void BlockCache(const IORequest& inIOReq,
+			  const Block::block_t inBlock,
+			  list<IORequest>& outIOReqs);
 
 public:
   // Constructors and destructors
@@ -62,38 +69,27 @@ public:
    * Create a simple block cache.
    *
    * @param inName A string name for the cache.
+   * @param inNextStore A lower-level storage device, if any.
    * @param inBlockSize The size of each block, in bytes.
    * @param inSize The size of the cache, in blocks.
    * @param inEjectPolicy The cache ejection policy.
    * @param inDemotePolicy_t The cache demotion policy.
    */
-  BlockStoreCacheSimple(const char *inName,
-			uint64_t inBlockSize,
-			uint64_t inSize,
-			EjectPolicy_t inEjectPolicy,
-			DemotePolicy_t inDemotePolicy) :
-    BlockStoreCache(inName, inBlockSize),
+  StoreCacheSimple(const char *inName,
+		   Store *inNextStore,
+		   uint64_t inBlockSize,
+		   uint64_t inSize,
+		   EjectPolicy_t inEjectPolicy,
+		   DemotePolicy_t inDemotePolicy) :
+    StoreCache(inName, inNextStore, inBlockSize),
     cache(inSize),
     ejectPolicy(inEjectPolicy),
-    demotePolicy(inDemotePolicy),
-    logRequestFlag(false) { ; };
+    demotePolicy(inDemotePolicy) { ; };
 
   /**
    * Destroy the cache.
    */
-  ~BlockStoreCacheSimple() { ; };
-
-  // I/O request handlers
-
-  virtual bool IORequestDown(const IORequest& inIOReq,
-			     list<IORequest>& outIOReq);
-
-  /**
-   * Log incoming I/O requests. Initially set to not log.
-   */
-  void logRequestToggle() {
-    logRequestFlag = (logRequestFlag ? false : true);
-  };
+  ~StoreCacheSimple() { ; };
 };
 
-#endif /* _BLOCKSTORECACHESIMPLE_HH_ */
+#endif /* _STORECACHESIMPLE_HH_ */

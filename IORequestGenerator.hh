@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequestGenerator.hh,v 1.4 2000/10/26 16:14:24 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/IORequestGenerator.hh,v 1.5 2000/10/30 01:12:44 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -12,51 +12,60 @@
 #endif /* HAVE_CONFIG_H */
 
 #include "IORequest.hh"
-#include "Node.hh"
+#include "Store.hh"
 
 class IORequestGenerator {
 protected:
-  Node *node;
+  Store *store;
 
   IORequest *nextRequest;
 
 private:
+  // Copy constructors - declared private and never defined
+
   IORequestGenerator(const IORequestGenerator&);
   IORequestGenerator& operator=(const IORequestGenerator&);
 
 public:
+  /**
+   * Create a request stream generator.
+   */
   IORequestGenerator() :
-    node(NULL),
+    store(NULL),
     nextRequest(NULL) { ; };
 
-  IORequestGenerator(Node *inNode) :
-    node(inNode),
+  /**
+   * Create a request stream generator.
+   */
+  IORequestGenerator(Store *inStore) :
+    store(inStore),
     nextRequest(NULL) { ; };
 
+  /**
+   * Destroy the generator.
+   */
   virtual ~IORequestGenerator() {
     if (nextRequest) {
       delete nextRequest;
     }
   };
 
-  const Node *nodeGet() const {
-    return (node);
-  };
-
   const IORequest *IORequestGet() const {
     return (nextRequest);
   };
 
-  // Comparison operator '<' sorts by the issue time of the next request.
-  // a < b is:
-  //
-  // true if b has a NULL nextRequest
-  // false if a has a NULL nextRequest
-  // the result of comparing the times with double-precision '<' otherwise
-
+  /**
+   * Comparison operator '<' sorts by the issue time of the next request.
+   *
+   * a < b is:
+   *
+   * true if b has a NULL nextRequest, false if a has a NULL nextRequest,
+   * or the result of comparing the times with double-precision '<'
+   * otherwise.
+   */
   bool operator<(const IORequestGenerator& inGenerator) const;
 
-  // Send a queued request on to the caching node.
+  // Send a queued request on to the lower-level storage device.
 
   virtual bool IORequestDown() = 0;
 };

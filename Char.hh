@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Char.hh,v 1.1 2002/02/12 00:38:54 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -24,11 +24,11 @@
 namespace Char {
   using std::map;
 
-  /**
-   * Lexographic sorting function class for strings
-   */
   class LessThan {
   public:
+    /**
+     * Lexographic sorting function class for strings
+     */
     bool operator()(const char *str1, const char *str2) const {
       return (strcmp(str1, str2) < 0);
     };

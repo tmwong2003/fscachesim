@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Block.hh,v 1.1 2002/02/11 20:08:22 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Block.hh,v 1.2 2002/02/12 00:38:54 tmwong Exp $
   Description:  Disk block type abstraction
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -16,11 +16,24 @@
 #include <stdint.h>
 #endif /* HAVE_STDINT_H */
 
+/**
+ * block_t disk block type abstraction and utility functions.
+ */
 namespace Block {
   using std::map;
 
+  /**
+   * block_t models disks as a collection of objects, where each object
+   * contains blocks.
+   */
   typedef struct {
+    /**
+     * The object ID.
+     */
     uint64_t objID;
+    /**
+     * The block offset into the object.
+     */
     uint64_t blockID;
   } block_t;
 
@@ -33,6 +46,9 @@ namespace Block {
     }
   };
 
+  /**
+   * Per-block counter.
+   */
   typedef map<block_t, uint64_t, LessThan> Counter;
 };
 

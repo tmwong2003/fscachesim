@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/main.cc,v 1.19 2001/11/20 02:20:14 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/fscachesim.cc,v 1.1 2002/02/12 00:38:54 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -10,16 +10,15 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "BlockStore.hh"
-#include "BlockStoreCache.hh"
-#include "BlockStoreCacheSimple.hh"
-#include "BlockStoreCacheSLRU.hh"
 #include "IORequest.hh"
 #include "IORequestGeneratorBatch.hh"
 #include "IORequestGeneratorFile.hh"
 #include "IORequestGeneratorFileGeneric.hh"
 #include "IORequestGeneratorFileMambo.hh"
-#include "Node.hh"
+#include "Store.hh"
+#include "StoreCache.hh"
+#include "StoreCacheSLRU.hh"
+#include "StoreCacheSimple.hh"
 
 // Command usage.
 
@@ -60,13 +59,13 @@ main(int argc,
 
   uint64_t arrayProbCacheSize = 0;
   uint64_t arrayProbCacheSizeMB = 0;
-  BlockStoreCacheSimple::EjectPolicy_t arrayEjectPolicy =
-    BlockStoreCacheSimple::LRU;
+  StoreCacheSimple::EjectPolicy_t arrayEjectPolicy =
+    StoreCacheSimple::LRU;
 
   // Default client parameters.
 
-  BlockStoreCacheSimple::DemotePolicy_t clientDemotePolicy = 
-    BlockStoreCacheSimple::None;
+  StoreCacheSimple::DemotePolicy_t clientDemotePolicy = 
+    StoreCacheSimple::None;
 
   // Default warmups.
 
@@ -76,6 +75,7 @@ main(int argc,
   // Default flags.
 
   bool useMamboFlag = false;
+  bool useSLRUarrayFlag = false;
 
   // Process command-line args.
 
@@ -87,14 +87,19 @@ main(int argc,
       blockSize = atol(optarg);
       break;
     case 'D':
-      clientDemotePolicy = BlockStoreCacheSimple::DemoteDemand;
+      clientDemotePolicy = StoreCacheSimple::DemoteDemand;
       break;
     case 'd':
-      clientDemotePolicy = BlockStoreCacheSimple::DemoteDemand;
-      arrayEjectPolicy = BlockStoreCacheSimple::MRU;
+      clientDemotePolicy = StoreCacheSimple::DemoteDemand;
+      arrayEjectPolicy = StoreCacheSimple::MRU;
       break;
     case 'm':
       useMamboFlag = true;
+      break;
+    case 's':
+      useSLRUarrayFlag = true;
+      arrayProbCacheSizeMB = atol(optarg);
+      arrayProbCacheSize = arrayProbCacheSizeMB * (globalMBToB / blockSize);
       break;
     case 'w':
       warmupTime = strtod(optarg, NULL);
@@ -130,28 +135,37 @@ main(int argc,
 
   // Create a single array cache for all client-missed I/Os to feed into.
 
-  BlockStore *arrayCache;
-  {
-    arrayCache = new BlockStoreCacheSimple("array",
-					   blockSize,
-					   arrayCacheSize,
-					   arrayEjectPolicy,
-					   BlockStoreCacheSimple::None);
+  Store *array;
+  if (useSLRUarrayFlag) {
+    array = new StoreCacheSLRU("array",
+			       NULL,
+			       blockSize,
+			       arrayCacheSize,
+			       arrayProbCacheSize);
   }
-  generators->StatisticsAdd(arrayCache);
-  Node array(arrayCache, NULL);
+  else {
+    array = new StoreCacheSimple("array",
+				 NULL,
+				 blockSize,
+				 arrayCacheSize,
+				 arrayEjectPolicy,
+				 StoreCacheSimple::None);
+  }
+  generators->StatisticsAdd(array);
+
+  // Create a client cache for each I/O request stream.
 
   for (int i = (optind + 2); i < argc; i++) {
     char buffer[40];
 
     sprintf(buffer, "%s", basename(argv[i]));
-    BlockStoreCache *cache = new BlockStoreCacheSimple(buffer,
-						       blockSize,
-						       clientCacheSize,
-						       BlockStoreCacheSimple::LRU,
-						       clientDemotePolicy);
-    generators->StatisticsAdd(cache);
-    Node *client = new Node(cache, &array);
+    StoreCacheSimple *client = new StoreCacheSimple(buffer,
+						    array,
+						    blockSize,
+						    clientCacheSize,
+						    StoreCacheSimple::LRU,
+						    clientDemotePolicy);
+    generators->StatisticsAdd(client);
 
     // Create I/O generator based on the input trace type.
 
@@ -174,9 +188,9 @@ main(int argc,
   printf("Client cache size %llu\n", clientCacheSizeMB);
   printf("Array cache size %llu\n", arrayCacheSizeMB);
   printf("Array cache policy %s-",
-	 (arrayEjectPolicy == BlockStoreCacheSimple::LRU ? "LRU" : "MRU"));
+	 (arrayEjectPolicy == StoreCacheSimple::LRU ? "LRU" : "MRU"));
   printf("%s\n",
-	 (clientDemotePolicy == BlockStoreCacheSimple::DemoteDemand ? "LRU" : "NONE"));
+	 (clientDemotePolicy == StoreCacheSimple::DemoteDemand ? "LRU" : "NONE"));
   printf("Block size %llu\n", blockSize);
   generators->statisticsShow();
 

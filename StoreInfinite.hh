@@ -1,16 +1,15 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreInfinite.hh,v 1.9 2002/02/11 20:08:22 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreInfinite.hh,v 1.10 2002/02/12 00:38:54 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
-#ifndef _BLOCKSTOREINFINITE_HH_
-#define _BLOCKSTOREINFINITE_HH_
+#ifndef _STOREINFINITE_HH_
+#define _STOREINFINITE_HH_
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#include <list>
 #include <map>
 
 extern "C" {
@@ -18,14 +17,14 @@ extern "C" {
 }
 
 #include "Block.hh"
-#include "BlockStore.hh"
+#include "Store.hh"
 #include "Cache.hh"
 #include "UInt64.hh"
 
 /**
  * Infinite LRU block cache.
  */
-class BlockStoreInfinite : public BlockStore {
+class StoreInfinite : public Store {
 private:
 
   // These data structures together form the 'cache'.
@@ -50,22 +49,24 @@ private:
 private:
   // Copy constructors - declared private and never defined
 
-  BlockStoreInfinite(const BlockStoreInfinite&);
-  BlockStoreInfinite& operator=(const BlockStoreInfinite&);
+  StoreInfinite(const StoreInfinite&);
+  StoreInfinite& operator=(const StoreInfinite&);
 
 public:
   /**
    * Create an infinite block cache.
    *
+   * There is no lower-level device below an infinite cache (of course).
+   *
    * @param inName A string name for the cache.
    * @param inBlockSize The size of each block, in bytes.
    * @param inSize The size of the cache, in blocks.
    */
-  BlockStoreInfinite(const char *inName,
-		     uint64_t inBlockSize,
-		     uint64_t inSize,
-		     bool inFreqFlag) :
-    BlockStore(inName, inBlockSize),
+  StoreInfinite(const char *inName,
+		uint64_t inBlockSize,
+		uint64_t inSize,
+		bool inFreqFlag) :
+    Store(inName, NULL, inBlockSize),
     blockTimestampMap(),
     blockTimestampClock(0),
     LRUTree(NULL),
@@ -77,12 +78,11 @@ public:
   /**
    * Destroy the infinite cache.
    */
-  ~BlockStoreInfinite() { ; };
+  ~StoreInfinite() { ; };
 
   // I/O request handlers
 
-  virtual bool IORequestDown(const IORequest& inIOReq,
-			     list<IORequest>& outIOReqList);
+  virtual bool IORequestDown(const IORequest& inIOReq);
 
   // Statistics management
 
@@ -90,10 +90,25 @@ public:
 
   virtual void statisticsShow() const;
 
+  /**
+   * Show block access frequencies.
+   */
   void statisticsFreqShow() const;
+
+  /**
+   * Show hit rate against LRU cache size.
+   */
   void statisticsLRUShow() const;
+
+  /**
+   * Show cumulative hit rate against LRU cache size.
+   */
   void statisticsLRUCumulShow() const;
+
+  /**
+   * Show block hit/miss counts.
+   */
   void statisticsSummaryShow() const;
 };
 
-#endif /* _BLOCKSTOREINFINITE_HH_ */
+#endif /* _STOREINFINITE_HH_ */

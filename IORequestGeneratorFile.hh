@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequestGeneratorFile.hh,v 1.4 2000/10/26 16:14:24 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/IORequestGeneratorFile.hh,v 1.1 2000/10/30 01:12:44 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -15,11 +15,23 @@
 
 #include "IORequest.hh"
 #include "IORequestGenerator.hh"
-#include "Node.hh"
+#include "Store.hh"
 
+/**
+ * Interface for I/O request generators that stream from a file. Classes
+ * that inherit from this class must implement a stream-format-specific
+ * request generator.
+ */
 class IORequestGeneratorFile : public IORequestGenerator {
 protected:
+  /**
+   * The file from which to stream requests.
+   */
   const char *filename;
+
+  /**
+   * The file handle for the file.
+   */
   FILE *file;
 
 private:
@@ -28,18 +40,38 @@ private:
 
 protected:
 
+  /**
+   * Queue a request in preparation for sending to a lower-level storage
+   * device.
+   */
   virtual void IORequestQueue() = 0;
 
 public:
-  IORequestGeneratorFile(Node *inNode,
+  /**
+   * Create a request generator that streams from inFilename.
+   *
+   * @param inStore The lower-level storage device to which to stream I/O
+   * requests.
+   * @param inFilename The file from which to stream requests.
+   */
+  IORequestGeneratorFile(Store *inStore,
 			 const char *inFilename);
 
+  /**
+   * Destroy the generator.
+   */
   virtual ~IORequestGeneratorFile();
 
+  /**
+   * Get the name of the file from which requests are streamed.
+   */
   const char *filenameGet() const {
     return (filename);
   };
 
+  /**
+   * Send a request to the lower-level storage device.
+   */
   virtual bool IORequestDown();
 };
 

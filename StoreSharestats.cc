@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreShareStats.cc,v 1.3 2002/02/11 20:08:22 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreSharestats.cc,v 1.3 2002/02/11 20:08:22 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -11,11 +11,11 @@
 #include "Cache.hh"
 #include "IORequest.hh"
 
-#include "StoreShareStats.hh"
+#include "StoreSharestats.hh"
 
 using namespace Block;
 
-StoreShareStats::~StoreShareStats()
+StoreSharestats::~StoreSharestats()
 {
   for (OrigMap::iterator i = origToAccessMap.begin();
        i != origToAccessMap.end();
@@ -25,14 +25,13 @@ StoreShareStats::~StoreShareStats()
 }
 
 bool
-StoreShareStats::IORequestDown(const IORequest& inIOReq,
-			       list<IORequest>& outIOReqList)
+StoreSharestats::IORequestDown(const IORequest& inIOReq)
 {
-  block_t block = {inIOReq.objectIDGet(), inIOReq.blockOffsetGet(blockSize)};
-  const char *orig = inIOReq.originatorGet();
-  uint64_t reqBlockLength = inIOReq.blockLengthGet(blockSize);
+  block_t block = {inIOReq.objIDGet(), inIOReq.blockOffGet(blockSize)};
+  const char *orig = inIOReq.origGet();
+  uint64_t reqBlockLen = inIOReq.blockLenGet(blockSize);
 
-  for (uint64_t i = 0; i < reqBlockLength; i++) {
+  for (uint64_t i = 0; i < reqBlockLen; i++) {
     Counter *theMap = NULL;
     OrigMap::iterator origIter = origToAccessMap.find(orig);
 
@@ -69,14 +68,14 @@ StoreShareStats::IORequestDown(const IORequest& inIOReq,
 }
 
 void
-StoreShareStats::statisticsReset()
+StoreSharestats::statisticsReset()
 {
   accessMap.clear();
   origToAccessMap.clear();
 }
 
 void
-StoreShareStats::statisticsShow() const
+StoreSharestats::statisticsShow() const
 {
   // Scan the counts of originators accessing each block, and return a
   // table of number of blocks against number of times that block was

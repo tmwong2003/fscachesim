@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreShareStats.hh,v 1.3 2002/02/11 20:08:22 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreSharestats.hh,v 1.3 2002/02/11 20:08:22 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -21,7 +21,7 @@ extern "C" {
 #include "Block.hh"
 #include "Store.hh"
 
-class StoreShareStats : public Store {
+class StoreSharestats : public Store {
 private:
   struct CharStarLessThan {
     bool operator()(const char *str1, const char *str2) const {
@@ -38,21 +38,20 @@ private:
 private:
   // Copy constructors - declared private and never defined
 
-  StoreShareStats(const StoreShareStats&);
-  StoreShareStats& operator=(const StoreShareStats&);
+  StoreSharestats(const StoreSharestats&);
+  StoreSharestats& operator=(const StoreSharestats&);
 
 public:
-  StoreShareStats(const char *inName,
+  StoreSharestats(const char *inName,
 		       unsigned int inBlockSize) :
-    Store(inName, inBlockSize),
+    Store(inName, NULL, inBlockSize),
     accessMap(),
     origToAccessMap() { ; };
-  ~StoreShareStats();
+  ~StoreSharestats();
 
   // Process incoming I/O requests
 
-  virtual bool IORequestDown(const IORequest& inIOReq,
-			     list<IORequest>& outIOReqList);
+  virtual bool IORequestDown(const IORequest& inIOReq);
 
   // Statistics management
 

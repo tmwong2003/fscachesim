@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreInfinite.cc,v 1.9 2002/02/11 20:08:22 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreInfinite.cc,v 1.10 2002/02/12 00:38:54 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -16,13 +16,12 @@
 #include "IORequest.hh"
 #include "UInt64.hh"
 
-#include "BlockStoreInfinite.hh"
+#include "StoreInfinite.hh"
 
 using Block::block_t;
 
 bool
-BlockStoreInfinite::IORequestDown(const IORequest& inIOReq,
-				  list<IORequest>& outIOReqList)
+StoreInfinite::IORequestDown(const IORequest& inIOReq)
 {
   block_t block = {inIOReq.objIDGet(), inIOReq.blockOffGet(blockSize)};
   uint64_t reqBlockLen = inIOReq.blockLenGet(blockSize);
@@ -118,7 +117,7 @@ BlockStoreInfinite::IORequestDown(const IORequest& inIOReq,
 }
 
 void
-BlockStoreInfinite::statisticsReset()
+StoreInfinite::statisticsReset()
 {
   // A reset for a cache doesn't wipe the infinite cache clean - it just
   // clears the LRU stack depth and freq. statistics.
@@ -128,11 +127,11 @@ BlockStoreInfinite::statisticsReset()
 
   // And of course, reset the parent.
 
-  BlockStore::statisticsReset();
+  Store::statisticsReset();
 }
 
 void
-BlockStoreInfinite::statisticsShow() const
+StoreInfinite::statisticsShow() const
 {
   if (freqFlag) {
     printf("Block access frequency:\n");
@@ -144,7 +143,7 @@ BlockStoreInfinite::statisticsShow() const
 }
 
 void
-BlockStoreInfinite::statisticsFreqShow() const
+StoreInfinite::statisticsFreqShow() const
 {
   for (Block::Counter::const_iterator i = freqMap.begin();
        i != freqMap.end();
@@ -155,7 +154,7 @@ BlockStoreInfinite::statisticsFreqShow() const
 }
 
 void
-BlockStoreInfinite::statisticsLRUShow() const
+StoreInfinite::statisticsLRUShow() const
 {
   for (UInt64::Counter::const_iterator i = LRUMap.begin();
        i != LRUMap.end();
@@ -170,7 +169,7 @@ BlockStoreInfinite::statisticsLRUShow() const
 }
 
 void
-BlockStoreInfinite::statisticsLRUCumulShow() const
+StoreInfinite::statisticsLRUCumulShow() const
 {
   uint64_t cumul = 0;
   uint64_t cumulTotal = readMisses;
@@ -202,7 +201,7 @@ BlockStoreInfinite::statisticsLRUCumulShow() const
 }
 
 void
-BlockStoreInfinite::statisticsSummaryShow() const
+StoreInfinite::statisticsSummaryShow() const
 {
   printf("Block hits %llu\n", readHits);
   printf("Block misses %llu\n", readMisses);

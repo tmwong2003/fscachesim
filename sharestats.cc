@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/sharestats.cc,v 1.3 2001/11/20 02:20:14 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/sharestats.cc,v 1.4 2002/02/12 00:38:55 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -11,13 +11,12 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "BlockStoreShareStats.hh"
 #include "IORequest.hh"
 #include "IORequestGeneratorBatch.hh"
 #include "IORequestGeneratorFile.hh"
-#include "IORequestGeneratorGeneric.hh"
-#include "IORequestGeneratorMambo.hh"
-#include "Node.hh"
+#include "IORequestGeneratorFileGeneric.hh"
+#include "IORequestGeneratorFileMambo.hh"
+#include "StoreSharestats.hh"
 
 // Command usage.
 
@@ -105,19 +104,18 @@ main(int argc, char *argv[])
 
   // Create a single infinite cache for all I/Os to feed into.
 
-  BlockStoreShareStats cache("cache-sharestats", blockSize);
+  StoreSharestats cache("cache-sharestats", blockSize);
   generators->StatisticsAdd(&cache);
-  Node host(&cache, NULL);
 
   for (int i = optind; i < argc; i++) {
     // Create I/O generator based on the input trace type.
 
     IORequestGeneratorFile *generator;
     if (useMamboFlag) {
-      generator = new IORequestGeneratorMambo(&host, argv[i]);
+      generator = new IORequestGeneratorFileMambo(&cache, argv[i]);
     }
     else {
-      generator = new IORequestGeneratorGeneric(&host, argv[i]);
+      generator = new IORequestGeneratorFileGeneric(&cache, argv[i]);
     }
     generators->IORequestGeneratorAdd(generator);
   }

@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Cache.hh,v 1.7 2002/02/11 20:08:22 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Cache.hh,v 1.8 2002/02/12 00:38:54 tmwong Exp $
   Description:  Simple cache object. Supports insertions at the head and tail.
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -23,7 +23,6 @@ using namespace std;
 #endif /* HAVE_STDINT_H */
 
 #include "Block.hh"
-#include "BlockStore.hh"
 
 /**
  * Cache object that supports insertions an its head and tail ends. A major
@@ -55,6 +54,12 @@ private:
    * The maximum block count.
    */
   uint64_t blockCountMax;
+
+private:
+  // Copy constructors - declared private and never defined
+
+  Cache(const Cache&);
+  Cache& operator=(const Cache&);
 
 public:
   /**

@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/tracestats.cc,v 1.10 2002/02/08 16:54:10 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/tracestats.cc,v 1.11 2002/02/12 00:38:55 tmwong Exp $
   Description:  Generate LRU and frequency trace stats using fscachesim
                 objects.
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
@@ -12,13 +12,12 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "BlockStoreInfinite.hh"
 #include "IORequest.hh"
 #include "IORequestGeneratorBatch.hh"
 #include "IORequestGeneratorFile.hh"
 #include "IORequestGeneratorFileGeneric.hh"
 #include "IORequestGeneratorFileMambo.hh"
-#include "Node.hh"
+#include "StoreInfinite.hh"
 
 // Command usage.
 
@@ -136,20 +135,19 @@ main(int argc, char *argv[])
   // Create a single (possibly infinite) cache for all I/Os to feed into.
 
   uint64_t cacheSize = cacheSizeMB * (globalMBToB / blockSize);
-  BlockStoreInfinite cache("cache", blockSize, cacheSize, false);
+  StoreInfinite cache("cache", blockSize, cacheSize, false);
 
   generators->StatisticsAdd(&cache);
-  Node host(&cache, NULL);
 
   for (int i = optind; i < argc; i++) {
     // Create I/O generator based on the input trace type.
 
     IORequestGeneratorFile *generator;
     if (useMamboFlag) {
-      generator = new IORequestGeneratorFileMambo(&host, argv[i]);
+      generator = new IORequestGeneratorFileMambo(&cache, argv[i]);
     }
     else {
-      generator = new IORequestGeneratorFileGeneric(&host, argv[i]);
+      generator = new IORequestGeneratorFileGeneric(&cache, argv[i]);
     }
     generators->IORequestGeneratorAdd(generator);
   }
