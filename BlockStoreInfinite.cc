@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreInfinite.cc,v 1.4 2000/10/26 16:14:24 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/BlockStoreInfinite.cc,v 1.5 2001/06/30 22:54:06 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -110,7 +110,7 @@ BlockStoreInfinite::statisticsLRUShow() const
     // Convert the x-axis to kilobytes instead of block size - the
     // latter is not an intuitive measure of size.
 
-    printf("%d %d\n", (i->first * blockSize / (1024 * 1024)), i->second);
+    printf("%d %d\n", ((i->first * (blockSize / 1024)) / 1024), i->second);
   }
   fflush(stdout);
 }
@@ -132,7 +132,7 @@ BlockStoreInfinite::statisticsLRUCumulShow() const
     // latter is not an intuitive measure of size.
 
     cumul += i->second;
-    printf("%d %4.3f\n", (i->first * blockSize / (1024 * 1024)), ((double)cumul / cumulTotal));
+    printf("%d %4.3f\n", ((i->first * (blockSize / 1024)) / 1024), ((double)cumul / cumulTotal));
   }
   fflush(stdout);
 }
