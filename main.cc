@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/main.cc,v 1.5 2000/10/24 19:54:42 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/main.cc,v 1.6 2000/10/26 16:14:24 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -13,15 +13,27 @@
 #include "BlockStoreInfinite.hh"
 #include "IORequest.hh"
 #include "IORequestGeneratorGeneric.hh"
+#include "IORequestGeneratorMambo.hh"
 #include "Node.hh"
 
+const char *globalProgArgs = "b:mw:";
+
+const char *globalProgUsage = \
+"[-m] " \
+"[-b block_size] " \
+"[-w warmup_time] " \
+"trace_files...";
+
+// Default command-line argument values.
+
 const int globalBlockSize = 4096;
+const double globalWarmupTime = 0;
 
 const int globalHostCacheSize = 16384;
-const CacheDemotePolicy_t globalHostDemotePolicy = None;
+const CacheDemotePolicy_t globalHostDemotePolicy = DemoteDemand;
 
-const int globalArrayCacheSize = 262144;
-const CacheReplPolicy_t globalArrayReplPolicy = LRU;
+const int globalArrayCacheSize = 16384;
+const CacheReplPolicy_t globalArrayReplPolicy = MRU;
 
 const int globalRecordsPerDot = 1000;
 
@@ -34,26 +46,73 @@ public:
   };
 };
 
+void
+usage(char *inProgName,
+      int inExitStatus)
+{
+  printf("Usage: %s %s\n", basename(inProgName), globalProgUsage);
+
+  exit(inExitStatus);
+}
+
 int
-main(int argc, char *argv[])
+main(int argc,
+     char *argv[])
 {
   list<IORequestGenerator *> generators;
-  BlockStoreCache arrayCache(globalBlockSize,
+
+  uint32_t blockSize = globalBlockSize;
+  double warmupTime = globalWarmupTime;
+
+  bool useMamboFlag = false;
+
+  // Process command-line args.
+
+  bool errFlag = false;
+  char opt;
+  while (!errFlag && (opt = getopt(argc, argv, globalProgArgs)) != EOF) {
+    switch (opt) {
+    case 'b':
+      blockSize = atol(optarg);
+      break;
+    case 'm':
+      useMamboFlag = true;
+      break;
+    case 'w':
+      warmupTime = strtod(optarg, NULL);
+      break;
+    default:
+      errFlag = true;
+    }
+  }
+
+  if (errFlag || optind >= argc) {
+    usage(argv[0], EXIT_FAILURE);
+  }
+
+  BlockStoreCache arrayCache(blockSize,
 			     globalArrayCacheSize,
 			     globalArrayReplPolicy,
 			     None);
-  Node array(&arrayCache, NULL);
+  Node array(&arrayCache, NULL, warmupTime);
   int records = 0;
 
-  for (int i = 1; i < argc; i++) {
-    BlockStoreCache *cache = new BlockStoreCache(globalBlockSize,
+  for (int i = optind; i < argc; i++) {
+    BlockStoreCache *cache = new BlockStoreCache(blockSize,
 						 globalHostCacheSize,
 						 LRU,
 						 globalHostDemotePolicy);
-    Node *host = new Node(cache, &array);
-    IORequestGeneratorGeneric *generator =
-      new IORequestGeneratorGeneric(host, argv[i]);
+    Node *host = new Node(cache, &array, warmupTime);
 
+    // Create I/O generator based on the input trace type.
+
+    IORequestGenerator *generator;
+    if (useMamboFlag) {
+      generator = new IORequestGeneratorMambo(host, argv[i]);
+    }
+    else {
+      generator = new IORequestGeneratorGeneric(host, argv[i]);
+    }
     generators.push_back(generator);
   }
 

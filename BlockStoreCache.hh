@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreCache.hh,v 1.3 2000/10/02 18:18:17 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreCache.hh,v 1.4 2000/10/24 19:54:41 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -75,7 +75,9 @@ public:
   virtual bool IORequestDown(const IORequest& inIOReq,
 			     list<IORequest>& outIOReq);
 
-  // Output statistics
+  // Statistics management
+
+  virtual void statisticsReset();
 
   virtual void statisticsShow() const;
 };

@@ -1,11 +1,13 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequestGenerator.cc,v 1.3 2000/10/24 19:54:41 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequestGeneratorGeneric.cc,v 1.1 2000/10/25 03:32:30 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "IORequest.hh"
 
 #include "IORequestGeneratorGeneric.hh"
 

@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequest.hh,v 1.4 2000/10/02 18:18:17 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequest.hh,v 1.5 2000/10/24 19:54:41 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -18,6 +18,7 @@ enum IORequestOp_t {Demote, Read};
 class IORequest {
 protected:
   const char *originator;
+  const uint32_t requestID;
 
   IORequestOp_t op;
 
@@ -43,21 +44,22 @@ public:
 	    uint32_t inOffset,
 	    uint32_t inLength) :
     originator(inOriginator),
+    requestID(0),
     op(inOp),
     timeIssued(inTimeIssued),
     objectID(inObjectID),
     offset(inOffset),
     length(inLength) { ; };
 
-  IORequest(const IORequest& inIOReq) {
-    originator = inIOReq.originator;
-    op = inIOReq.op;
-    timeIssued = inIOReq.timeIssued;
-    devID = inIOReq.devID;
-    objectID = inIOReq.objectID;
-    offset = inIOReq.offset;
-    length = inIOReq.length;
-  };
+  IORequest(const IORequest& inIOReq) :
+    originator(inIOReq.originator),
+    requestID(inIOReq.requestID),
+    op(inIOReq.op),
+    timeIssued(inIOReq.timeIssued),
+    devID(inIOReq.devID),
+    objectID(inIOReq.objectID),
+    offset(inIOReq.offset),
+    length(inIOReq.length) { ; };
 
   ~IORequest() { ; };
 
@@ -65,6 +67,10 @@ public:
 
   const char *originatorGet() const {
     return (originator);
+  };
+
+  uint32_t requestIDGet() const {
+    return (requestID);
   };
 
   IORequestOp_t opGet() const {

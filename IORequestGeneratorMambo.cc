@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequestGeneratorMambo.cc,v 1.2 2000/10/25 17:39:21 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/IORequestGeneratorMambo.cc,v 1.3 2000/10/26 16:14:24 tmwong Exp $
   Description:  Generate I/O requests from a Mambo trace file.
   Author:       A. Acharya <acha@cs.umd.edu>, T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -7,6 +7,8 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "IORequest.hh"
 
 #include "IORequestGeneratorMambo.hh"
 

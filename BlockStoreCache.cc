@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreCache.cc,v 1.3 2000/10/02 18:18:17 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreCache.cc,v 1.4 2000/10/24 19:54:41 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -118,6 +118,18 @@ BlockStoreCache::IORequestDown(const IORequest& inIOReq,
   }
 
   return (true);
+}
+
+void
+BlockStoreCache::statisticsReset()
+{
+  blockDemoteHitsMap.clear();
+  blockDemoteMissesMap.clear();
+
+  blockReadHitsMap.clear();
+  blockReadMissesMap.clear();
+
+  BlockStore::statisticsReset();
 }
 
 void
