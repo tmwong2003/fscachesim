@@ -1,7 +1,7 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/main.cc,v 1.3 2000/09/28 02:54:50 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/main.cc,v 1.4 2000/10/02 18:18:17 tmwong Exp $
   Description:  
-  Author:       T.M. Wong <tmwong@cs.cmu.edu>
+  Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
 #include <functional>
@@ -18,10 +18,10 @@
 const int globalBlockSize = 4096;
 
 const int globalHostCacheSize = 16384;
-const CacheDemotePolicy_t globalHostDemotePolicy = DemoteDemand;
+const CacheDemotePolicy_t globalHostDemotePolicy = None;
 
-const int globalArrayCacheSize = 16384;
-const CacheReplPolicy_t globalArrayReplPolicy = MRU;
+const int globalArrayCacheSize = 262144;
+const CacheReplPolicy_t globalArrayReplPolicy = LRU;
 
 const int globalRecordsPerDot = 1000;
 

@@ -1,8 +1,8 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/main.cc,v 1.3 2000/09/28 02:54:50 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/tracestats.cc,v 1.1 2000/10/02 18:17:42 tmwong Exp $
   Description:  Generate LRU and frequency trace stats using fscachesim
                 objects.
-  Author:       T.M. Wong <tmwong@cs.cmu.edu>
+  Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
 #include <functional>
@@ -14,7 +14,7 @@
 #include "IORequestGenerator.hh"
 #include "Node.hh"
 
-const int globalBlockSize = 4096;
+const int globalBlockSize = 256;
 
 const int globalRecordsPerDot = 1000;
 

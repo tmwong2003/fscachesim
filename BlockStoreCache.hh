@@ -1,7 +1,7 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreCache.hh,v 1.2 2000/09/28 02:54:49 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreCache.hh,v 1.3 2000/10/02 18:18:17 tmwong Exp $
   Description:  
-  Author:       T.M. Wong <tmwong@cs.cmu.edu>
+  Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
 #ifndef _BLOCKSTORECACHE_HH_

@@ -1,7 +1,7 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreDisk.hh,v 1.1 2000/09/22 16:15:38 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/BlockStoreDisk.hh,v 1.2 2000/09/28 02:54:49 tmwong Exp $
   Description:  
-  Author:       T.M. Wong <tmwong@cs.cmu.edu>
+  Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
 #ifndef _BLOCKSTOREDISK_HH_

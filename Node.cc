@@ -1,7 +1,7 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/Node.cc,v 1.2 2000/09/22 16:15:39 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/fscachesim/Node.cc,v 1.3 2000/09/28 02:54:50 tmwong Exp $
   Description:  
-  Author:       T.M. Wong <tmwong@cs.cmu.edu>
+  Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
 #include "IORequest.hh"
