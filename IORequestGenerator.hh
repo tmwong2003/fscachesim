@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/IORequestGenerator.hh,v 1.5 2000/10/30 01:12:44 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/IORequestGenerator.hh,v 1.6 2002/02/12 21:50:55 tmwong Exp $
   Description:  
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
@@ -14,10 +14,20 @@
 #include "IORequest.hh"
 #include "Store.hh"
 
+/**
+ * Interface for I/O request generators. Classes that inherit from
+ * this class must implement all abstract methods.
+ */
 class IORequestGenerator {
 protected:
+  /**
+   * The lower-level storage device below this generator.
+   */
   Store *store;
 
+  /**
+   * The pending I/O request.
+   */
   IORequest *nextRequest;
 
 private:
@@ -50,6 +60,9 @@ public:
     }
   };
 
+  /**
+   * Get the pending I/O request.
+   */
   const IORequest *IORequestGet() const {
     return (nextRequest);
   };
@@ -65,8 +78,9 @@ public:
    */
   bool operator<(const IORequestGenerator& inGenerator) const;
 
-  // Send a queued request on to the lower-level storage device.
-
+  /**
+   * Send a queued request on to the lower-level storage device.
+   */
   virtual bool IORequestDown() = 0;
 };
 
