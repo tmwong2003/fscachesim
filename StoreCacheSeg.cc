@@ -1,12 +1,20 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSeg.cc,v 1.5 2001/11/20 02:20:13 tmwong Exp $
-  Description:  
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSeg.cc,v 1.1 2002/02/13 20:21:08 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
 #include <math.h>
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif /* HAVE_STDINT_H */
 #include <stdio.h>
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif /* HAVE_STDLIB_H */
 
 #include "Block.hh"
 #include "IORequest.hh"
@@ -56,12 +64,11 @@ StoreCacheSeg::blockPutAtSegCascade(const block_t& inBlock,
 }
 
 StoreCacheSeg::StoreCacheSeg(const char *inName,
-			     Store *inNextStore,
 			     uint64_t inBlockSize,
 			     uint64_t inSize,
 			     int inSegCount,
 			     bool inNormalizeFlag) :
-  StoreCache(inName, inNextStore, inBlockSize),
+  StoreCache(inName, inBlockSize),
   cacheSegCount(inSegCount),
   ghost(inName, inSize, inNormalizeFlag)
 {
@@ -89,13 +96,12 @@ StoreCacheSeg::StoreCacheSeg(const char *inName,
 // the size of the previous segment.
 
 StoreCacheSeg::StoreCacheSeg(const char *inName,
-			     Store *inNextStore,
 			     uint64_t inBlockSize,
 			     uint64_t inSize,
 			     int inSegCount,
 			     int inSegMultiplier,
 			     bool inNormalizeFlag) :
-  StoreCache(inName, inNextStore, inBlockSize),
+  StoreCache(inName, inBlockSize),
   cacheSegCount(inSegCount),
   ghost(inName, inSize, inNormalizeFlag)
 {
@@ -161,18 +167,19 @@ StoreCacheSeg::BlockCache(const IORequest& inIOReq,
 			  list<IORequest>& outIOReqs)
 {
   const char* reqOrig = inIOReq.origGet();
-  IORequestOp_t op = inIOReq.opGet();
+  IORequest::IORequestOp_t op = inIOReq.opGet();
 
-  // See if we have cached this block.
+  // See if we have cached this block. We only update the ghost hit counts
+  // when we receive a read request.
 
   int blockSeg = blockGetCascade(inBlock);
   if (blockSeg != cacheSegCount) {
     switch (op) {
-    case Demote:
+    case IORequest::Demote:
       demoteHitsPerOrig[reqOrig]++;
       demoteHits++;
       break;
-    case Read:
+    case IORequest::Read:
       readHitsPerOrig[reqOrig]++;
       readHits++;
       ghost.probUpdate(inBlock);
@@ -181,29 +188,31 @@ StoreCacheSeg::BlockCache(const IORequest& inIOReq,
       abort();
     }
 
-    // For now, cache the block at the MRU end of the actual LRU queue.
+    // Move the block to the MRU end of the actual LRU queue.
 
     blockPutAtSegCascade(inBlock, cacheSegCount - 1);
   }
   else {
     switch (op) {
-    case Demote:
+    case IORequest::Demote:
       demoteMissesPerOrig[reqOrig]++;
       demoteMisses++;
       break;
-    case Read:
+    case IORequest::Read:
       readMissesPerOrig[reqOrig]++;
       readMisses++;
       ghost.probUpdate(inBlock);
 
-      // Create a new IORequest to pass on to the next-level node.
-
+      // The following code is commented out since, as implemented,
+      // segmented caches are terminal devices.
+#if 0
       outIOReqs.push_back(IORequest(reqOrig,
-				    Read,
+				    IORequest::Read,
 				    inIOReq.timeIssuedGet(),
 				    inIOReq.objIDGet(),
 				    inBlock.blockID * blockSize,
 				    blockSize));
+#endif /* 0 */
       break;
     default:
       abort();

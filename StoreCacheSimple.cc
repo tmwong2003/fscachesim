@@ -1,6 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSimple.cc,v 1.1 2002/02/12 21:50:56 tmwong Exp $
-  Description:  
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSimple.cc,v 1.2 2002/02/13 20:21:08 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -36,11 +35,11 @@ StoreCacheSimple::BlockCache(const IORequest& inIOReq,
     cache.blockGet(inBlock);
 
     switch (inIOReq.opGet()) {
-    case Demote:
+    case IORequest::Demote:
       demoteHitsPerOrig[inIOReq.origGet()]++;
       demoteHits++;
       break;
-    case Read:
+    case IORequest::Read:
       readHitsPerOrig[inIOReq.origGet()]++;
       readHits++;
       break;
@@ -59,9 +58,9 @@ StoreCacheSimple::BlockCache(const IORequest& inIOReq,
 
       // If necessary, create a Demote I/O.
 
-      if (demotePolicy == Demand) {
+      if (nextStore && demotePolicy == Demand) {
 	outIOReqs.push_back(IORequest(inIOReq.origGet(),
-				      Demote,
+				      IORequest::Demote,
 				      inIOReq.timeIssuedGet(),
 				      demoteBlock.objID,
 				      demoteBlock.blockID * blockSize,
@@ -70,23 +69,24 @@ StoreCacheSimple::BlockCache(const IORequest& inIOReq,
     }
 
     switch (inIOReq.opGet()) {
-    case Demote:
+    case IORequest::Demote:
       demoteMissesPerOrig[inIOReq.origGet()]++;
       demoteMisses++;
       break;
-    case Read:
+    case IORequest::Read:
       readMissesPerOrig[inIOReq.origGet()]++;
       readMisses++;
 
       // Create a new IORequest to pass on to the next-level node.
 
-      outIOReqs.push_back(IORequest(inIOReq.origGet(),
-				    Read,
-				    inIOReq.timeIssuedGet(),
-				    inIOReq.objIDGet(),
-				    inBlock.blockID * blockSize,
-				    blockSize));
-
+      if (nextStore) {
+	outIOReqs.push_back(IORequest(inIOReq.origGet(),
+				      IORequest::Read,
+				      inIOReq.timeIssuedGet(),
+				      inIOReq.objIDGet(),
+				      inBlock.blockID * blockSize,
+				      blockSize));
+      }
       break;
     default:
       abort();
@@ -98,7 +98,7 @@ StoreCacheSimple::BlockCache(const IORequest& inIOReq,
     cache.blockPutAtTail(inBlock);
     break;
   case MRU:
-    if (inIOReq.opGet() == Demote) {
+    if (inIOReq.opGet() == IORequest::Demote) {
       // Demoted blocks always go at the eject-me-last end.
 
       cache.blockPutAtTail(inBlock);

@@ -1,9 +1,11 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/IORequestGeneratorGeneric.cc,v 1.4 2001/11/20 02:20:13 tmwong Exp $
-  Description:  
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/IORequestGeneratorFileGeneric.cc,v 1.1 2002/02/12 00:38:54 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif /* HAVE_STDINT_H */
 #include <stdio.h>
 #include <stdlib.h>
 #define __USE_GNU 1
@@ -47,7 +49,7 @@ IORequestGeneratorFileGeneric::IORequestQueue()
     }
     else {
       nextRequest = new IORequest(basename(filename),
-				  Read,
+				  IORequest::Read,
 				  timeIssued,
 				  objID,
 				  off,

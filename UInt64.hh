@@ -1,6 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/UInt64.hh,v 1.1 2002/02/11 20:11:28 tmwong Exp $
-  Description:  uint64_t utility containers
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/UInt64.hh,v 1.2 2002/02/13 20:21:08 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -16,6 +15,9 @@
 #include <stdint.h>
 #endif /* HAVE_STDINT_H */
 
+/**
+ * 64-bit integer utility functions and containers
+ */
 namespace UInt64 {
   using std::map;
 
@@ -33,6 +35,9 @@ namespace UInt64 {
     }
   };
 
+  /**
+   * Per-integer counter
+   */
   typedef map<uint64_t, uint64_t, LessThan> Counter;
 };
 

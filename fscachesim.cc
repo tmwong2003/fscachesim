@@ -1,14 +1,24 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/fscachesim.cc,v 1.2 2002/02/12 21:50:57 tmwong Exp $
-  Description:  
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/fscachesim.cc,v 1.3 2002/02/13 20:21:08 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
 #include <functional>
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif /* HAVE_STDINT_H */
 #include <stdio.h>
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif /* HAVE_STDLIB_H */
 #include <string.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif /* HAVE_UNISTD_H */
 
 #include "IORequest.hh"
 #include "IORequestGeneratorBatch.hh"
@@ -154,7 +164,6 @@ main(int argc,
   Store *array;
   if (useArraySLRUFlag) {
     array = new StoreCacheSLRU("array",
-			       NULL,
 			       blockSize,
 			       arraySize,
 			       arrayProbSize);
@@ -162,7 +171,6 @@ main(int argc,
   else if (useArraySegFlag) {
     if (useArraySegUniformFlag) {
       array = new StoreCacheSeg("array",
-				NULL,
 				blockSize,
 				arraySize,
 				globalStoreCacheSegSegCount,
@@ -170,7 +178,6 @@ main(int argc,
     }
     else {
       array = new StoreCacheSeg("array",
-				NULL,
 				blockSize,
 				arraySize,
 				globalStoreCacheSegSegCount,
@@ -180,7 +187,6 @@ main(int argc,
   }
   else {
     array = new StoreCacheSimple("array",
-				 NULL,
 				 blockSize,
 				 arraySize,
 				 arrayEjectPolicy,

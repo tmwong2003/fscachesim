@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreInfinite.hh,v 1.10 2002/02/12 00:38:54 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreInfinite.hh,v 1.1 2002/02/12 21:50:56 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -11,6 +11,9 @@
 #endif /* HAVE_CONFIG_H */
 
 #include <map>
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif /* HAVE_STDINT_H */
 
 extern "C" {
 #include "top-down-size-splay.h"

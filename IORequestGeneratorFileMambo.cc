@@ -1,6 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/IORequestGeneratorMambo.cc,v 1.6 2001/11/20 02:20:13 tmwong Exp $
-  Description:  Generate I/O requests from a Mambo trace file.
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/IORequestGeneratorFileMambo.cc,v 1.1 2002/02/12 00:38:54 tmwong Exp $
   Author:       A. Acharya <acha@cs.umd.edu>, T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -147,7 +146,7 @@ IORequestGeneratorFileMambo::IORequestQueue()
 	  uint64_t uniqueFileID =
 	    staticDir[traceHeader.fileNames[record.fileId].name];
 	  nextRequest = new IORequest(basename(filename),
-				      Read,
+				      IORequest::Read,
 				      record.wallClock,
 				      uniqueFileID,
 				      record.offset,

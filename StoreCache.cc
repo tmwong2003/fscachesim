@@ -1,15 +1,19 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCache.cc,v 1.14 2002/02/12 00:38:54 tmwong Exp $
-  Description:  
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCache.cc,v 1.1 2002/02/12 21:50:56 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
+#include <list>
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif /* HAVE_STDINT_H */
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "Block.hh"
 #include "Char.hh"
 #include "IORequest.hh"
+#include "Store.hh"
 
 #include "StoreCache.hh"
 

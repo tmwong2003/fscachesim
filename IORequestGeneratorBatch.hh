@@ -1,6 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/IORequestGeneratorBatch.hh,v 1.3 2002/02/12 21:50:55 tmwong Exp $
-  Description:  
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/IORequestGeneratorBatch.hh,v 1.4 2002/02/13 20:21:08 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -12,13 +11,21 @@
 #endif /* HAVE_CONFIG_H */
 
 #include <list>
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif /* HAVE_STDINT_H */
 
 #include "IORequestGenerator.hh"
 #include "Statistics.hh"
 
+/**
+ * Read I/O requests from multiple generators (with warm-up periods, if
+ * desired), and send them off to lower-level storage devices.
+ */
 class IORequestGeneratorBatch :
   public IORequestGenerator,
-  public Statistics {
+  public Statistics
+{
 private:
   class IORequestGeneratorLessThan:
     public binary_function<IORequestGenerator *, IORequestGenerator *, bool> {
@@ -42,10 +49,15 @@ private:
   uint64_t recordsPerDot;
 
 private:
+  // Copy constructors: declared private and never defined
+
   IORequestGeneratorBatch(const IORequestGeneratorBatch&);
   IORequestGeneratorBatch& operator=(const IORequestGeneratorBatch&);
 
 public:
+  /**
+   * Create a batch I/O request generator.
+   */
   IORequestGeneratorBatch() :
     IORequestGenerator(),
     Statistics(""),
@@ -57,6 +69,12 @@ public:
     warmupDoneFlag(true),
     recordsPerDot(1000) { ; };
 
+  /**
+   * Create a batch I/O request generator with a warm-up period of some
+   * number of requests.
+   *
+   * @param inWarmupCount The number of requests in the warm-up period.
+   */
   IORequestGeneratorBatch(uint64_t inWarmupCount) :
     IORequestGenerator(),
     Statistics(""),
@@ -68,6 +86,11 @@ public:
     warmupDoneFlag(false),
     recordsPerDot(1000) { ; };
 
+  /**
+   * Create a batch I/O request generator with a timed warm-up period.
+   *
+   * @param inWarmupCount The time of the warm-up period.
+   */
   IORequestGeneratorBatch(double inWarmupTime) :
     IORequestGenerator(),
     Statistics(""),
@@ -79,12 +102,25 @@ public:
     warmupDoneFlag(false),
     recordsPerDot(1000) { ; };
 
+  /**
+   * Destroy the generator.
+   */
   virtual ~IORequestGeneratorBatch();
 
+  /**
+   * Add a subsidary request generator to the batch.
+   *
+   * @param inGenerator A pointer to the subsidiary generator.
+   */
   void IORequestGeneratorAdd(IORequestGenerator *inGenerator) {
     generators.push_back(inGenerator);
   };
 
+  /**
+   * Add a subsidary statistics object to the batch.
+   *
+   * @param inGenerator A pointer to the subsidiary statistics object.
+   */
   void StatisticsAdd(Statistics *inStatistics) {
     statistics.push_back(inStatistics);
   };

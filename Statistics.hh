@@ -1,6 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Statistics.hh,v 1.1 2000/10/30 01:12:45 tmwong Exp $
-  Description:  Statistics interface for functions that keep and print stats.
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Statistics.hh,v 1.2 2002/02/12 00:38:54 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 

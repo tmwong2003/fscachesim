@@ -1,6 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCache.hh,v 1.1 2002/02/12 21:50:56 tmwong Exp $
-  Description:  
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCache.hh,v 1.2 2002/02/13 20:21:08 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -86,6 +85,18 @@ public:
 	     Store *inNextStore,
 	     uint64_t inBlockSize) :
     Store(inName, inNextStore, inBlockSize),
+    logRequestFlag(false) { ; };
+
+  /**
+   * Create a block cache.
+   *
+   * @param inName A string name for the cache.
+   * @param inNextStore A lower-level storage device (can be NULL).
+   * @param inBlockSize The size of each block, in bytes.
+   */
+  StoreCache(const char *inName,
+	     uint64_t inBlockSize) :
+    Store(inName, inBlockSize),
     logRequestFlag(false) { ; };
 
   /**

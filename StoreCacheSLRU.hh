@@ -1,6 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSLRU.hh,v 1.1 2002/02/12 21:50:56 tmwong Exp $
-  Description:  
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSLRU.hh,v 1.2 2002/02/13 20:21:08 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -12,6 +11,9 @@
 #endif /* HAVE_CONFIG_H */
 
 #include <list>
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif /* HAVE_STDINT_H */
 
 #include "Block.hh"
 #include "Cache.hh"
@@ -83,6 +85,22 @@ public:
 		 uint64_t inSize,
 		 uint64_t inProbSize) :
     StoreCache(inName, inNextStore, inBlockSize),
+    probCache(inProbSize),
+    protCache(inSize - inProbSize) { ; };
+
+  /**
+   * Create an SLRU cache.
+   *
+   * @param inName A string name for the cache.
+   * @param inBlockSize The size of each block, in bytes.
+   * @param inSize The size of the total cache, in blocks.
+   * @param inProbSize The size of the probationary cache, in blocks.
+   */
+  StoreCacheSLRU(const char *inName,
+		 uint64_t inBlockSize,
+		 uint64_t inSize,
+		 uint64_t inProbSize) :
+    StoreCache(inName, inBlockSize),
     probCache(inProbSize),
     protCache(inSize - inProbSize) { ; };
 

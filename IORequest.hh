@@ -1,6 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/IORequest.hh,v 1.8 2001/11/20 02:20:13 tmwong Exp $
-  Description:  
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/IORequest.hh,v 1.9 2002/02/12 00:38:54 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -16,12 +15,21 @@
 #endif /* HAVE_STDINT_H */
 #include <stdio.h>
 
-enum IORequestOp_t {Demote, Read};
-
+/**
+ * I/O request object abstraction.
+ **/
 class IORequest {
+public:
+  /**
+   * Type of I/O operation.
+   */
+  enum IORequestOp_t {
+    Demote, /**< Demote operation */
+    Read /**< Read operation */
+  };
+
 private:
   const char *orig;
-  const uint64_t reqID;
 
   IORequestOp_t op;
 
@@ -39,65 +47,105 @@ private:
 public:
   // Constructors and destructors
 
+  /**
+   * Create an I/O request.
+   *
+   * @param inOrig The name of the request originator.
+   * @param inOp The operation type of the request.
+   * @param inTimeIssued The time the request was issued.
+   * @param inObjID The object ID of the request.
+   * @param inOff The offset into the object of the request.
+   * @param inOff The lenght of the request.
+   */
   IORequest(const char *inOrig,
 	    IORequestOp_t inOp,
 	    double inTimeIssued,
-	    uint64_t inObjectID,
+	    uint64_t inObjID,
 	    uint64_t inOff,
 	    uint64_t inLen) :
     orig(inOrig),
-    reqID(0),
     op(inOp),
     timeIssued(inTimeIssued),
-    objID(inObjectID),
+    objID(inObjID),
     off(inOff),
     len(inLen) { ; };
 
+  /**
+   * Copy an I/O request.
+   *
+   * @param inIOReq The request to be copied.
+   */
   IORequest(const IORequest& inIOReq) :
     orig(inIOReq.orig),
-    reqID(inIOReq.reqID),
     op(inIOReq.op),
     timeIssued(inIOReq.timeIssued),
     objID(inIOReq.objID),
     off(inIOReq.off),
     len(inIOReq.len) { ; };
 
+  /**
+   * Destroy the request.
+   */
   ~IORequest() { ; };
 
   // Accessors
 
+  /**
+   * Get the name of the originator.
+   */
   const char *origGet() const {
     return (orig);
   };
 
-  uint64_t reqIDGet() const {
-    return (reqID);
-  };
-
+  /**
+   * Get the operation type of the request.
+   */
   IORequestOp_t opGet() const {
     return (op);
   };
 
+  /**
+   * Get the issue time of the request.
+   */
   double timeIssuedGet() const {
     return (timeIssued);
   };
 
+  /**
+   * Get the object ID that the request accesses.
+   */
   uint64_t objIDGet() const {
     return (objID);
   };
 
+  /**
+   * Get the offset into of the object that the request accesses.
+   */
   uint64_t offGet() const {
     return (off);
   };
 
+  /**
+   * Get the length of the request.
+   */
   uint64_t lenGet() const {
     return (len);
   };
 
+  /**
+   * Get the offset into of the object that the request accesses, in blocks.
+   *
+   * @param inBlockSize The block size.
+   */
   uint64_t blockOffGet(const uint64_t inBlockSize) const {
     return (off / inBlockSize);
   };
 
+  /**
+   * Get the length of the request, in block.
+   *
+   * @param inBlockSize The block size.
+   */
   uint64_t blockLenGet(const uint64_t inBlockSize) const {
     //  The following expression is len + starting fill + ending fill.
 

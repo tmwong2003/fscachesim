@@ -1,12 +1,17 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Ghost.cc,v 1.3 2001/11/20 02:20:13 tmwong Exp $
-  Description:  
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Ghost.cc,v 1.1 2002/02/13 20:21:07 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
 #include <algorithm>
 #include <stdio.h>
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif /* HAVE_STDLIB_H */
 
 #include "Block.hh"
 #include "IORequest.hh"
@@ -16,33 +21,33 @@
 using Block::block_t;
 
 void
-Ghost::blockPut(IORequestOp_t inOp,
-		Block::block_t block)
+Ghost::blockPut(IORequest::IORequestOp_t inOp,
+		Block::block_t inBlock)
 {
   switch(inOp) {
-  case Demote:
-    if (demote.isCached(block)) {
+  case IORequest::Demote:
+    if (demote.isCached(inBlock)) {
 
-      demote.blockGet(block);
+      demote.blockGet(inBlock);
     }
     else if (demote.isFull()) {
       block_t ejectBlock;
 
       demote.blockGetAtHead(ejectBlock);
     }
-    demote.blockPutAtTail(block);
+    demote.blockPutAtTail(inBlock);
     break;
-  case Read:
-    if (read.isCached(block)) {
+  case IORequest::Read:
+    if (read.isCached(inBlock)) {
 
-      read.blockGet(block);
+      read.blockGet(inBlock);
     }
     else if (read.isFull()) {
       block_t ejectBlock;
 
       read.blockGetAtHead(ejectBlock);
     }
-    read.blockPutAtTail(block);
+    read.blockPutAtTail(inBlock);
     break;
   default:
     abort();
@@ -50,20 +55,20 @@ Ghost::blockPut(IORequestOp_t inOp,
 }
 
 void
-Ghost::probUpdate(Block::block_t block)
+Ghost::probUpdate(Block::block_t inBlock)
 {
-  if (demote.isCached(block)) {
+  if (demote.isCached(inBlock)) {
     // If all we cached was demotes, we would have won.
 
-    demote.blockGet(block);
-    demote.blockPutAtTail(block);
+    demote.blockGet(inBlock);
+    demote.blockPutAtTail(inBlock);
     demoteReadHits++;
   }
-  if (read.isCached(block)) {
+  if (read.isCached(inBlock)) {
     // If all we cached was reads, we would have won.
 
-    read.blockGet(block);
-    read.blockPutAtTail(block);
+    read.blockGet(inBlock);
+    read.blockPutAtTail(inBlock);
     readReadHits++;
   }
 

@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Char.hh,v 1.2 2002/02/12 21:50:55 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Char.hh,v 1.3 2002/02/13 20:21:07 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -14,12 +14,10 @@
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
 #endif /* HAVE_STDINT_H */
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif /* HAVE_STDLIB_H */
+#include <string.h>
 
 /**
- * Utility functions and containers for character strings
+ * Character string utility functions and containers
  */
 namespace Char {
   using std::map;

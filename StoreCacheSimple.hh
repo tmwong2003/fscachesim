@@ -1,6 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSimple.hh,v 1.1 2002/02/12 21:50:56 tmwong Exp $
-  Description:  
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSimple.hh,v 1.2 2002/02/13 20:21:08 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -82,6 +81,25 @@ public:
 		   EjectPolicy_t inEjectPolicy,
 		   DemotePolicy_t inDemotePolicy) :
     StoreCache(inName, inNextStore, inBlockSize),
+    cache(inSize),
+    ejectPolicy(inEjectPolicy),
+    demotePolicy(inDemotePolicy) { ; };
+
+  /**
+   * Create a simple block cache.
+   *
+   * @param inName A string name for the cache.
+   * @param inBlockSize The size of each block, in bytes.
+   * @param inSize The size of the cache, in blocks.
+   * @param inEjectPolicy The cache ejection policy.
+   * @param inDemotePolicy_t The cache demotion policy.
+   */
+  StoreCacheSimple(const char *inName,
+		   uint64_t inBlockSize,
+		   uint64_t inSize,
+		   EjectPolicy_t inEjectPolicy,
+		   DemotePolicy_t inDemotePolicy) :
+    StoreCache(inName, inBlockSize),
     cache(inSize),
     ejectPolicy(inEjectPolicy),
     demotePolicy(inDemotePolicy) { ; };

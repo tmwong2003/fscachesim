@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSLRU.cc,v 1.1 2002/02/12 21:50:56 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/StoreCacheSLRU.cc,v 1.2 2002/02/13 20:21:08 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -38,12 +38,12 @@ StoreCacheSLRU::BlockCache(const IORequest& inIOReq,
     protCache.blockGet(inBlock);
 
     switch (inIOReq.opGet()) {
-    case Demote:
+    case IORequest::Demote:
       protDemoteHitsPerOrig[inIOReq.origGet()]++;
       demoteHitsPerOrig[inIOReq.origGet()]++;
       demoteHits++;
       break;
-    case Read:
+    case IORequest::Read:
       protReadHitsPerOrig[inIOReq.origGet()]++;
       readHitsPerOrig[inIOReq.origGet()]++;
       readHits++;
@@ -76,12 +76,12 @@ StoreCacheSLRU::BlockCache(const IORequest& inIOReq,
     }
 
     switch (inIOReq.opGet()) {
-    case Demote:
+    case IORequest::Demote:
       probDemoteHitsPerOrig[inIOReq.origGet()]++;
       demoteHitsPerOrig[inIOReq.origGet()]++;
       demoteHits++;
       break;
-    case Read:
+    case IORequest::Read:
       probReadHitsPerOrig[inIOReq.origGet()]++;
       readHitsPerOrig[inIOReq.origGet()]++;
       readHits++;
@@ -106,22 +106,24 @@ StoreCacheSLRU::BlockCache(const IORequest& inIOReq,
     }
 
     switch (inIOReq.opGet()) {
-    case Demote:
+    case IORequest::Demote:
       demoteMissesPerOrig[inIOReq.origGet()]++;
       demoteMisses++;
       break;
-    case Read:
+    case IORequest::Read:
       readMissesPerOrig[inIOReq.origGet()]++;
       readMisses++;
 
       // Create a new IORequest to pass on to the next-level node.
 
-      outIOReqs.push_back(IORequest(inIOReq.origGet(),
-				    Read,
-				    0,
-				    inIOReq.objIDGet(),
-				    inBlock.blockID * blockSize,
-				    blockSize));
+      if (nextStore) {
+	outIOReqs.push_back(IORequest(inIOReq.origGet(),
+				      IORequest::Read,
+				      0,
+				      inIOReq.objIDGet(),
+				      inBlock.blockID * blockSize,
+				      blockSize));
+      }
       break;
     default:
       abort();

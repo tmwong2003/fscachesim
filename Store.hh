@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Store.hh,v 1.9 2002/02/12 00:38:54 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/Store.hh,v 1.1 2002/02/12 21:50:56 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -16,6 +16,9 @@ using namespace std;
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
 #endif /* HAVE_STDINT_H */
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif /* HAVE_STDLIB_H */
 
 #include "IORequest.hh"
 #include "Statistics.hh"
@@ -76,6 +79,15 @@ public:
 	uint64_t inBlockSize);
 
   /**
+   * Create a block store.
+   *
+   * @param inName A string name for the store.
+   * @param inBlockSize The size of each block, in bytes.
+   */
+  Store(const char *inName,
+	uint64_t inBlockSize);
+
+  /**
    *Destroy a block store.
    */
   virtual ~Store() { ; };
@@ -109,6 +121,16 @@ Store::Store(const char *inName,
 	     uint64_t inBlockSize) :
   Statistics(inName),
   nextStore(inNextStore),
+  blockSize(inBlockSize)
+{
+  statisticsReset();
+};
+
+inline
+Store::Store(const char *inName,
+	     uint64_t inBlockSize) :
+  Statistics(inName),
+  nextStore(NULL),
   blockSize(inBlockSize)
 {
   statisticsReset();
