@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/fscachesim.cc,v 1.6 2002/02/18 00:23:45 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/fscachesim.cc,v 1.7 2002/02/18 20:56:19 tmwong Exp $
   Author:       T.M. Wong <tmwong+@cs.cmu.edu>
 */
 
@@ -282,7 +282,7 @@ main(int argc,
 
   // Prepare output files.
 
-  {
+  if (outFilePrefix) {
     char filename[1024];
 
     sprintf(filename,
