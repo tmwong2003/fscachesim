@@ -1,5 +1,5 @@
 /*
-  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/pdl-62/Cvs/tracestats/top-down-size-splay.c,v 1.1.1.1 2000/08/29 15:56:45 tmwong Exp $
+  RCS:          $Header: /afs/cs.cmu.edu/user/tmwong/Cvs/fscachesim/top-down-size-splay.c,v 1.1.1.1 2000/09/21 16:25:41 tmwong Exp $
   Description:  An implementation of top-down splaying with sizes
   Author:       D. Sleator <sleator@cs.cmu.edu>
   Created:      January 1994.
@@ -55,6 +55,7 @@
 
 #include <malloc.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #define compare(i,j) ((i)-(j))
 /* This is the comparison.                                       */

@@ -5,6 +5,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
 #include "iotrace.h"
 
@@ -98,7 +99,7 @@ void processRecords(int numRecords)
   }
 }
 
-void main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
   int numrecs;
 

@@ -122,7 +122,7 @@ int processRecords(int numRecords)
   return recsWritten;
 }
 
-void main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
   int numrecs, outrecs;
 
