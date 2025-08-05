@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 
   if (argc < 2) 
   {
-    fprintf(stderr,"Usage: %s binary-file ascii-file\n");
+    fprintf(stderr,"Usage: %s binary-file ascii-file\n", argv[0]);
     exit(1);
   }
 

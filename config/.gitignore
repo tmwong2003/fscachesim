@@ -1,6 +1,8 @@
 aclocal.m4
+compile
 config.guess
 config.sub
+depcomp
 install-sh
 missing
 mkinstalldirs
