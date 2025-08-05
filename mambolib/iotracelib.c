@@ -5,10 +5,10 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 #include "iotracelib.h"
-
-extern void *malloc(int size);
 
 #define RECBUFSIZE 512
 
@@ -181,7 +181,7 @@ int  getNumRecords(int td)
   return headers[td].header.numOfRecords;
 }
 
-void main()
+int main()
 {
   int td;
   tracerec_t record;

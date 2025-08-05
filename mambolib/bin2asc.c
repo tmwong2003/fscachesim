@@ -5,6 +5,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
 #include "iotrace.h"
 
@@ -98,13 +99,13 @@ void processRecords(int numRecords)
   }
 }
 
-void main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
   int numrecs;
 
   if (argc < 2) 
   {
-    fprintf(stderr,"Usage: %s binary-file ascii-file\n");
+    fprintf(stderr,"Usage: %s binary-file ascii-file\n", argv[0]);
     exit(1);
   }
 
