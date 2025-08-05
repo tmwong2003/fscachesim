@@ -26,10 +26,11 @@ _$*
 *.ln
 core
 # CVS default ignores end
+.DS_Store
+.deps
 Makefile
 Makefile.in
 HPL
-.deps
 aclocal.m4
 autom4te.cache
 backup
