@@ -55,7 +55,6 @@
 
 #include <malloc.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #define compare(i,j) ((i)-(j))
 /* This is the comparison.                                       */
